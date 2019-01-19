@@ -25,9 +25,11 @@ services:
     - '3306:3306'
   lb: 
     image: nginx
+    command: /service/images/nginx/entrypoint.sh
     container_name: day_trader_lb
     volumes:
-      - ./loadbalancer/nginx.conf:/etc/nginx/nginx.conf
+      - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./images/nginx:/service/images/nginx
     ports:
       - '80:80'
       - '443:443'
