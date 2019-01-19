@@ -1,0 +1,35 @@
+services:
+  web:
+    command: python ./day_trader/manage.py runserver 0:41000
+    environment:
+     PYTHONUNBUFFERED: 1
+    build:
+      context: .
+      dockerfile: ./images/django/Dockerfile
+    ports:
+    - '41000'
+    volumes:
+    - .:/service/
+  cache:
+    container_name: day_trader_cache
+    image: memcached
+    ports:
+    - '11211:11211'
+  db:
+    container_name: day_trader_db
+    environment:
+      MYSQL_DATABASE: day_trader_db
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    image: mysql:5.7
+    ports:
+    - '3306:3306'
+  lb: 
+    image: nginx
+    container_name: day_trader_lb
+    volumes:
+      - ./loadbalancer/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - '80:80'
+      - '443:443'
+
+version: '3.6'
