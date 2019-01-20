@@ -1,6 +1,7 @@
 services:
   web:
     command: python ./day_trader/manage.py runserver 0:41000
+    container_name: day_trader_web
     environment:
      PYTHONUNBUFFERED: 1
     build:
@@ -39,6 +40,7 @@ services:
     ports:
       - '6379:6379'
   worker:
+    container_name: day_trader_worker
     build:
       context: ./images
       dockerfile: ./worker/Dockerfile
