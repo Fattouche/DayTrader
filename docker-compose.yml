@@ -4,8 +4,8 @@ services:
     environment:
      PYTHONUNBUFFERED: 1
     build:
-      context: .
-      dockerfile: ./images/django/Dockerfile
+      context: ./images/django
+      dockerfile: ./Dockerfile
     ports:
     - '41000'
     volumes:
@@ -29,9 +29,19 @@ services:
     container_name: day_trader_lb
     volumes:
       - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./images/nginx:/service/images/nginx
+      - ./images:/service/images
     ports:
       - '80:80'
       - '443:443'
+  queue:
+    image: redis
+    container_name: day_trader_queue
+    ports:
+      - '6379:6379'
+  worker:
+    build:
+      context: ./images
+      dockerfile: ./worker/Dockerfile
+    command: rq worker -c settings
 
 version: '3.6'

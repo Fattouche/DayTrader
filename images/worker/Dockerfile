@@ -3,8 +3,11 @@ FROM python
 RUN mkdir /service
 WORKDIR /service
 
-COPY ./requirements.txt .
+COPY ./worker/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["bash", "./images/django/entrypoint.sh"]
+COPY ./worker .
+
+ENTRYPOINT ["bash", "./entrypoint.sh"]
+
