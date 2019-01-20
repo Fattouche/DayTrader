@@ -10,6 +10,7 @@ class User(models.Model):
     user_id = models.CharField(max_length=100, primary_key=True)
     balance = models.PositiveIntegerField(default=0)
     stocks = models.ManyToManyField(Stock)
+    password = models.CharField(max_length=50)
 
 
 class Trigger(models.Model):
