@@ -2,8 +2,6 @@
 
 cd /service/images/
 
-chmod +x ./wait-for-it.sh
-
 bash ./wait-for-it.sh day_trader_web:41000 --timeout=300
 
 #Uncomment to scale up
