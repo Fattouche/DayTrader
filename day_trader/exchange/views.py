@@ -55,10 +55,6 @@ def cancel_set_sell(request):
     return HttpResponse("Init view of stock exchange index")
 
 
-def set_sell_trigger(request):
-    return HttpResponse("Init view of stock exchange index")
-
-
 def set_buy_trigger(request):
     return HttpResponse("Init view of stock exchange index")
 
