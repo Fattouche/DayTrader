@@ -3,7 +3,7 @@ from django.db import models
 
 class Stock(models.Model):
     symbol = models.CharField(max_length=3, primary_key=True)
-    price = models.FloatField(default=0)
+    price = models.DecimalField(max_digits=65, decimal_places=2, default=0)
 
     def verify_triggers(self, increased):
         # Only need to check sell
@@ -31,7 +31,7 @@ class Stock(models.Model):
 
 class User(models.Model):
     user_id = models.CharField(max_length=100, primary_key=True)
-    balance = models.FloatField(default=0)
+    balance = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     stocks = models.ManyToManyField(Stock, through='UserStock')
     password = models.CharField(max_length=50)
 
@@ -53,23 +53,23 @@ class UserStock(models.Model):
 class SellTrigger(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     stock_symbol = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    price = models.FloatField(default=0)
-    stock_amount = models.FloatField(default=0)
+    price = models.DecimalField(max_digits=65, decimal_places=2, default=0)
+    stock_amount = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     committed = models.BooleanField(default=False)
 
 
 class BuyTrigger(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     stock_symbol = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    price = models.FloatField(default=0)
-    cash_amount = models.FloatField(default=0)
+    price = models.DecimalField(max_digits=65, decimal_places=2, default=0)
+    cash_amount = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     committed = models.BooleanField(default=False)
 
 
 class Sell(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     stock_symbol = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    cash_amount = models.FloatField(default=0)
+    cash_amount = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     stock_sold_amount = models.PositiveIntegerField(default=0)
     committed = models.BooleanField(default=False)
 
@@ -77,5 +77,5 @@ class Sell(models.Model):
 class Buy(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     stock_symbol = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    cash_amount = models.FloatField(default=0)
+    cash_amount = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     committed = models.BooleanField(default=False)
