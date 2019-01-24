@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "django_rq",
+    "cachalot",
 ]
 
 MIDDLEWARE = [
@@ -83,6 +84,7 @@ DATABASES = {
 }
 
 # Cache
+CACHALOT_ENABLED = True
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
