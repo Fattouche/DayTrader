@@ -1,6 +1,6 @@
 from django.http import HttpResponseBadRequest
 from decimal import Decimal
-import re
+
 class FilterBadRequestsMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
