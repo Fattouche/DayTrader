@@ -3,3 +3,4 @@ django
 python-memcached
 rq
 redis
+gunicorn
