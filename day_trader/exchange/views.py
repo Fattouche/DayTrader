@@ -2,17 +2,40 @@ from django.shortcuts import render
 
 from django.http import HttpResponse
 
+import django_rq
+
+from .models import *
+from django.core.cache import cache
+from decimal import Decimal
+from django.http import JsonResponse
+
 
 def index(request):
     return HttpResponse("Init view of stock exchange index")
 
 
 def add(request):
-    return HttpResponse("Init view of stock exchange index")
+    params = request.POST
+    user_id = params.get('user_id')
+    amount = params.get('amount')
+    user = User.objects.get(user_id=user_id)
+    user.balance += Decimal(amount)
+    user.save()
+    return JsonResponse({'balance': user.balance}, status=200)
 
 
 def quote(request):
-    return HttpResponse("Init view of stock exchange index")
+    params = request.GET
+    user_id = params.get('user_id')
+    symbol = params.get('symbol')
+    stock = cache.get(symbol)
+    if(stock is None):
+        price = execute_request(
+            user_id=user_id, symbol=symbol, command="QUOTE")
+        stock = Stock(symbol=symbol, price=price)
+        cache.set(symbol, stock)
+        django_rq.enqueue(stock.verify_triggers)
+    return JsonResponse({'stock': stock.symbol, 'price': stock.price}, status=200)
 
 
 def buy(request):
