@@ -5,8 +5,9 @@ from django.http import HttpResponse
 import django_rq
 
 from .models import *
-
+from django.core.cache import cache
 from decimal import Decimal
+from django.http import JsonResponse
 
 
 def index(request):
@@ -20,11 +21,10 @@ def add(request):
     user = User.objects.get(user_id=user_id)
     user.balance += Decimal(amount)
     user.save()
-    return HttpResponse("New balance {0}".format(user.balance), status=200)
+    return JsonResponse({'balance': user.balance}, status=200)
 
 
 def quote(request):
-    # placeholders
     params = request.GET
     user_id = params.get('user_id')
     symbol = params.get('symbol')
@@ -35,8 +35,7 @@ def quote(request):
         stock = Stock(symbol=symbol, price=price)
         cache.set(symbol, stock)
         django_rq.enqueue(stock.verify_triggers)
-
-    return HttpResponse("stock: "+symbol)
+    return JsonResponse({'stock': stock.symbol, 'price': stock.price}, status=200)
 
 
 def buy(request):
