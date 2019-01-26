@@ -5,6 +5,7 @@ from django.http import HttpResponse
 import django_rq
 
 from .models import *
+from .utils import *
 from django.core.cache import cache
 from decimal import Decimal
 from django.http import JsonResponse
@@ -28,13 +29,7 @@ def quote(request):
     params = request.GET
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    stock = cache.get(symbol)
-    if(stock is None):
-        price = execute_request(
-            user_id=user_id, symbol=symbol, command="QUOTE")
-        stock = Stock(symbol=symbol, price=price)
-        cache.set(symbol, stock)
-        django_rq.enqueue(stock.verify_triggers)
+    stock = quote(symbol)
     return JsonResponse({'stock': stock.symbol, 'price': stock.price}, status=200)
 
 
