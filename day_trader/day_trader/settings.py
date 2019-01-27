@@ -49,6 +49,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'day_trader.middleware.filter_bad_requests.FilterBadRequestsMiddleware',
+    'day_trader.middleware.create_user.CreateUserMiddleware',
 ]
 
 ROOT_URLCONF = 'day_trader.urls'
