@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 import time
 
 class Stock:
@@ -9,13 +10,13 @@ class Stock:
 
     def check_sell_trigger(self):
         sell_trigger = SellTrigger.objects.filter(
-            stock_symbol=self.symbol, committed=False)
+            stock_symbol=self.symbol, committed=False, active=True)
         for trigger in sell_trigger:
             trigger.check_validity(self.price)
 
     def check_buy_trigger(self):
         buy_trigger = BuyTrigger.objects.filter(
-            stock_symbol=self.symbol, committed=False)
+            stock_symbol=self.symbol, committed=False, active=True)
         for trigger in buy_trigger:
             trigger.check_validity(self.price, self.symbol)
 
@@ -59,12 +60,83 @@ class User(models.Model):
         buy = Buy.create(user_id=self.user_id, stock_symbol=symbol, cash_amount=amount, stock_price=stock.price, user=self)
         self.buy_stack.append(buy)
         cache.set(self.user_id, self)
+    
+    def cancel_buy():
+        if self.buy_stack:
+          self.buy_stack.pop().cancel(self)
+          cache.set(self.user_id, self)
 
     def perform_sell(self, symbol, amount):
         stock = Stock.quote(symbol)
         sell = Sell.create(user_id=self.user_id, stock_symbol=symbol, cash_amount=amount, stock_price=stock.price, user=self)
         self.sell_stack.append(buy)
         cache.set(self.user_id, self)
+    
+    def cancel_sell():
+        if self.sell_stack:
+            self.sell_stack.pop().cancel(self)
+            cache.set(self.user_id, self)
+ 
+    def set_buy_amount(self, symbol, amount):
+        buy_trigger, created = BuyTrigger.objects.get_or_create(
+            stock_symbol=symbol,
+            user_id=self.user_id,
+            defaults={'cash_amount': amount},
+        )
+        self.update_balance(amount*-1)
+        if not created:
+            buy_trigger.update_cash_amount(amount)
+    
+    def set_sell_amount(self, symbol, amount):
+        sell_trigger, created = SellTrigger.objects.get_or_create(
+            stock_symbol=symbol,
+            user_id=self.user_id,
+            defaults={'cash_amount': amount},
+        )
+
+        if not created:
+            sell_trigger.update_cash_amount(amount)
+    
+    def set_buy_trigger(self, symbol, amount):
+        try:
+            buy_trigger = BuyTrigger.objects.get(stock_symbol=symbol,user_id=self.user_id)
+            if(buy_trigger.cash_amount > 0):
+                buy_trigger.update_trigger_price(amount)
+            else:
+                buy_trigger = None
+        except ObjectDoesNotExist:
+            buy_trigger = None
+
+        return buy_trigger is not None
+    
+    def set_sell_trigger(self, symbol, amount):
+        try:
+            sell_trigger = SellTrigger.objects.get(stock_symbol=symbol,user_id=self.user_id)
+            if(sell_trigger.cash_amount > 0):
+                sell_trigger.update_trigger_price(amount)
+        except ObjectDoesNotExist:
+            sell_trigger = None
+
+        return sell_trigger is not None
+
+    def cancel_set_buy(self, symbol):
+        try:
+            buy_trigger = BuyTrigger.objects.get(stock_symbol=symbol,user_id=self.user_id)
+            self.update_balance(buy_trigger.cash_amount)
+            buy_trigger.cancel()
+        except ObjectDoesNotExist:
+            buy_trigger = None
+
+        return buy_trigger is not None
+    
+    def cancel_set_sell(self, symbol):
+        try:
+            sell_trigger = SellTrigger.objects.get(stock_symbol=symbol,user_id=self.user_id)
+            sell_trigger.cancel()
+        except ObjectDoesNotExist:
+            buy_trigger = None
+
+        return buy_trigger is not None
 
     def update_balance(self, change):
         self.balance += change
@@ -88,7 +160,9 @@ class SellTrigger(models.Model):
     price = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     cash_amount = models.DecimalField(
         max_digits=65, decimal_places=2, default=0)
+    stock_reserved_amount = models.PositiveIntegerField(default=0)
     committed = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
 
     def check_validity(self, price):
         if(self.price <= price):
@@ -97,6 +171,39 @@ class SellTrigger(models.Model):
             sell.commit(user)
             self.committed = True
             self.save()
+    
+    def update_cash_amount(self, amount):
+        self.cash_amount += amount
+        self.save()
+    
+    # TODO(isaacsahle): Chose to allow updating a set sell trigger
+    # for the same stock. Since we need to reserve these stocks, 
+    # a quote for the current price is necessarry. In the future,
+    #  we might want to not allow updating these triggers to minimize
+    #  quote server hits.
+    def update_trigger_price(self, amount):
+        user_stock = UserStock.objects.get(user_id=self.user_id, stock_symbol=self.stock_symbol)
+        stock = Stock.quote(self.stock_symbol)
+        stock_reserve_amount = amount // stock.price
+        trigger_updated = False
+        if stock_reserve_amount > 0 and (user_stock.amount + self.stock_reserved_amount) >= stock_reserve_amount:
+            user_stock.update_amount(self.stock_reserved_amount - stock_reserve_amount)
+            self.stock_reserved_amount = stock_reserve_amount
+            self.price = amount
+            self.active = True
+            self.save()
+            trigger_updated = True
+        return trigger_updated
+
+    def cancel(self):
+        user_stock = UserStock.objects.get(user_id=self.user_id, stock_symbol=self.stock_symbol)
+        user_stock.update_amount(self.stock_reserved_amount)
+        self.price = 0
+        self.cash_amount = 0
+        self.stock_reserved_amount = 0
+        self.active = False
+        self.save()
+
 
 
 class BuyTrigger(models.Model):
@@ -106,6 +213,7 @@ class BuyTrigger(models.Model):
     cash_amount = models.DecimalField(
         max_digits=65, decimal_places=2, default=0)
     committed = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
 
     def check_validity(self, price, symbol):
         if(self.price >= price):
@@ -114,7 +222,21 @@ class BuyTrigger(models.Model):
             buy.commit(user)
             self.committed = True
             self.save()
-
+    
+    def update_cash_amount(self, amount):
+        self.cash_amount += amount
+        self.save()
+   
+    def update_trigger_price(self, amount):
+        self.price = amount
+        self.active = True
+        self.save()
+    
+    def cancel(self):
+        self.active = False
+        self.price = 0
+        self.cash_amount = 0
+        self.save()
 
 class Sell(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -141,8 +263,10 @@ class Sell(models.Model):
         self.save()
 
     def cancel(self, user):
-        print("not implemented yet")
-        #TODO
+        user_stock = UserStock.objects.get(
+            user_id=self.user_id, stock_symbol=self.stock_symbol)
+        user_stock.update_amount(self.stock_sold_amount)
+        
 
 
 class Buy(models.Model):
@@ -160,12 +284,11 @@ class Buy(models.Model):
         buy.stock_bought_amount = cash_amount//stock_price
         buy.actual_cash_amount = buy.stock_bought*price
         buy.timestamp = time.time()
-        user.update_balance(buy.acual_cash_amount*-1)
+        user.update_balance(buy.actual_cash_amount*-1)
         return buy
     
     def cancel(self, user):
-        print("not implemented yet")
-        #TODO
+        user.update_balance(self.actual_cash_amount)
 
     def commit(self, user):
         user_stock = UserStock.objects.get(
