@@ -92,7 +92,7 @@ class SellTrigger(models.Model):
 
     def check_validity(self, price):
         if(self.price <= price):
-            user = User.objects.get(user_id=trigger.user_id)
+            user = User.get(user_id)
             sell = Sell.create(user_id=user.user_id, stock_symbol=self.stock_symbol, cash_amount=cash_amount, stock_price=price)
             sell.commit(user)
             self.committed = True
@@ -109,7 +109,7 @@ class BuyTrigger(models.Model):
 
     def check_validity(self, price, symbol):
         if(self.price >= price):
-            user = User.objects.get(user_id=trigger.user_id)
+            user = User.get(user_id)
             buy = Buy.create(user_id=user.user_id, stock_symbol=self.stock_symbol, cash_amount=cash_amount, stock_price=price)
             buy.commit(user)
             self.committed = True
@@ -129,7 +129,7 @@ class Sell(models.Model):
     def create(cls, user_id, stock_symbol, cash_amount, stock_price, user):
         sell = cls(user_id=user_id, stock_symbol=stock_symbol, intended_cash_amount=cash_amount)
         sell.stock_sold_amount = cash_amount//stock_price
-        sell.actual_cash_amount = sell.stock_sold_amount*price
+        sell.actual_cash_amount = sell.stock_sold_amount*stock_price
         sell.timestamp = time.time()
         user_stock = UserStock.objects.get(
             user_id=self.user_id, stock_symbol=symbol)
@@ -158,9 +158,9 @@ class Buy(models.Model):
     def create(cls, user_id, stock_symbol, cash_amount, stock_price, user):
         buy = cls(user_id=user_id, stock_symbol=stock_symbol, cash_amount=cash_amount)
         buy.stock_bought_amount = cash_amount//stock_price
-        buy.actual_cash_amount = buy.stock_bought*price
+        buy.actual_cash_amount = buy.stock_bought_amount*price
         buy.timestamp = time.time()
-        user.update_balance(buy.acual_cash_amount*-1)
+        user.update_balance(buy.actual_cash_amount*-1)
         return buy
     
     def cancel(self, user):
