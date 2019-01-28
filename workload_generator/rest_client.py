@@ -66,3 +66,4 @@ class RestClient:
                 data["amount"] = float(args[3]) if len(args) > 3 else None
 
         return cmd_type, data
+        
