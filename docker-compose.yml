@@ -26,11 +26,10 @@ services:
   lb:
     build:
       context: ./images/nginx
-    command: /service/images/nginx/entrypoint.sh
+    command: /service/entrypoint.sh
     container_name: day_trader_lb
     volumes:
       - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./images:/service/images
     ports:
       - '80:80'
       - '443:443'
