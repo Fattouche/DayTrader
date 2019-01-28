@@ -24,7 +24,8 @@ services:
     ports:
     - '3306:3306'
   lb:
-    image: nginx
+    build:
+      context: ./images/nginx
     command: /service/images/nginx/entrypoint.sh
     container_name: day_trader_lb
     volumes:
@@ -39,10 +40,10 @@ services:
     ports:
       - '6379:6379'
   worker:
-    container_name: day_trader_worker
-    volumes:
-    - .:/service/
     build:
       context: ./images/worker
+    container_name: day_trader_worker
+    volumes:
+    - ./day_trader:/day_trader
 
 version: '3.6'
