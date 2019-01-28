@@ -1,18 +1,16 @@
 def parse_commands_file(cmd_file):
 
-    unnamed_data_strcuture = {}
+    cmd_struct = {}
 
     with open(cmd_file, "r") as lines: 
         for line in lines:
             cmd = line.split(" ")[1]
             cmd_list = cmd.split(",")
-            user_id = cmd_list[1]
-
-            if cmd_list[0] == "DUMPLOG":    user_id = "adminxxx"
+            user_id = "adminxxx" if cmd_list[0] == "DUMPLOG" and len(cmd_list) == 2 else cmd_list[1]
             
-            if user_id in unnamed_data_strcuture: 
-                unnamed_data_strcuture[user_id].append((" ".join(cmd_list)))
+            if user_id in cmd_struct: 
+                cmd_struct[user_id].append((" ".join(cmd_list)))
             else:
-                unnamed_data_strcuture[user_id] = [" ".join(cmd_list)]
+                cmd_struct[user_id] = [" ".join(cmd_list)]
 
-    return unnamed_data_strcuture
+    return cmd_struct

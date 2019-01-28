@@ -6,6 +6,9 @@ class WorkloadGenerator:
 
     def __init__ (self, user_cmd_file):
         self.user_cmd_file = user_cmd_file
+    
+    def update_file(user_cmd_file):
+        self.user_cmd_file = user_cmd_file
 
     def run(self):
         user_cmds = parser.parse_commands_file(self.user_cmd_file)
@@ -19,7 +22,7 @@ class WorkloadGenerator:
         return
 
 def main():
-    generator =  WorkloadGenerator("1userWorkLoad.txt")
+    generator =  WorkloadGenerator("2userWorkLoad.txt")
     generator.run()
 
 if __name__ == "__main__":

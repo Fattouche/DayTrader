@@ -1,11 +1,11 @@
 import threading
 import rest_client
 
-
 def target(user_id, cmd_list):
-
+    client = rest_client.RestClient("http://localhost")
     for cmd in cmd_list:
-        rest_client.send_cmd(cmd)    
+        client.send_cmd(user_id, cmd)  
+        # print(cmd)  
     
 
 
