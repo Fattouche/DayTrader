@@ -19,7 +19,7 @@ class WorkloadGenerator:
         return
 
 def main():
-    generator =  WorkloadGenerator("2userWorkLoad.txt")
+    generator =  WorkloadGenerator("1userWorkLoad.txt")
     generator.run()
 
 if __name__ == "__main__":

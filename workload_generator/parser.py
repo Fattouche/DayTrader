@@ -8,7 +8,7 @@ def parse_commands_file(cmd_file):
             cmd_list = cmd.split(",")
             user_id = cmd_list[1]
 
-            if cmd_list[0] == "DUMPLOG":    continue
+            if cmd_list[0] == "DUMPLOG":    user_id = "adminxxx"
             
             if user_id in unnamed_data_strcuture: 
                 unnamed_data_strcuture[user_id].append((" ".join(cmd_list)))

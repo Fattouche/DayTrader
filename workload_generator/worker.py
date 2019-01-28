@@ -1,4 +1,11 @@
 import threading
+import rest_client
+
 
 def target(user_id, cmd_list):
-    print(threading.current_thread().getName() , user_id, len(cmd_list))
+
+    for cmd in cmd_list:
+        rest_client.send_cmd(cmd)    
+    
+
+
