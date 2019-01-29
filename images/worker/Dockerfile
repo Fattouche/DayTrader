@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt
 
 COPY . /service
 
-ENTRYPOINT ["bash", "./images/worker/entrypoint.sh"]
+ENTRYPOINT ["bash", "./entrypoint.sh"]

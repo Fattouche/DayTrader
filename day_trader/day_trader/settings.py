@@ -49,6 +49,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'day_trader.middleware.filter_bad_requests.FilterBadRequestsMiddleware',
+    'day_trader.middleware.create_user.CreateUserMiddleware',
 ]
 
 ROOT_URLCONF = 'day_trader.urls'
@@ -84,11 +86,12 @@ DATABASES = {
 }
 
 # Cache
-CACHALOT_ENABLED = False
+CACHALOT_ENABLED = True
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': 'cache',
+        'TIMEOUT': 60,
     }
 }
 
