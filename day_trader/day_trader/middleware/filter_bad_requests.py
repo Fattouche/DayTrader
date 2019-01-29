@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from django.urls import reverse
 from decimal import Decimal
+import json
+
 
 class FilterBadRequestsMiddleware(object):
     def __init__(self, get_response):
@@ -18,10 +20,11 @@ class FilterBadRequestsMiddleware(object):
         self.add_path = reverse('add')
         self.quote_path = reverse('quote')
         self.dumplog_path = reverse('dumplog')
-    
+
     def __call__(self, request):
-        query_dict = request.POST if request.method == 'POST' else request.GET
-        
+        query_dict = json.loads(
+            request.body) if request.method == 'POST' else request.GET
+
         if 'user_id' not in query_dict and request.path != self.index and not request.path.startswith(self.admin_index):
             return JsonResponse({'error': 'User id is required'}, status=400)
         hasSymbol = 'symbol' in query_dict
