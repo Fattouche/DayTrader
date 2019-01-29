@@ -127,7 +127,7 @@ func makeRequest(requests []*http.Request) {
 }
 
 func main() {
-	parseCommands("test.txt")
+	parseCommands("2userWorkLoad.txt")
 	wg.Add(len(userMap))
 	start := time.Now()
 	for _, requests := range userMap {

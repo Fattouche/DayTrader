@@ -48,7 +48,7 @@ class WorkloadGenerator:
 
 
 def main():
-    generator = WorkloadGenerator("test.txt")
+    generator = WorkloadGenerator("2userWorkLoad.txt")
     generator.run()
 
 
