@@ -36,7 +36,7 @@ var amountCommands = map[string]int{
 }
 var userMap = make(map[string][]*http.Request)
 var wg sync.WaitGroup
-var baseURL string = "http://localhost/"
+var baseURL = "http://localhost/"
 
 func parseCommands(filename string) {
 	file, err := os.Open(filename)
@@ -103,19 +103,18 @@ func generateRequest(userID string, commands []string) *http.Request {
 			os.Exit(1)
 		}
 		return req
-	} else {
-		req, err := http.NewRequest(requestType, url, nil)
-		if err != nil {
-			log.Println("Error creating request: ", err)
-			os.Exit(1)
-		}
-		q := req.URL.Query()
-		for key, val := range params {
-			q.Add(key, val)
-		}
-		req.URL.RawQuery = q.Encode()
-		return req
 	}
+	req, err := http.NewRequest(requestType, url, nil)
+	if err != nil {
+		log.Println("Error creating request: ", err)
+		os.Exit(1)
+	}
+	q := req.URL.Query()
+	for key, val := range params {
+		q.Add(key, val)
+	}
+	req.URL.RawQuery = q.Encode()
+	return req
 }
 
 func makeRequest(requests []*http.Request) {
