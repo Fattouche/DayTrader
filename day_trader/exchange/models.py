@@ -67,7 +67,7 @@ class User(models.Model):
         self.buy_stack.append(buy)
         cache.set(self.user_id, self)
     
-    def cancel_buy():
+    def cancel_buy(self):
         buy = self.pop_from_buy_stack()
         if buy is not None:
             buy.cancel(self)
@@ -84,7 +84,7 @@ class User(models.Model):
         self.sell_stack.append(sell)
         cache.set(self.user_id, self)
     
-    def cancel_sell():
+    def cancel_sell(self):
         sell = self.pop_from_sell_stack()
         if sell is not None:
             sell.cancel(self)

@@ -13,6 +13,7 @@ urlpatterns = [
     path('sell', views.sell, name='sell'),
     path('commit_sell', views.commit_sell, name='commit_sell'),
     path('cancel_sell', views.cancel_sell, name='cancel_sell'),
+    path('cancel_buy', views.cancel_sell, name='cancel_buy'),
     path('set_buy_amount', views.set_buy_amount, name='set_buy_amount'),
     path('set_sell_amount', views.set_sell_amount, name='set_sell_amount'),
     path('set_sell_trigger', views.set_sell_trigger, name='set_sell_trigger'),

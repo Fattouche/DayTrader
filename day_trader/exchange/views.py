@@ -59,7 +59,8 @@ def commit_buy(request):
 
 def cancel_buy(request):
     params = json.loads(request.body)
-    User.get(params.get('user_id')).cancel_buy()
+    user = User.get(params.get('user_id'))
+    user.cancel_buy()
     return JsonResponse({'action': 'cancel_buy', 'balance': user.balance}, status=200)
 
 
@@ -91,8 +92,9 @@ def commit_sell(request):
 
 def cancel_sell(request):
     params = json.loads(request.body)
-    User.get(params.get('user_id')).cancel_sell()
-    return JsonResponse({'action': 'cancel_sell'}, status=200)
+    user = User.get(params.get('user_id'))
+    user.cancel_sell()
+    return JsonResponse({'action': 'cancel_sell', 'balance': user.balance}, status=200)
 
 
 def set_buy_amount(request):
