@@ -37,7 +37,7 @@ class Stock:
         data = s.recv(1024)
         s.close()
 
-        response = data.split(",")  #log the timestamp etc from this response
+        response = data.decode().split(",")  #log the timestamp etc from this response
         quote_price = response[0]
         self.price = quote_price
 
