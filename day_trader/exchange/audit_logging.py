@@ -1,26 +1,11 @@
-import csv
 from lxml import etree
-from datetime import datetime
+import exchange.models as Models
 
-# Number of log entries to cache in memory before flushing to file
-MAX_BUFFER_LEN = 1000
-
-SYSTEM_OUTPUT_FILENAME = 'system_output.log'
-
-# Encoding of transactions:
-# Each transaction is represented as set of comma separated values, as 
-# specified here:
-# http://www.ece.uvic.ca/~seng468/ProjectWebSite/logfile.xsd
+# TODO: Implement per-user dump
 #
-# Example: A BUY transaction, at time 12345, by user 'cool_dude', on server
-# SERVER_X, with transaction number 100, with funds of 999, would be encoded as:
-# accountTransaction,12345,SERVER_X,100,BUY,cool_dude,999
+# TODO: write to DB tables using workers, rather than to CSV
 #
-# TODO: Look into python coroutines for async IO: 
-# https://lxml.de/api.html#incremental-xml-generation
-#
-# TODO: Implement per-user log files
-#
+# TODO: Consider buffering logs in memory, if DB I/O is a bottleneck
 # Note that AuditLogger is a singleton
 class AuditLogger:
     _instance = None
@@ -42,79 +27,82 @@ class AuditLogger:
 
 
     class _AuditLogger:
-        def __init__(self):
-            # TODO: timestamp output filename, so that we don't overwrite
-            # every time we run
-            self.encoded_system_output = open(
-                SYSTEM_OUTPUT_FILENAME, 'w', newline='')
-            self.encoded_system_output_writer = csv.writer(
-                self.encoded_system_output, delimiter=',')
-
-            # Buffer some lines in memory, so that we aren't doing file IO for
-            # every single transaction
-            self.buffer = []
-
-
-        def __del__(self):
-            self.encoded_system_output.close()
-
-
         def log_user_command(self, server_name, transaction_num, command, 
-                username='', stock_symbol='', filename='', funds=''):
-            # TODO: log to user-specific file as well
-            event = [
-                server_name, str(transaction_num), command, username, 
-                stock_symbol, filename, str(funds)
-            ]
-            self._log_event('userCommand', event)
-
+                username='', stock_symbol='', filename='', funds=None):
+            base_log = Models.BaseLog(log_type='userCommand', 
+                server=server_name, transaction_num=transaction_num)
+            base_log.save()
+            user_command_log = Models.UserCommandLog(
+                command=command, username=username,
+                stock_symbol=stock_symbol, filename=filename,
+                funds=funds)
+            user_command_log.base_log = base_log
+            user_command_log.save()
+            
 
         def log_quote_server_event(self, server_name, transaction_num,
                 price, stock_symbol, username, quote_server_timestamp, 
                 crypto_key):
-            event = [
-                server_name, str(transaction_num), str(price), stock_symbol,
-                username, quote_server_timestamp, crypto_key
-            ]
-            self._log_event('quoteServer', event)
+            base_log = Models.BaseLog(log_type='quoteServer', 
+                server=server_name, transaction_num=transaction_num)
+            base_log.save()
+            quote_server_log = Models.QuoteServerLog(
+                price=price, stock_symbol=stock_symbol,
+                username=username, 
+                quote_server_time=quote_server_timestamp,
+                crypto_key=crypto_key)
+            quote_server_log.base_log = base_log
+            quote_server_log.save()
 
 
         def log_account_transaction(self, server_name, transaction_num, action, 
                 username, funds):
-            event = [
-                server_name, str(transaction_num), action, username, 
-                str(funds)
-            ]
-            self._log_event('accountTransaction', event)
+            base_log = Models.BaseLog(log_type='accountTransaction', 
+                server=server_name, transaction_num=transaction_num)
+            base_log.save()
+            account_transaction_log = Models.AccountTransactionLog(
+                action=action, username=username,
+                funds=funds)
+            account_transaction_log.base_log = base_log
+            account_transaction_log.save()
 
 
         def log_system_event(self, server_name, transaction_num, command, 
-                username='', stock_symbol='', filename='', funds=''):
-            event = [
-                server_name, str(transaction_num), command, username, 
-                stock_symbol, filename, str(funds)
-            ]
-            self._log_event('systemEvent', event)
+                username='', stock_symbol='', filename='', funds=None):
+            base_log = Models.BaseLog(log_type='systemEvent', 
+                server=server_name, transaction_num=transaction_num)
+            base_log.save()
+            system_event_log = Models.SystemEventLog(
+                command=command, username=username, stock_symbol=stock_symbol,
+                filename=filename, funds=funds)
+            system_event_log.base_log = base_log
+            system_event_log.save()
 
 
         def log_error_event(self, server_name, transaction_num, command, 
-                username='', stock_symbol='', filename='', funds='', 
+                username='', stock_symbol='', filename='', funds=None, 
                 error_message=''):
-            event = [
-                server_name, str(transaction_num), command, username, 
-                stock_symbol, filename, str(funds), error_message
-            ]
-            self._log_event('errorEvent', event)
+            base_log = Models.BaseLog(log_type='errorEvent', 
+                server=server_name, transaction_num=transaction_num)
+            base_log.save()
+            error_event_log = Models.ErrorEventLog(
+                command=command, username=username, stock_symbol=stock_symbol,
+                filename=filename, funds=funds, error_message=error_message)
+            error_event_log.base_log = base_log
+            error_event_log.save()
 
 
         def log_debug_event(self, server_name, transaction_num, command, 
-                username='', stock_symbol='', filename='', funds='', 
+                username='', stock_symbol='', filename='', funds=None, 
                 debug_message=''):
-            event = [
-                server_name, str(transaction_num), command, username, 
-                stock_symbol, filename, str(funds), debug_message
-            ]
-            self._log_event('debugEvent', event)
+            base_log = Models.BaseLog(log_type='debugEvent', 
+                server=server_name, transaction_num=transaction_num)
+            base_log.save()
+            debug_event_log = Models.DebugEventLog(
+                command=command, username=username, stock_symbol=stock_symbol,
+                filename=filename, funds=funds, debug_message=debug_message)
+            debug_event_log.base_log = base_log
+            debug_event_log.save()
 
         
         def dump_user_log(self, username, filename):
@@ -122,159 +110,188 @@ class AuditLogger:
 
 
         def dump_system_logs(self, filename):
-            self._dump_buffer()
-
-            # Close encoded output file before we open it for reading
-            self.encoded_system_output.close()
-
             with etree.xmlfile(filename) as xf:
                 with xf.element('log'):
-                    with open(SYSTEM_OUTPUT_FILENAME, newline='') as \
-                            encoded_output:
-                        reader = csv.reader(encoded_output)
-                        for event_info in reader:
-                            if event_info[0] == 'userCommand':
-                                AuditLogger._decode_user_command_to_xml(
-                                    xf, event_info)
-                            elif event_info[0] == 'quoteServer':
-                                AuditLogger._decode_quote_server_event_to_xml(
-                                    xf, event_info)
-                            elif event_info[0] == 'accountTransaction':
-                                AuditLogger._decode_account_transaction_to_xml(
-                                    xf, event_info)
-                            elif event_info[0] == 'systemEvent':
-                                AuditLogger._decode_system_event_to_xml(
-                                    xf, event_info)
-                            elif event_info[0] == 'errorEvent':
-                                AuditLogger._decode_error_event_to_xml(
-                                    xf, event_info)
-                            elif event_info[0] == 'debugEvent':
-                                AuditLogger._decode_debug_event_to_xml(
-                                    xf, event_info)
+                    for user_command_log in Models.UserCommandLog.objects \
+                                            .select_related('base_log').all():
+                        base_log = user_command_log.base_log
+                        AuditLogger._write_user_command_to_xml(xf, base_log, 
+                            user_command_log)
 
-            
-            # Re-open for writing once we're done
-            self.encoded_system_output = open(SYSTEM_OUTPUT_FILENAME, 'a')
-            self.encoded_system_output_writer = csv.writer(
-                self.encoded_system_output)
+                    for quote_server_log in Models.QuoteServerLog.objects \
+                                            .select_related('base_log').all():
+                        base_log = quote_server_log.base_log
+                        AuditLogger._write_quote_server_event_to_xml(xf, 
+                            base_log, quote_server_log)
 
+                    for account_transaction_log in Models.AccountTransactionLog\
+                                                    .objects \
+                                                    .select_related('base_log')\
+                                                    .all():
+                        base_log = account_transaction_log.base_log
+                        AuditLogger._write_account_transaction_to_xml(xf, 
+                            base_log, account_transaction_log)
 
-        def _dump_buffer(self):
-            self.encoded_system_output_writer.writerows(self.buffer)
-            self.buffer.clear()
+                    for system_event_log in Models.SystemEventLog.objects \
+                                            .select_related('base_log').all():
+                        base_log = system_event_log.base_log
+                        AuditLogger._write_system_event_to_xml(xf, base_log, 
+                            system_event_log)
 
+                    for error_event_log in Models.ErrorEventLog.objects \
+                                            .select_related('base_log').all():
+                        base_log = error_event_log.base_log
+                        AuditLogger._write_error_event_to_xml(xf, base_log, 
+                            error_event_log)
 
-        def _log_event(self, event_type, event):
-            curr_timestamp = int(datetime.utcnow().timestamp() * 1000)
-            self.buffer.append(
-                [event_type, str(curr_timestamp)] + 
-                event
-            )
-
-            if len(self.buffer) >= MAX_BUFFER_LEN:
-                self._dump_buffer()  
+                    for debug_event_log in Models.DebugEventLog.objects \
+                                            .select_related('base_log').all():
+                        base_log = debug_event_log.base_log
+                        AuditLogger._write_debug_event_to_xml(xf, base_log, 
+                            debug_event_log)
 
 
     @staticmethod
-    def _write_xml_element(xf, event_info, index, name):
+    def _write_xml_element(xf, name, text):
         element = etree.Element(name)
-        element.text = event_info[index]
+        element.text = text
         xf.write(element)
 
 
     @staticmethod
-    def _decode_user_command_to_xml(xf, event_info):
+    def _write_user_command_to_xml(xf, base_log, user_command_log):
         with xf.element('userCommand'):
-            AuditLogger._write_xml_element(xf, event_info, 1, 'timestamp')
-            AuditLogger._write_xml_element(xf, event_info, 2, 'server')
-            AuditLogger._write_xml_element(xf, event_info, 3, 'transactionNum')
-            AuditLogger._write_xml_element(xf, event_info, 4, 'command')
-            if event_info[5]:
-                AuditLogger._write_xml_element(xf, event_info, 5, 'username')
-            if event_info[6]:
-                AuditLogger._write_xml_element(xf, event_info, 6, 'stockSymbol')
-            if event_info[7]:
-                AuditLogger._write_xml_element(xf, event_info, 7, 'filename')
-            if event_info[8]:
-                AuditLogger._write_xml_element(xf, event_info, 8, 'funds')
+            AuditLogger._write_xml_element(xf, 'timestamp', 
+                str(int(base_log.timestamp.timestamp() * 1000)))
+            AuditLogger._write_xml_element(xf, 'server', base_log.server)
+            AuditLogger._write_xml_element(xf, 'transactionNum', 
+                str(base_log.transaction_num))
+            AuditLogger._write_xml_element(xf, 'command', 
+                user_command_log.command)
+            if user_command_log.username:
+                AuditLogger._write_xml_element(xf, 'username',
+                    user_command_log.username)
+            if user_command_log.stock_symbol:
+                AuditLogger._write_xml_element(xf, 'stockSymbol', 
+                    user_command_log.stock_symbol)
+            if user_command_log.filename:
+                AuditLogger._write_xml_element(xf, 'filename', 
+                    user_command_log.filename)
+            if user_command_log.funds:
+                AuditLogger._write_xml_element(xf, 'funds', 
+                    str(user_command_log.funds))
 
 
     @staticmethod
-    def _decode_quote_server_event_to_xml(xf, event_info):
+    def _write_quote_server_event_to_xml(xf, base_log, quote_server_log):
         with xf.element('quoteServer'):
-            AuditLogger._write_xml_element(xf, event_info, 1, 'timestamp')
-            AuditLogger._write_xml_element(xf, event_info, 2, 'server')
-            AuditLogger._write_xml_element(xf, event_info, 3, 'transactionNum')
-            AuditLogger._write_xml_element(xf, event_info, 4, 'price')
-            AuditLogger._write_xml_element(xf, event_info, 5, 'stockSymbol')
-            AuditLogger._write_xml_element(xf, event_info, 6, 'username')
-            AuditLogger._write_xml_element(xf, event_info, 7, 'quoteServerTime')
-            AuditLogger._write_xml_element(xf, event_info, 8, 'cryptokey')
+            AuditLogger._write_xml_element(xf, 'timestamp', 
+                str(int(base_log.timestamp.timestamp() * 1000)))
+            AuditLogger._write_xml_element(xf, 'server', base_log.server)
+            AuditLogger._write_xml_element(xf, 'transactionNum', 
+                str(base_log.transaction_num))
+            AuditLogger._write_xml_element(xf, 'price', 
+                str(quote_server_log.price))
+            AuditLogger._write_xml_element(xf, 'stockSymbol', 
+                quote_server_log.stock_symbol)
+            AuditLogger._write_xml_element(xf, 'username', 
+                quote_server_log.username)
+            AuditLogger._write_xml_element(xf, 'quoteServerTime', 
+                str(quote_server_log.quote_server_time))
+            AuditLogger._write_xml_element(xf, 'cryptokey',
+                quote_server_log.crypto_key)
 
 
     @staticmethod
-    def _decode_account_transaction_to_xml(xf, event_info):
+    def _write_account_transaction_to_xml(xf, base_log, 
+            account_transaction_log):
         with xf.element('accountTransaction'):
-            AuditLogger._write_xml_element(xf, event_info, 1, 'timestamp')
-            AuditLogger._write_xml_element(xf, event_info, 2, 'server')
-            AuditLogger._write_xml_element(xf, event_info, 3, 'transactionNum')
-            AuditLogger._write_xml_element(xf, event_info, 4, 'action')
-            AuditLogger._write_xml_element(xf, event_info, 5, 'username')
-            AuditLogger._write_xml_element(xf, event_info, 6, 'funds')
+            AuditLogger._write_xml_element(xf, 'timestamp', 
+                str(int(base_log.timestamp.timestamp() * 1000)))
+            AuditLogger._write_xml_element(xf, 'server', base_log.server)
+            AuditLogger._write_xml_element(xf, 'transactionNum', 
+                str(base_log.transaction_num))
+            AuditLogger._write_xml_element(xf, 'action',
+                account_transaction_log.action)
+            AuditLogger._write_xml_element(xf, 'username',
+                account_transaction_log.username)
+            AuditLogger._write_xml_element(xf, 'funds',
+                str(account_transaction_log.funds))
 
 
     @staticmethod
-    def _decode_system_event_to_xml(xf, event_info):
+    def _write_system_event_to_xml(xf, base_log, system_event_log):
         with xf.element('systemEvent'):
-            AuditLogger._write_xml_element(xf, event_info, 1, 'timestamp')
-            AuditLogger._write_xml_element(xf, event_info, 2, 'server')
-            AuditLogger._write_xml_element(xf, event_info, 3, 'transactionNum')
-            AuditLogger._write_xml_element(xf, event_info, 4, 'command')
-            if event_info[5]:
-                AuditLogger._write_xml_element(xf, event_info, 5, 'username')
-            if event_info[6]:
-                AuditLogger._write_xml_element(xf, event_info, 6, 'stockSymbol')
-            if event_info[7]:
-                AuditLogger._write_xml_element(xf, event_info, 7, 'filename')
-            if event_info[8]:
-                AuditLogger._write_xml_element(xf, event_info, 8, 'funds')
+            AuditLogger._write_xml_element(xf, 'timestamp', 
+                str(int(base_log.timestamp.timestamp() * 1000)))
+            AuditLogger._write_xml_element(xf, 'server', base_log.server)
+            AuditLogger._write_xml_element(xf, 'transactionNum', 
+                str(base_log.transaction_num))
+            AuditLogger._write_xml_element(xf, 'command', 
+                system_event_log.command)
+            if system_event_log.username:
+                AuditLogger._write_xml_element(xf, 'username',
+                    system_event_log.username)
+            if system_event_log.stock_symbol:
+                AuditLogger._write_xml_element(xf, 'stockSymbol',
+                    system_event_log.stock_symbol)
+            if system_event_log.filename:
+                AuditLogger._write_xml_element(xf, 'filename',
+                    system_event_log.filename)
+            if system_event_log.funds:
+                AuditLogger._write_xml_element(xf, 'funds',
+                    str(system_event_log.funds))
 
 
     @staticmethod
-    def _decode_error_event_to_xml(xf, event_info):
+    def _write_error_event_to_xml(xf, base_log, error_event_log):
         with xf.element('errorEvent'):
-            AuditLogger._write_xml_element(xf, event_info, 1, 'timestamp')
-            AuditLogger._write_xml_element(xf, event_info, 2, 'server')
-            AuditLogger._write_xml_element(xf, event_info, 3, 'transactionNum')
-            AuditLogger._write_xml_element(xf, event_info, 4, 'command')
-            if event_info[5]:
-                AuditLogger._write_xml_element(xf, event_info, 5, 'username')
-            if event_info[6]:
-                AuditLogger._write_xml_element(xf, event_info, 6, 'stockSymbol')
-            if event_info[7]:
-                AuditLogger._write_xml_element(xf, event_info, 7, 'filename')
-            if event_info[8]:
-                AuditLogger._write_xml_element(xf, event_info, 8, 'funds')
-            if event_info[9]:
-                AuditLogger._write_xml_element(
-                    xf, event_info, 9, 'errorMessage')
+            AuditLogger._write_xml_element(xf, 'timestamp', 
+                str(int(base_log.timestamp.timestamp() * 1000)))
+            AuditLogger._write_xml_element(xf, 'server', base_log.server)
+            AuditLogger._write_xml_element(xf, 'transactionNum', 
+                str(base_log.transaction_num))
+            AuditLogger._write_xml_element(xf, 'command', 
+                error_event_log.command)
+            if error_event_log.username:
+                AuditLogger._write_xml_element(xf, 'username',
+                    error_event_log.username)
+            if error_event_log.stock_symbol:
+                AuditLogger._write_xml_element(xf, 'stockSymbol',
+                    error_event_log.stock_symbol)
+            if error_event_log.filename:
+                AuditLogger._write_xml_element(xf, 'filename',
+                    error_event_log.filename)
+            if error_event_log.funds:
+                AuditLogger._write_xml_element(xf, 'funds', 
+                    str(error_event_log.funds))
+            if error_event_log.error_message:
+                AuditLogger._write_xml_element(xf, 'errorMessage', 
+                    error_event_log.error_message)
 
 
     @staticmethod
-    def _decode_debug_event_to_xml(xf, event_info):
+    def _write_debug_event_to_xml(xf, base_log, debug_event_log):
         with xf.element('debugEvent'):
-            AuditLogger._write_xml_element(xf, event_info, 1, 'timestamp')
-            AuditLogger._write_xml_element(xf, event_info, 2, 'server')
-            AuditLogger._write_xml_element(xf, event_info, 3, 'transactionNum')
-            AuditLogger._write_xml_element(xf, event_info, 4, 'command')
-            if event_info[5]:
-                AuditLogger._write_xml_element(xf, event_info, 5, 'username')
-            if event_info[6]:
-                AuditLogger._write_xml_element(xf, event_info, 6, 'stockSymbol')
-            if event_info[7]:
-                AuditLogger._write_xml_element(xf, event_info, 7, 'filename')
-            if event_info[8]:
-                AuditLogger._write_xml_element(xf, event_info, 8, 'funds')
-            if event_info[9]:
-                AuditLogger._write_xml_element(
-                    xf, event_info, 9, 'debugMessage')
+            AuditLogger._write_xml_element(xf, 'timestamp', 
+                str(int(base_log.timestamp.timestamp() * 1000)))
+            AuditLogger._write_xml_element(xf, 'server', base_log.server)
+            AuditLogger._write_xml_element(xf, 'transactionNum', 
+                str(base_log.transaction_num))
+            AuditLogger._write_xml_element(xf, 'command', 
+                debug_event_log.command)
+            if debug_event_log.username:
+                AuditLogger._write_xml_element(xf, 'username',
+                    debug_event_log.username)
+            if debug_event_log.stock_symbol:
+                AuditLogger._write_xml_element(xf, 'stockSymbol',
+                    debug_event_log.stock_symbol)
+            if debug_event_log.filename:
+                AuditLogger._write_xml_element(xf, 'filename',
+                    debug_event_log.filename)
+            if debug_event_log.funds:
+                AuditLogger._write_xml_element(xf, 'funds', 
+                    str(debug_event_log.funds))
+            if debug_event_log.debug_message:
+                AuditLogger._write_xml_element(xf, 'debugMessage', 
+                    debug_event_log.debug_message)
