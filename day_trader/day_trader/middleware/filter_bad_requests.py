@@ -3,7 +3,6 @@ from django.urls import reverse
 from decimal import Decimal
 import json
 
-
 class FilterBadRequestsMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
@@ -22,8 +21,7 @@ class FilterBadRequestsMiddleware(object):
         self.dumplog_path = reverse('dumplog')
 
     def __call__(self, request):
-        query_dict = json.loads(
-            request.body) if request.method == 'POST' else request.GET
+        query_dict = request.GET if request.method == 'GET' else json.loads(request.body)
 
         if 'user_id' not in query_dict and request.path != self.index and not request.path.startswith(self.admin_index):
             return JsonResponse({'error': 'User id is required'}, status=400)
