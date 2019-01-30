@@ -3,5 +3,5 @@ RUN mkdir /service
 COPY . /service
 WORKDIR /service
 EXPOSE 4442
-
-ENTRYPOINT [ "go run server.go" ]
+RUN chmod +x server.go
+ENTRYPOINT [ "go",  "run" , "server.go" ]
