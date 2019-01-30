@@ -18,6 +18,7 @@ urlpatterns = [
     path('set_sell_amount', views.set_sell_amount, name='set_sell_amount'),
     path('set_sell_trigger', views.set_sell_trigger, name='set_sell_trigger'),
     path('cancel_set_sell', views.cancel_set_sell, name='cancel_set_sell'),
+    path('cancel_set_buy', views.cancel_set_buy, name='cancel_set_buy'),
     path('set_buy_trigger', views.set_buy_trigger, name='set_buy_trigger'),
     path('dumplog', views.dumplog, name='dumplog'),
     path('display_summary', views.display_summary, name='display_summary'),

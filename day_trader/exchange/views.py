@@ -36,7 +36,7 @@ def buy(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = params.get('amount')
+    amount = Decimal(params.get('amount'))
     user = User.get(user_id)
     err = user.perform_buy(symbol, amount)
     if err is not None:
@@ -68,7 +68,7 @@ def sell(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = params.get('amount')
+    amount = Decimal(params.get('amount'))
     user = User.get(user_id)
     sell = user.pop_from_sell_stack()
     err = user.perform_sell(symbol, amount)
@@ -101,7 +101,7 @@ def set_buy_amount(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = params.get('amount')
+    amount = Decimal(params.get('amount'))
     user = User.get(user_id)
     if(user.balance < amount):
         return JsonResponse({'action': 'set_buy_amount', 'error': 'user balance too low'}, status=412)
@@ -113,7 +113,7 @@ def set_sell_amount(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = params.get('amount')
+    amount = Decimal(params.get('amount'))
     user = User.get(user_id)
     user.set_sell_amount(symbol, amount)
     return JsonResponse({'action': 'set_sell_amount'}, status=200)
@@ -123,7 +123,7 @@ def set_buy_trigger(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = params.get('amount')
+    amount = Decimal(params.get('amount'))
     user = User.get(user_id)
     trigger_set = user.set_buy_trigger(symbol, amount)
     if not trigger_set:
@@ -135,7 +135,7 @@ def set_sell_trigger(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = params.get('amount')
+    amount = Decimal(params.get('amount'))
     user = User.get(user_id)
     trigger_set = user.set_sell_trigger(symbol, amount)
     if not trigger_set:

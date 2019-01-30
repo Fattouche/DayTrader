@@ -92,7 +92,7 @@ class User(models.Model):
     def set_buy_amount(self, symbol, amount):
         buy_trigger, created = BuyTrigger.objects.get_or_create(
             stock_symbol=symbol,
-            user_id=self.user_id,
+            user_id=self,
             defaults={'cash_amount': amount},
         )
         self.update_balance(amount*-1)
@@ -102,7 +102,7 @@ class User(models.Model):
     def set_sell_amount(self, symbol, amount):
         sell_trigger, created = SellTrigger.objects.get_or_create(
             stock_symbol=symbol,
-            user_id=self.user_id,
+            user_id=self,
             defaults={'cash_amount': amount},
         )
 

@@ -1,6 +1,7 @@
 from django.test import TestCase
 from .audit_logging import AuditLogger
 import xml.etree.ElementTree as ET
+import exchange.models as models
 
 class AuditLoggingTestCase(TestCase):
     def setUp(self):
@@ -117,3 +118,11 @@ class AuditLoggingTestCase(TestCase):
         self.assertEqual(root[5][5].text, 'HGU')
         self.assertEqual(root[5][6].tag, 'debugMessage')
         self.assertEqual(root[5][6].text, 'Complete')
+
+class ViewFunctionsTestCase(TestCase):
+    
+    def set_buy_trigger_test(self):
+        user = models.User(user_id="oY01WVirLr")
+        user.set_buy_trigger("ABC",50.00)
+        
+
