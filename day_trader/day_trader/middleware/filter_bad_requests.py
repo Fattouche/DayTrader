@@ -19,7 +19,7 @@ class FilterBadRequestsMiddleware(object):
         self.add_path = reverse('add')
         self.quote_path = reverse('quote')
         self.dumplog_path = reverse('dumplog')
-    
+
     def __call__(self, request):
         query_dict = request.GET if request.method == 'GET' else json.loads(request.body)
 
