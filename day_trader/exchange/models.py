@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import time
 import django_rq
 from decimal import Decimal
+import socket
 
 
 class Stock:
@@ -28,8 +29,17 @@ class Stock:
         self.check_buy_trigger()
 
     def execute_quote_request(self, user_id):
-        print("execute_quote_request not yet implemented")
-        self.price = 5
+        request = "{},{}\r".format(self.symbol, user_id)
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('localhost',4442))
+        s.send(request)
+        data = s.recv(1024)
+        s.close()
+
+        response = data.split(",")  #log the timestamp etc from this response
+        quote_price = response[0]
+        self.price = quote_price
 
     @classmethod
     def quote(cls, symbol, user_id):
