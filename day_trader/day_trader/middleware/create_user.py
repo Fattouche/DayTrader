@@ -6,7 +6,7 @@ class CreateUserMiddleware(object):
         self.get_response = get_response
     
     def __call__(self, request):
-        query_dict = request.POST if request.method == 'POST' else request.GET
+        query_dict = request.GET if request.method == 'GET' else json.loads(request.body)
 
         if 'user_id' in query_dict:
             User.objects.get_or_create(
