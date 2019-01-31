@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from exchange.models import User
+import json
 
 class CreateUserMiddleware(object):
     def __init__(self, get_response):
