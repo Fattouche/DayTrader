@@ -138,7 +138,7 @@ class User(models.Model):
         try:
             buy_trigger = BuyTrigger.objects.get(
                 stock_symbol=symbol, user_id=self.user_id)
-            if(buy_trigger.cash_amount > 0):
+            if(buy_trigger.cash_amount > 0 and buy_trigger.cash_amount >= amount):
                 buy_trigger.update_trigger_price(amount)
             else:
                 buy_trigger = None
