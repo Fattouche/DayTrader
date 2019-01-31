@@ -41,6 +41,7 @@ func startServer(hostName, port string) {
 		info := string(buf[:len])
 		infoArr := strings.Split(info, ",")
 		msg := genResponse(infoArr[0], infoArr[1])
+		log.Println("Response: ", msg)
 		conn.Write(msg)
 	}
 }

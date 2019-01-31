@@ -1,0 +1,9 @@
+version: '3.6'
+services:
+  generator:
+    command: go run /service/server.go
+    image: golang
+    ports: 
+      - '4442:4442'
+    volumes:
+    - ./server.go:/service/server.go
