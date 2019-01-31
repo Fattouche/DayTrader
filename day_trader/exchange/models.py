@@ -201,7 +201,7 @@ class User(models.Model):
 
 class UserStock(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    stock_symbol = models.CharField(max_length=3, primary_key=True)
+    stock_symbol = models.CharField(max_length=3)
     amount = models.PositiveIntegerField(default=0)
 
     def update_amount(self, change):
