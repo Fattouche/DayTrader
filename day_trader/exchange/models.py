@@ -175,9 +175,9 @@ class User(models.Model):
                 stock_symbol=symbol, user_id=self.user_id)
             sell_trigger.cancel()
         except ObjectDoesNotExist:
-            buy_trigger = None
+            sell_trigger = None
 
-        return buy_trigger is not None
+        return sell_trigger is not None
 
     def update_balance(self, change):
         self.balance += change
@@ -315,7 +315,7 @@ class Sell(models.Model):
                    intended_cash_amount=cash_amount, sell_price=stock_price)
         sell.stock_sold_amount = Decimal(cash_amount)//Decimal(stock_price)
         sell.actual_cash_amount = Decimal(
-            sell.stock_sold_amount)*(stock_price)
+            sell.stock_sold_amount)*Decimal(stock_price)
         sell.timestamp = time.time()
         user_stock = UserStock.objects.get(
             user_id=user, stock_symbol=stock_symbol)
@@ -348,7 +348,7 @@ class Buy(models.Model):
         buy = cls(user_id=user, stock_symbol=stock_symbol,
                   purchase_price=stock_price)
         buy.stock_bought_amount = Decimal(cash_amount)//Decimal(stock_price)
-        buy.actual_cash_amount = Decimal(buy.stock_bought_amount)*(stock_price)
+        buy.actual_cash_amount = Decimal(buy.stock_bought_amount)*Decimal(stock_price)
         buy.timestamp = time.time()
         user.update_balance(buy.actual_cash_amount*-1)
         return buy
