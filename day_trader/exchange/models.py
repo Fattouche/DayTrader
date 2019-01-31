@@ -16,12 +16,14 @@ def singleton(cls, *args, **kw):
         return instances[cls]
     return _singleton
 
-@singleton
+#Uncomment to switch back to singleton
+#@singleton
 class Socket():
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect(
                 (settings.QUOTE_SERVER_HOST, settings.QUOTE_SERVER_PORT))
+
 
 class Stock:
     def __init__(self, symbol, price):

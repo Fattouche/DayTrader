@@ -121,14 +121,18 @@ func generateRequest(userID string, commands []string) *http.Request {
 func makeRequest(requests []*http.Request) {
 	client := &http.Client{}
 	for _, req := range requests {
-		client.Do(req)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println("ERROR: ", err)
+		}
+		log.Println(resp)
 	}
 	wg.Done()
 }
 
 func main() {
 	fileName := flag.String("f", "1userWorkLoad", "The name of the workload file")
-	tempBaseURL := flag.String("url", "http://localhost", "The url of the web server")
+	tempBaseURL := flag.String("url", "http://day_trader_lb/", "The url of the web server")
 	flag.Parse()
 	baseURL = *tempBaseURL
 	parseCommands(*fileName)

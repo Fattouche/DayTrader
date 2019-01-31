@@ -33,7 +33,7 @@ func startServer(hostName, port string) {
 		len, err := conn.Read(buf)
 		if err != nil {
 			if err == io.EOF {
-				return
+				continue
 			}
 			log.Println("Error reading", err)
 			return
