@@ -5,6 +5,7 @@ import time
 import django_rq
 from decimal import Decimal
 import socket
+from exchange.audit_logging import AuditLogger
 
 
 class Stock:
@@ -39,6 +40,13 @@ class Stock:
 
         response = data.decode().split(",")  #log the timestamp etc from this response
         quote_price = response[0]
+        
+        logger = AuditLogger.get_instance()
+        # TODO(cailan): deal with server name
+        # TODO(cailan): deal with transaction number
+        logger.log_quote_server_event('BEAVER_1', 1, quote_price,
+            self.symbol, user_id, response[3], response[4])
+
         self.price = quote_price
 
     @classmethod
