@@ -28,7 +28,7 @@ class Socket():
 class Stock:
     def __init__(self, symbol, price):
         self.symbol = symbol
-        self.price = price
+        self.price = Decimal(price)
 
     def check_sell_trigger(self):
         sell_trigger = SellTrigger.objects.filter(
@@ -99,9 +99,9 @@ class User(models.Model):
 
     def perform_sell(self, symbol, amount):
         user=User.get(self.user_id)
-        stock_amount=UserStock.objects.get(
+        user_stock, created=UserStock.objects.get_or_create(
             stock_symbol=symbol, user_id=user)
-        if stock_amount is None or stock_amount == 0:
+        if user_stock.amount is None or user_stock.amount == 0:
             return "Not enough {0} to sell".format(symbol)
         stock = Stock.quote(symbol, self.user_id)
         sell = Sell.create(stock_symbol=symbol,
@@ -238,7 +238,7 @@ class SellTrigger(models.Model):
     #  we might want to not allow updating these triggers to minimize
     #  quote server hits.
     def update_trigger_price(self, amount):
-        user_stock = UserStock.objects.get(
+        user_stock,created = UserStock.objects.get_or_create(
             user_id=self.user_id, stock_symbol=self.stock_symbol)
         stock = Stock.quote(self.stock_symbol)
         stock_reserve_amount = amount // stock.price
@@ -254,7 +254,7 @@ class SellTrigger(models.Model):
         return trigger_updated
 
     def cancel(self):
-        user_stock = UserStock.objects.get(
+        user_stock,created = UserStock.objects.get_or_create(
             user_id=self.user_id, stock_symbol=self.stock_symbol)
         user_stock.update_amount(self.stock_reserved_amount)
         self.price = 0
@@ -317,7 +317,7 @@ class Sell(models.Model):
         sell.actual_cash_amount = Decimal(
             sell.stock_sold_amount)*Decimal(stock_price)
         sell.timestamp = time.time()
-        user_stock = UserStock.objects.get(
+        user_stock,created = UserStock.objects.get_or_create(
             user_id=user, stock_symbol=stock_symbol)
         user_stock.update_amount(sell.stock_sold_amount*-1)
         return sell
@@ -327,7 +327,7 @@ class Sell(models.Model):
         self.save()
 
     def cancel(self, user):
-        user_stock = UserStock.objects.get(
+        user_stock,created = UserStock.objects.get_or_create(
             user_id=self.user_id, stock_symbol=self.stock_symbol)
         user_stock.update_amount(self.stock_sold_amount)
 
