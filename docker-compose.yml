@@ -45,4 +45,8 @@ services:
     volumes:
     - ./day_trader:/day_trader
 
+networks:
+  default:
+    name: day_trader_default
+
 version: '3.6'
