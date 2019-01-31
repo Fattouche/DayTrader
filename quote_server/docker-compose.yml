@@ -1,9 +1,16 @@
 version: '3.6'
 services:
-  generator:
+  server:
     command: go run /service/server.go
+    container_name: quote_server
     image: golang
     ports: 
       - '4442:4442'
     volumes:
     - ./server.go:/service/server.go
+    networks:
+      - day_trader_default
+
+networks:
+  day_trader_default:
+    external: true
