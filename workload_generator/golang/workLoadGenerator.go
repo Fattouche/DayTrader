@@ -135,7 +135,7 @@ func makeRequest(requests []*http.Request) {
 
 func main() {
 	fileName := flag.String("f", "1userWorkLoad", "The name of the workload file")
-	tempBaseURL := flag.String("url", "http://day_trader_lb/", "The url of the web server")
+	tempBaseURL := flag.String("url", "http://daytraderlb/", "The url of the web server")
 	flag.Parse()
 	baseURL = *tempBaseURL
 	parseCommands(*fileName)

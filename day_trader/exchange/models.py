@@ -53,7 +53,7 @@ class Stock:
         data=socket.socket.recv(1024)
         response=data.decode().split(",")  # log the timestamp etc from this response
         quote_price=response[0]
-        self.price=quote_price
+        self.price=Decimal(quote_price)
 
     @classmethod
     def quote(cls, symbol, user_id):
@@ -211,7 +211,7 @@ class UserStock(models.Model):
 
 class SellTrigger(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    stock_symbol = models.CharField(max_length=3, primary_key=True)
+    stock_symbol = models.CharField(max_length=3)
     price = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     cash_amount = models.DecimalField(
         max_digits=65, decimal_places=2, default=0)
@@ -240,7 +240,7 @@ class SellTrigger(models.Model):
     def update_trigger_price(self, amount):
         user_stock,created = UserStock.objects.get_or_create(
             user_id=self.user_id, stock_symbol=self.stock_symbol)
-        stock = Stock.quote(self.stock_symbol)
+        stock = Stock.quote(self.stock_symbol, self.user_id)
         stock_reserve_amount = amount // stock.price
         trigger_updated = False
         if stock_reserve_amount > 0 and (user_stock.amount + self.stock_reserved_amount) >= stock_reserve_amount:
@@ -266,7 +266,7 @@ class SellTrigger(models.Model):
 
 class BuyTrigger(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    stock_symbol = models.CharField(max_length=3, primary_key=True)
+    stock_symbol = models.CharField(max_length=3)
     price = models.DecimalField(max_digits=65, decimal_places=2, default=0)
     cash_amount = models.DecimalField(
         max_digits=65, decimal_places=2, default=0)
