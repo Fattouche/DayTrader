@@ -3,6 +3,7 @@ from .audit_logging import AuditLogger
 import xml.etree.ElementTree as ET
 from .models.business_models import User, BuyTrigger, SellTrigger, \
                                     UserStock, Stock
+from decimal import Decimal
 
 class AuditLoggingTestCase(TestCase):
     def test_logging_and_system_dumplog(self):
@@ -123,7 +124,18 @@ class ViewFunctionsTestCase(TestCase):
         self.stock_symbol = "ABC"
         self.user = User(user_id="oY01WVirLr")
         self.user.save()
-        
+    
+    # TODO(isaacsahle): Write this shit.
+    # def test_set_buy_amount_no_balance(self):
+    # def test_set_buy_amount_enough_balance(self):
+    # def test_set_sell_amount_no_stock(self):
+    # def test_set_sell_amount_enough_stock(self):
+    # def cancel_set_buy_no_buys(self):
+    # def cancel_set_buy_with_buys(self):
+    # def cancel_set_sell_no_sells(self):
+    # def cancel_set_sell_with_sells(self):
+    
+
     def test_set_buy_trigger_no_amount(self):
         trigger_set = self.user.set_buy_trigger(self.stock_symbol,50.00)
         self.assertFalse(trigger_set)
@@ -134,20 +146,77 @@ class ViewFunctionsTestCase(TestCase):
         self.assertFalse(trigger_set)
 
     def test_set_buy_trigger_price_less_than_amount(self):
+        trigger_price = Decimal('50.00')
         BuyTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=100.00).save()
-        trigger_set = self.user.set_buy_trigger(self.stock_symbol,50.00)
+        trigger_set = self.user.set_buy_trigger(self.stock_symbol,trigger_price)
         buy_trigger = BuyTrigger.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol)
         
         self.assertTrue(trigger_set)
-        self.assertEqual(buy_trigger.price, 50.00)
+        self.assertEqual(buy_trigger.price, trigger_price)
+    
+    def test_set_buy_trigger_update_amount(self):
+        trigger_price_1 = Decimal('50.00')
+        trigger_price_2 = Decimal('90.00')
+        BuyTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=100.00).save()
+        trigger_set = self.user.set_buy_trigger(self.stock_symbol,trigger_price_1)
+        buy_trigger = BuyTrigger.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol) 
+        
+        self.assertTrue(trigger_set)
+        self.assertEqual(buy_trigger.price, trigger_price_1)
+        
+        trigger_set = self.user.set_buy_trigger(self.stock_symbol,trigger_price_2)
+        buy_trigger = BuyTrigger.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol)
+
+        self.assertTrue(trigger_set)
+        self.assertEqual(buy_trigger.price, trigger_price_2)
     
     def test_set_sell_trigger_no_amount(self):
         trigger_set = self.user.set_sell_trigger(self.stock_symbol,50.00)
         self.assertFalse(trigger_set)
         
-    # def test_set_sell_trigger_not_enough_stock(self):
-    #     SellTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=100.00).save()
-    #     UserStock(user_id=self.user.user_id, stock_symbol=self.stock_symbol, amount=0).save()
-    #     Stock(symbol=self.stock_symbol,price=1.00).save()
-    #     trigger_set = self.user.set_sell_trigger(self.stock_symbol,50.00)
-    #     self.assertFalse(trigger_set)
+    def test_set_sell_trigger_not_enough_stock(self):
+        SellTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=100.00).save()
+        UserStock(user_id=self.user, stock_symbol=self.stock_symbol).save()
+        trigger_set = self.user.set_sell_trigger(self.stock_symbol,Decimal('50.00'))
+
+        self.assertFalse(trigger_set)
+    
+    def test_set_sell_trigger_enough_stock(self):
+        trigger_price = Decimal('3.45')
+        SellTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=524.12).save()
+        UserStock(user_id=self.user, stock_symbol=self.stock_symbol, amount=1).save()
+
+        trigger_set = self.user.set_sell_trigger(self.stock_symbol,trigger_price)
+        user_stock = UserStock.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol)
+        sell_trigger = SellTrigger.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol) 
+
+
+        self.assertTrue(trigger_set)
+        self.assertEqual(user_stock.amount,0)
+        self.assertEqual(sell_trigger.price,trigger_price)
+        self.assertEqual(sell_trigger.stock_reserved_amount,1)
+        
+    
+    def test_set_sell_trigger_update_amount(self):
+        trigger_price_1 = Decimal('50.00')
+        trigger_price_2 = Decimal('40.00')
+        SellTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=50.00).save()
+        UserStock(user_id=self.user, stock_symbol=self.stock_symbol, amount=2).save()
+
+        trigger_set = self.user.set_sell_trigger(self.stock_symbol,trigger_price_1)
+        user_stock = UserStock.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol)
+        sell_trigger = SellTrigger.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol) 
+
+        self.assertTrue(trigger_set)
+        self.assertEqual(sell_trigger.price, trigger_price_1)
+        self.assertEqual(sell_trigger.stock_reserved_amount,1)
+        self.assertEqual(user_stock.amount,1)
+
+        
+        trigger_set = self.user.set_sell_trigger(self.stock_symbol,trigger_price_2)
+        sell_trigger = SellTrigger.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol)
+
+        self.assertTrue(trigger_set)
+        self.assertEqual(sell_trigger.price,trigger_price_2)
+        self.assertEqual(sell_trigger.stock_reserved_amount,1)
+        self.assertEqual(user_stock.amount,1)

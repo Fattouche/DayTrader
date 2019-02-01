@@ -116,9 +116,9 @@ def set_sell_amount(request):
     symbol = params.get('symbol')
     amount = Decimal(params.get('amount'))
     user = User.get(user_id)
-    user.set_sell_amount(symbol, amount)
+    if(not (user.set_sell_amount(symbol, amount))):
+        return JsonResponse({'action': 'set_sell_amount', 'error': 'user stock too low'}, status=412)
     return JsonResponse({'action': 'set_sell_amount'}, status=200)
-
 
 def set_buy_trigger(request):
     params = json.loads(request.body)
