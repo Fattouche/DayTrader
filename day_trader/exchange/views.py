@@ -4,11 +4,12 @@ from django.http import HttpResponse
 
 import django_rq
 
-from .models import *
+from .models.business_models import *
 from django.core.cache import cache
 from decimal import Decimal
 from django.http import JsonResponse
 import json
+from .audit_logging import AuditLogger
 
 
 def index(request):
@@ -166,7 +167,16 @@ def cancel_set_sell(request):
 
 
 def dumplog(request):
-    return HttpResponse("Init view of stock exchange index")
+    params = json.loads(request.body)
+    if 'filename' not in params:
+        return JsonResponse({'error': 'filename is required'}, status=400)
+
+    if 'user_id' not in params:
+        AuditLogger.dump_system_logs(params['filename'])
+    else:
+        AuditLogger.dump_user_log(params['user_id'], params['filename'])
+
+    return HttpResponse("System logs dumped to file {}".format(params['filename']))
 
 
 def display_summary(request):

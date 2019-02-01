@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'day_trader.middleware.filter_bad_requests.FilterBadRequestsMiddleware',
     'day_trader.middleware.create_user.CreateUserMiddleware',
+    'day_trader.middleware.logging.LogRequestMiddleware'
 ]
 
 ROOT_URLCONF = 'day_trader.urls'

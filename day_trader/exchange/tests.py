@@ -1,28 +1,26 @@
 from django.test import TestCase
 from .audit_logging import AuditLogger
 import xml.etree.ElementTree as ET
-from exchange.models import User, BuyTrigger, SellTrigger, UserStock, Stock
+from .models.business_models import User, BuyTrigger, SellTrigger, \
+                                    UserStock, Stock
 
 class AuditLoggingTestCase(TestCase):
-    def setUp(self):
-        self.audit_logger = AuditLogger.get_instance()
-
     def test_logging_and_system_dumplog(self):
-        self.audit_logger.log_user_command('SERVER_1', 1, 'BUY', 
+        AuditLogger.log_user_command('SERVER_1', 1, 'BUY', 
             username='cailan', stock_symbol='HGU', filename='blah.txt',
             funds=1000000)
-        self.audit_logger.log_quote_server_event('SERVER_1', 1, 25, 'HGU',
+        AuditLogger.log_quote_server_event('SERVER_1', 1, 25, 'HGU',
             'cailan', '12345', 'key_15')
-        self.audit_logger.log_account_transaction('SERVER_1', 1, 'BUY',
+        AuditLogger.log_account_transaction('SERVER_1', 1, 'BUY',
             'cailan', 1000000)
-        self.audit_logger.log_system_event('SERVER_1', 1, 'BUY',
+        AuditLogger.log_system_event('SERVER_1', 1, 'BUY',
             username='cailan', stock_symbol='HGU')
-        self.audit_logger.log_error_event('SERVER_1', 1, 'BUY',
+        AuditLogger.log_error_event('SERVER_1', 1, 'BUY',
             username='cailan', stock_symbol='HGU', error_message='Oops')
-        self.audit_logger.log_debug_event('SERVER_1', 1, 'BUY',
+        AuditLogger.log_debug_event('SERVER_1', 1, 'BUY',
             username='cailan', stock_symbol='HGU', debug_message='Complete')
 
-        self.audit_logger.dump_system_logs('test_output.xml')
+        AuditLogger.dump_system_logs('test_output.xml')
 
         tree = ET.parse('test_output.xml')
         root = tree.getroot()
