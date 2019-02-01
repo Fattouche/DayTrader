@@ -54,7 +54,7 @@ def commit_buy(request):
         return JsonResponse({'action': 'commit_buy', 'error': 'no buy currently exists'}, status=404)
     if(is_expired(buy.timestamp)):
         return JsonResponse({'action': 'commit_buy', 'stock': buy.stock_symbol, 'error': 'buy has expired, please re-buy in order to commit'}, status=408)
-    buy.commit(user)
+    buy.commit()
     return JsonResponse({'action': 'commit_buy', 'stock': buy.stock_symbol, 'amount_bought': buy.stock_bought_amount, 'balance': user.balance}, status=200)
 
 
@@ -87,7 +87,7 @@ def commit_sell(request):
         return JsonResponse({'action': 'commit_sell', 'error': 'no sell currently exists'}, status=404)
     if(is_expired(sell.timestamp)):
         return JsonResponse({'action': 'commit_sell', 'stock': sell.stock_symbol, 'error': 'sell has expired, please re-buy in order to commit'}, status=408)
-    sell.commit(user)
+    sell.commit()
     return JsonResponse({'action': 'commit_sell', 'stock': sell.stock_symbol, 'amount_sold': sell.stock_sold_amount, 'balance': user.balance}, status=200)
 
 

@@ -243,7 +243,7 @@ class SellTrigger(models.Model):
 
     def check_validity(self, price):
         if(self.price <= price):
-            user = User.get(user_id)
+            user = User.get(self.user_id)
             # TODO(isaacsahle): This should be refactored.
             actual_cash_amount = self.stock_reserved_amount * (price)
             sell = Sell.create(user_id=user.user_id, stock_symbol=self.stock_symbol,
@@ -293,7 +293,7 @@ class BuyTrigger(models.Model):
 
     def check_validity(self, price, symbol):
         if(self.price >= price):
-            user = User.get(user_id)
+            user = User.get(self.user_id)
             buy = Buy.create(user_id=user.user_id, stock_symbol=self.stock_symbol,
                              cash_amount=cash_amount, stock_price=price)
             buy.commit(user)
