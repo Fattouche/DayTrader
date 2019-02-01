@@ -55,7 +55,7 @@ func parseCommands(filename string) {
 		totalCommand := strings.Split(scanner.Text(), " ")
 		userCommands := strings.Split(totalCommand[1], ",")
 		if userCommands[0] == "DUMPLOG" && len(userCommands) == 2 {
-			userID = "admin"
+			userID = ""
 		} else {
 			userID = userCommands[1]
 		}
@@ -73,7 +73,9 @@ func generateRequest(userID string, commands []string) *http.Request {
 		requestType = "GET"
 	}
 	params := make(map[string]string)
-	params["user_id"] = userID
+	if len(userID) > 0 {
+		params["user_id"] = userID
+	}
 	if commands[0] == "DUMPLOG" {
 		if len(commands) > 2 {
 			params["filename"] = commands[2]
