@@ -1,7 +1,8 @@
 from django.test import TestCase
 from .audit_logging import AuditLogger
 import xml.etree.ElementTree as ET
-from .models.business_models import User, BuyTrigger
+from .models.business_models import User, BuyTrigger, SellTrigger, \
+                                    UserStock, Stock
 
 class AuditLoggingTestCase(TestCase):
     def test_logging_and_system_dumplog(self):
@@ -119,22 +120,34 @@ class AuditLoggingTestCase(TestCase):
 class ViewFunctionsTestCase(TestCase):
     
     def setUp(self):
+        self.stock_symbol = "ABC"
         self.user = User(user_id="oY01WVirLr")
         self.user.save()
         
     def test_set_buy_trigger_no_amount(self):
-        trigger_set = self.user.set_buy_trigger("ABC",50.00)
+        trigger_set = self.user.set_buy_trigger(self.stock_symbol,50.00)
         self.assertFalse(trigger_set)
 
     def test_set_buy_trigger_price_greater_than_amount(self):
-        BuyTrigger(stock_symbol="ABC",user_id=self.user,cash_amount=50.00).save()
-        trigger_set = self.user.set_buy_trigger("ABC",100.00)
+        BuyTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=50.00).save()
+        trigger_set = self.user.set_buy_trigger(self.stock_symbol,100.00)
         self.assertFalse(trigger_set)
 
     def test_set_buy_trigger_price_less_than_amount(self):
-        BuyTrigger(stock_symbol="ABC",user_id=self.user,cash_amount=100.00).save()
-        trigger_set = self.user.set_buy_trigger("ABC",50.00)
-        buy_trigger = BuyTrigger.objects.get(user_id=self.user.user_id,stock_symbol="ABC")
+        BuyTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=100.00).save()
+        trigger_set = self.user.set_buy_trigger(self.stock_symbol,50.00)
+        buy_trigger = BuyTrigger.objects.get(user_id=self.user.user_id,stock_symbol=self.stock_symbol)
         
         self.assertTrue(trigger_set)
         self.assertEqual(buy_trigger.price, 50.00)
+    
+    def test_set_sell_trigger_no_amount(self):
+        trigger_set = self.user.set_sell_trigger(self.stock_symbol,50.00)
+        self.assertFalse(trigger_set)
+        
+    # def test_set_sell_trigger_not_enough_stock(self):
+    #     SellTrigger(stock_symbol=self.stock_symbol,user_id=self.user,cash_amount=100.00).save()
+    #     UserStock(user_id=self.user.user_id, stock_symbol=self.stock_symbol, amount=0).save()
+    #     Stock(symbol=self.stock_symbol,price=1.00).save()
+    #     trigger_set = self.user.set_sell_trigger(self.stock_symbol,50.00)
+    #     self.assertFalse(trigger_set)
