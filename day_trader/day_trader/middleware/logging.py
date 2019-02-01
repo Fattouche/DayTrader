@@ -1,15 +1,20 @@
+import json
 from exchange.audit_logging import AuditLogger
 
 class LogRequestMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
-        self.logger = AuditLogger.get_instance()
 
     def __call__(self, request):
-        params = json.loads(request.body)
         # TODO(cailan): deal with server_name
         # TODO(cailan): deal with transaction_num
+        command = request.path[1:].upper()
         log_input = {}
+        if request.method == 'POST':
+            params = json.loads(request.body)
+        else:
+            params = request.GET
+
         if 'user_id' in params:
             log_input['username'] = params['user_id']
         if 'symbol' in params:
@@ -19,4 +24,5 @@ class LogRequestMiddleware(object):
         if 'funds' in params:
             log_input['funds'] = params['funds']
 
-        log_user_command('BEAVER_1', 1, params['command'], **(log_input))
+        AuditLogger.log_user_command('BEAVER_1', 1, command, **(log_input))
+        return self.get_response(request)

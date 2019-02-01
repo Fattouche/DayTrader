@@ -5,8 +5,8 @@ import time
 import django_rq
 from decimal import Decimal
 import socket
-from exchange.audit_logging import AuditLogger
 from django.conf import settings
+from exchange.audit_logging import AuditLogger
 
 
 def singleton(cls, *args, **kw):
@@ -56,10 +56,9 @@ class Stock:
         quote_price=response[0]
         self.price=Decimal(quote_price)
 
-        logger = AuditLogger.get_instance()
         # TODO(cailan): deal with server name
         # TODO(cailan): deal with transaction number
-        logger.log_quote_server_event('BEAVER_1', 1, quote_price,
+        AuditLogger.log_quote_server_event('BEAVER_1', 1, quote_price,
             self.symbol, user_id, response[3], response[4])
 
     @classmethod
@@ -94,8 +93,8 @@ class User(models.Model):
         if Decimal(amount) > self.balance:
             return "Not enough balance, have {0} need {1}".format(self.balance, amount)
         stock=Stock.quote(symbol, self.user_id)
-        buy=Buy.create(stock_symbol = symbol,
-                         cash_amount = amount, stock_price = stock.price, user = self)
+        buy=Buy.create(stock_symbol=symbol, cash_amount=amount, 
+                        stock_price=stock.price, user=self)
         self.buy_stack.append(buy)
         cache.set(self.user_id, self)
 
@@ -190,6 +189,10 @@ class User(models.Model):
         self.balance += change
         cache.set(self.user_id, self)
         self.save()
+        # TODO(cailan): fix server_name and transaction_num
+        action = 'add' if change >= 0 else 'remove'
+        AuditLogger.log_account_transaction('BEAVER_1', 1, action, self.user_id,
+            abs(change))
 
     def pop_from_buy_stack(self):
         if self.buy_stack:
@@ -377,63 +380,3 @@ def is_expired(previous_time):
     return False
 
 
-class BaseLog(models.Model):
-    log_type = models.CharField(max_length=32)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    server = models.CharField(max_length=8)
-    transaction_num = models.PositiveIntegerField()
-
-
-class UserCommandLog(models.Model):
-    base_log = models.OneToOneField(BaseLog, on_delete=models.CASCADE)
-    command = models.CharField(max_length=16)
-    username = models.CharField(max_length=64)
-    stock_symbol = models.CharField(max_length=3)
-    filename = models.FilePathField(path="/dumplog_output")
-    funds = models.IntegerField(null=True)
-
-
-class QuoteServerLog(models.Model):
-    base_log = models.OneToOneField(BaseLog, on_delete=models.CASCADE)
-    price = models.PositiveIntegerField()
-    stock_symbol = models.CharField(max_length=3)
-    username = models.CharField(max_length=128)
-    quote_server_time = models.PositiveIntegerField()
-    # TODO: what is crypto key length?
-    crypto_key = models.CharField(max_length=256)
-
-
-class AccountTransactionLog(models.Model):
-    base_log = models.OneToOneField(BaseLog, on_delete=models.CASCADE)
-    action = models.CharField(max_length=32)
-    username = models.CharField(max_length=64)
-    funds = models.IntegerField()
-
-
-class SystemEventLog(models.Model):
-    base_log = models.OneToOneField(BaseLog, on_delete=models.CASCADE)
-    command = models.CharField(max_length=16)
-    username = models.CharField(max_length=64)
-    stock_symbol = models.CharField(max_length=3)
-    filename = models.FilePathField(path="/dumplog_output")
-    funds = models.IntegerField(null=True)
-
-
-class ErrorEventLog(models.Model):
-    base_log = models.OneToOneField(BaseLog, on_delete=models.CASCADE)
-    command = models.CharField(max_length=16)
-    username = models.CharField(max_length=64)
-    stock_symbol = models.CharField(max_length=3)
-    filename = models.FilePathField(path="/dumplog_output")
-    funds = models.IntegerField(null=True)
-    error_message = models.CharField(max_length=512)
-
-
-class DebugEventLog(models.Model):
-    base_log = models.OneToOneField(BaseLog, on_delete=models.CASCADE)
-    command = models.CharField(max_length=16)
-    username = models.CharField(max_length=64)
-    stock_symbol = models.CharField(max_length=3)
-    filename = models.FilePathField(path="/dumplog_output")
-    funds = models.IntegerField(null=True)
-    debug_message = models.CharField(max_length=512)
