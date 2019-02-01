@@ -167,7 +167,7 @@ def cancel_set_sell(request):
 
 
 def dumplog(request):
-    params = json.loads(request.body)
+    params = request.GET
     if 'filename' not in params:
         return JsonResponse({'error': 'filename is required'}, status=400)
 
