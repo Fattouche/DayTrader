@@ -23,7 +23,7 @@ class FilterBadRequestsMiddleware(object):
     def __call__(self, request):
         query_dict = request.GET if request.method == 'GET' else json.loads(request.body)
 
-        if 'user_id' not in query_dict and request.path != self.index and not request.path.startswith(self.admin_index):
+        if 'user_id' not in query_dict and request.path != self.index and not request.path.startswith(self.admin_index) and request.path != self.dumplog_path:
             return JsonResponse({'error': 'User id is required'}, status=400)
         hasSymbol = 'symbol' in query_dict
         hasAmount = 'amount' in query_dict

@@ -1,0 +1,15 @@
+version: '3.6'
+services:
+  generator:
+    command: go run /service/workLoadGenerator.go -f="/service/workload_files/1_user_workload"
+    container_name: workload_generator
+    image: golang
+    volumes:
+    - ./golang/workLoadGenerator.go:/service/workLoadGenerator.go
+    - ./workload_files:/service/workload_files
+    networks:
+      - day_trader_default
+  
+networks:
+  day_trader_default:
+    external: true

@@ -1,7 +1,7 @@
 from django.test import TestCase
 from .audit_logging import AuditLogger
 import xml.etree.ElementTree as ET
-import exchange.models as models
+from exchange.models import User, BuyTrigger
 
 class AuditLoggingTestCase(TestCase):
     def setUp(self):
@@ -121,8 +121,23 @@ class AuditLoggingTestCase(TestCase):
 
 class ViewFunctionsTestCase(TestCase):
     
-    def set_buy_trigger_test(self):
-        user = models.User(user_id="oY01WVirLr")
-        user.set_buy_trigger("ABC",50.00)
+    def setUp(self):
+        self.user = User(user_id="oY01WVirLr")
+        self.user.save()
         
+    def test_set_buy_trigger_no_amount(self):
+        trigger_set = self.user.set_buy_trigger("ABC",50.00)
+        self.assertFalse(trigger_set)
 
+    def test_set_buy_trigger_price_greater_than_amount(self):
+        BuyTrigger(stock_symbol="ABC",user_id=self.user,cash_amount=50.00).save()
+        trigger_set = self.user.set_buy_trigger("ABC",100.00)
+        self.assertFalse(trigger_set)
+
+    def test_set_buy_trigger_price_less_than_amount(self):
+        BuyTrigger(stock_symbol="ABC",user_id=self.user,cash_amount=100.00).save()
+        trigger_set = self.user.set_buy_trigger("ABC",50.00)
+        buy_trigger = BuyTrigger.objects.get(user_id=self.user.user_id,stock_symbol="ABC")
+        
+        self.assertTrue(trigger_set)
+        self.assertEqual(buy_trigger.price, 50.00)

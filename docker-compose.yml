@@ -1,6 +1,6 @@
 services:
   web:
-    command: gunicorn day_trader.wsgi -b 0:41000 --reload
+    command: gunicorn day_trader.wsgi -b 0:41000 --workers=4 --keep-alive=10 --reload
     container_name: day_trader_web
     environment:
      PYTHONUNBUFFERED: 1
@@ -27,7 +27,7 @@ services:
     build:
       context: ./images/nginx
     command: /service/entrypoint.sh
-    container_name: day_trader_lb
+    container_name: daytraderlb
     volumes:
       - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
@@ -44,5 +44,9 @@ services:
     container_name: day_trader_worker
     volumes:
     - ./day_trader:/day_trader
+
+networks:
+  default:
+    name: day_trader_default
 
 version: '3.6'

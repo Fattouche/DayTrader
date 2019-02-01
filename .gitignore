@@ -4,4 +4,3 @@ __pycache__/
 *$py.class
 .DS_Store
 *.txt
-workload_generator/workload_files/*

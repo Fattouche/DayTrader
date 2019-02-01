@@ -4,7 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -36,7 +39,8 @@ var amountCommands = map[string]int{
 }
 var userMap = make(map[string][]*http.Request)
 var wg sync.WaitGroup
-var baseURL = "http://localhost/"
+var baseURL string
+var client = &http.Client{}
 
 func parseCommands(filename string) {
 	file, err := os.Open(filename)
@@ -118,15 +122,23 @@ func generateRequest(userID string, commands []string) *http.Request {
 }
 
 func makeRequest(requests []*http.Request) {
-	client := &http.Client{}
 	for _, req := range requests {
-		client.Do(req)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println("ERROR: ", err)
+		}
+		io.Copy(ioutil.Discard, resp.Body)
+		resp.Body.Close()
 	}
 	wg.Done()
 }
 
 func main() {
-	parseCommands("2userWorkLoad.txt")
+	fileName := flag.String("f", "1userWorkLoad", "The name of the workload file")
+	tempBaseURL := flag.String("url", "http://daytraderlb/", "The url of the web server")
+	flag.Parse()
+	baseURL = *tempBaseURL
+	parseCommands(*fileName)
 	wg.Add(len(userMap))
 	start := time.Now()
 	for _, requests := range userMap {

@@ -25,6 +25,8 @@ SECRET_KEY = '3&3=#)d^7%bj6w6^d^@4#sd044%k_5^%p0wc8thdx*&gyd+1!_'
 DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+QUOTE_SERVER_HOST = "quote_server"
+QUOTE_SERVER_PORT = 4442
 
 
 # Application definition

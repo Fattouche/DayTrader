@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	hostName := "localhost"
+	hostName := ""
 	port := ":4442"
 	startServer(hostName, port)
 }
@@ -24,16 +24,16 @@ func startServer(hostName, port string) {
 	}
 	log.Println("Listening on", hostName+port)
 	buf := make([]byte, 100)
-	conn, err := ln.Accept()
-	if err != nil {
-		log.Println("Error accepting", err)
-		return
-	}
 	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Println("Error accepting", err)
+			return
+		}
 		len, err := conn.Read(buf)
 		if err != nil {
 			if err == io.EOF {
-				return
+				continue
 			}
 			log.Println("Error reading", err)
 			return
@@ -46,6 +46,7 @@ func startServer(hostName, port string) {
 }
 
 func genResponse(symbol, userID string) []byte {
+	log.Printf("Recieved request for %s by %s\n", symbol, userID)
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	price := r1.Float64() * 30
