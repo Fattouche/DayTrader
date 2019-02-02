@@ -84,12 +84,12 @@ class User(models.Model):
 
     @classmethod
     def get(cls, user_id):
-        ##user = cache.get(user_id)
-        # if(user is None):
-        user = cls.objects.get(user_id=user_id)
-        user.sell_stack = []
-        user.buy_stack = []
-        cache.set(user.user_id, user)
+        user = cache.get(user_id)
+        if(user is None):
+            user = cls.objects.get(user_id=user_id)
+            user.sell_stack = []
+            user.buy_stack = []
+            cache.set(user.user_id, user)
         return user
 
     def perform_buy(self, symbol, amount):
@@ -386,6 +386,7 @@ class BuyTrigger(models.Model):
     def cancel(self):
         self.buy.cancel(self.user)
         self.committed = True
+        self.active = False
         self.save()
 
 
