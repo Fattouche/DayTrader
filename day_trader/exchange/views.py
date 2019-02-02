@@ -120,6 +120,7 @@ def set_sell_amount(request):
         return JsonResponse({'action': 'set_sell_amount', 'error': 'user stock too low'}, status=412)
     return JsonResponse({'action': 'set_sell_amount'}, status=200)
 
+
 def set_buy_trigger(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -160,9 +161,9 @@ def cancel_set_sell(request):
     user_id = params.get('user_id')
     symbol = params.get('symbol')
     user = User.get(user_id)
-    set_sell_cancelled = user.cancel_set_sell(symbol)
-    if not set_sell_cancelled:
-        return JsonResponse({'action': 'cancel_set_sell', 'error': 'no set sell to cancel'}, status=412)
+    err = user.cancel_set_sell(symbol)
+    if err:
+        return JsonResponse({'action': 'cancel_set_sell', 'error': err}, status=404)
     return JsonResponse({'action': 'cancel_set_sell'}, status=200)
 
 
