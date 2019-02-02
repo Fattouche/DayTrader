@@ -71,7 +71,6 @@ def sell(request):
     symbol = params.get('symbol')
     amount = Decimal(params.get('amount'))
     user = User.get(user_id)
-    sell = user.pop_from_sell_stack()
     err = user.perform_sell(symbol, amount)
     if err is not None:
         return JsonResponse({'action': 'sell', 'error': err}, status=400)
