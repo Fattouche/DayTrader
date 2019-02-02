@@ -57,7 +57,7 @@ def commit_buy(request):
         return JsonResponse({'action': 'commit_buy', 'error': 'no buy currently exists'}, status=404)
     if(is_expired(buy.timestamp)):
         return JsonResponse({'action': 'commit_buy', 'stock': buy.stock_symbol, 'error': 'buy has expired, please re-buy in order to commit'}, status=408)
-    buy.commit(user)
+    buy.commit()
     return JsonResponse({'action': 'commit_buy', 'stock': buy.stock_symbol, 'amount_bought': buy.stock_bought_amount, 'balance': user.balance}, status=200)
 
 
@@ -123,9 +123,9 @@ def set_sell_amount(request):
     symbol = params.get('symbol')
     amount = Decimal(params.get('amount'))
     user = User.get(user_id)
-    user.set_sell_amount(symbol, amount)
+    if(not (user.set_sell_amount(symbol, amount))):
+        return JsonResponse({'action': 'set_sell_amount', 'error': 'user stock too low'}, status=412)
     return JsonResponse({'action': 'set_sell_amount'}, status=200)
-
 
 def set_buy_trigger(request):
     params = json.loads(request.body)
@@ -175,7 +175,7 @@ def cancel_set_sell(request):
 
 
 def dumplog(request):
-    params = json.loads(request.body)
+    params = request.GET
     if 'filename' not in params:
         return JsonResponse({'error': 'filename is required'}, status=400)
 
