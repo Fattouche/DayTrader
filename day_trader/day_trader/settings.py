@@ -89,7 +89,7 @@ DATABASES = {
 }
 
 # Cache
-CACHALOT_ENABLED = True
+CACHALOT_ENABLED = False
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',

@@ -140,6 +140,11 @@ func makeRequest(requests []*http.Request) {
 		if err != nil {
 			log.Println("ERROR: ", err)
 		}
+		/*if resp.StatusCode == 400 {
+			buf := make([]byte, 1000)
+			resp.Body.Read(buf)
+			log.Println(string(buf))
+		}*/
 		io.Copy(ioutil.Discard, resp.Body)
 		resp.Body.Close()
 	}
