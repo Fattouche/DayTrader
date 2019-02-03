@@ -30,15 +30,16 @@ class Socket():
 
 
 class Stock:
-    def __init__(self, symbol, price):
+    def __init__(self, symbol, price, transaction_num):
         self.symbol = symbol
         self.price = Decimal(price)
+        self.transaction_num = transaction_num
 
     def check_sell_trigger(self):
         sell_trigger = SellTrigger.objects.filter(
             sell__stock_symbol=self.symbol, active=True)
         for trigger in sell_trigger:
-            trigger.check_validity(self.price)
+            trigger.check_validity(self.price, self.transaction_num)
 
     def check_buy_trigger(self):
         buy_trigger = BuyTrigger.objects.filter(
@@ -50,7 +51,7 @@ class Stock:
         self.check_sell_trigger()
         self.check_buy_trigger()
 
-    def execute_quote_request(self, user_id):
+    def execute_quote_request(self, user_id, transaction_num):
         request = "{},{}\r".format(self.symbol, user_id)
         socket = Socket()
         socket.socket.send(request.encode())
@@ -60,16 +61,15 @@ class Stock:
         self.price = Decimal(quote_price)
 
         # TODO(cailan): deal with server name
-        # TODO(cailan): deal with transaction number
-        AuditLogger.log_quote_server_event('BEAVER_1', 1, quote_price,
-                                           self.symbol, user_id, response[3], response[4])
+        AuditLogger.log_quote_server_event('BEAVER_1', transaction_num, 
+            quote_price, self.symbol, user_id, response[3], response[4])
 
     @classmethod
-    def quote(cls, symbol, user_id):
+    def quote(cls, symbol, user_id, transaction_num):
         stock = cache.get(symbol)
         if(stock is None):
             stock = cls(symbol=symbol, price=0)
-            stock.execute_quote_request(user_id=user_id)
+            stock.execute_quote_request(user_id, transaction_num)
             cache.set(symbol, stock, 60)
             django_rq.enqueue(stock.verify_triggers)
         return stock
@@ -96,9 +96,10 @@ class User(models.Model):
             user.sell_stack = []
         return user
 
-    def perform_buy(self, symbol, amount):
+    def perform_buy(self, symbol, amount, transaction_num):
         buy, err = Buy.create(stock_symbol=symbol,
-                              cash_amount=amount, user=self)
+                              cash_amount=amount, user=self,
+                              transaction_num=transaction_num)
         if(err):
             return err
         if not hasattr(self, 'buy_stack'):
@@ -106,16 +107,17 @@ class User(models.Model):
         self.buy_stack.append(buy)
         cache.set(self.user_id, self)
 
-    def cancel_buy(self):
+    def cancel_buy(self, transaction_num):
         buy = self.pop_from_buy_stack()
         if buy is not None:
-            buy.cancel(self)
+            buy.cancel(self, transaction_num)
 
-    def perform_sell(self, symbol, amount):
+    def perform_sell(self, symbol, amount, transaction_num):
         user_stock, created = UserStock.objects.get_or_create(
             stock_symbol=symbol, user=self)
         sell, err = Sell.create(stock_symbol=symbol,
-                                cash_amount=amount, user=self)
+                                cash_amount=amount, user=self,
+                                transaction_num=transaction_num)
         if(err):
             return err
         if not hasattr(self, 'sell_stack'):
@@ -128,16 +130,17 @@ class User(models.Model):
         if sell is not None:
             sell.cancel()
 
-    def set_buy_amount(self, symbol, amount):
+    def set_buy_amount(self, symbol, amount, transaction_num):
         try:
             buy_trigger = BuyTrigger.objects.get(
                 user__user_id=self.user_id,
-                buy__stock_symbol=symbol,
+                buy__stock_symbol=symbol
             )
-            buy_trigger.update_cash_amount(amount)
+            buy_trigger.update_cash_amount(amount, transaction_num)
         except:
             buy, err = Buy.create(stock_symbol=symbol,
-                                  cash_amount=amount, user=self)
+                                  cash_amount=amount, user=self,
+                                  transaction_num=transaction_num)
             if(err):
                 return err
             buy.save()
@@ -180,7 +183,7 @@ class User(models.Model):
         except ObjectDoesNotExist:
             return "Trigger requires a sell amount first, please make one"
 
-    def cancel_set_buy(self, symbol):
+    def cancel_set_buy(self, symbol, transaction_num):
         try:
             buy_trigger = BuyTrigger.objects.get(
                 buy__stock_symbol=symbol, user=self)
@@ -196,15 +199,15 @@ class User(models.Model):
         except ObjectDoesNotExist:
             return "sell trigger not found"
 
-    def update_balance(self, change):
+    def update_balance(self, change, transaction_num):
         self = User.get(self.user_id)
         self.balance = Decimal(self.balance) + Decimal(change)
         cache.set(self.user_id, self)
         self.save()
-        # TODO(cailan): fix server_name and transaction_num
+        # TODO(cailan): fix server_name
         action = 'add' if change >= 0 else 'remove'
-        AuditLogger.log_account_transaction('BEAVER_1', 1, action, self.user_id,
-                                            abs(change))
+        AuditLogger.log_account_transaction('BEAVER_1', transaction_num, 
+            action, self.user_id, abs(change))
 
     def pop_from_buy_stack(self):
         if hasattr(self, 'buy_stack'):
@@ -243,8 +246,8 @@ class Sell(models.Model):
         max_digits=65, decimal_places=2, default=0)
 
     @classmethod
-    def create(cls, stock_symbol, cash_amount, user):
-        stock = Stock.quote(stock_symbol, user.user_id)
+    def create(cls, stock_symbol, cash_amount, user, transaction_num):
+        stock = Stock.quote(stock_symbol, user.user_id, transaction_num)
         sell = cls(user=user, stock_symbol=stock_symbol)
         err = sell.update_cash_amount(cash_amount)
         if(err):
@@ -278,8 +281,8 @@ class Sell(models.Model):
             return "Not enough stock, have {0} need {1}".format(user_stock.amount, stock_sold_amount)
         self.intended_cash_amount = amount
 
-    def commit(self, user):
-        user.update_balance(self.actual_cash_amount)
+    def commit(self, user, transaction_num):
+        user.update_balance(self.actual_cash_amount, transaction_num)
         self.save()
 
     def cancel(self):
@@ -300,22 +303,22 @@ class Buy(models.Model):
         max_digits=65, decimal_places=2, default=0)
 
     @classmethod
-    def create(cls, stock_symbol, cash_amount, user):
+    def create(cls, stock_symbol, cash_amount, user, transaction_num):
         stock = Stock.quote(stock_symbol, user.user_id)
         buy = cls(user=user, stock_symbol=stock_symbol,
                   purchase_price=stock.price)
-        err = buy.update_cash_amount(cash_amount)
+        err = buy.update_cash_amount(cash_amount, transaction_num)
         if(err):
             return None, err
         buy.update_price(stock.price)
         buy.timestamp = time.time()
         return buy, None
 
-    def update_cash_amount(self, amount):
+    def update_cash_amount(self, amount, transaction_num):
         if amount > self.user.balance:
             return None, "Not enough balance, have {0} need {1}".format(self.user.balance, amount)
         updated_amount = (self.intended_cash_amount - amount)
-        self.user.update_balance(updated_amount)
+        self.user.update_balance(updated_amount, transaction_num)
         self.intended_cash_amount = abs(updated_amount)
 
     def update_price(self, stock_price):
@@ -323,8 +326,8 @@ class Buy(models.Model):
         self.stock_bought_amount = self.intended_cash_amount//self.stock_price
         self.actual_cash_amount = self.stock_bought_amount*self.stock_price
 
-    def cancel(self, user):
-        user.update_balance(self.intended_cash_amount)
+    def cancel(self, user, transaction_num):
+        user.update_balance(self.intended_cash_amount, transaction_num)
 
     def commit(self):
         user_stock, created = UserStock.objects.get_or_create(
@@ -375,8 +378,8 @@ class BuyTrigger(models.Model):
             self.active = False
             self.save()
 
-    def update_cash_amount(self, amount):
-        self.buy.update_cash_amount(amount)
+    def update_cash_amount(self, amount, transaction_num):
+        self.buy.update_cash_amount(amount, transaction_num)
         self.save()
 
     def update_trigger_price(self, price):
