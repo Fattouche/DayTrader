@@ -16,7 +16,8 @@ services:
     ports:
     - '11211:11211'
   db:
-    image: mysql:5.7
+    image: mysql
+    command: mysqld --max_allowed_packet=256M --max_connections=1024 --default-authentication-plugin=mysql_native_password
     container_name: day_trader_db
     environment:
       MYSQL_DATABASE: day_trader_db
