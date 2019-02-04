@@ -7,6 +7,7 @@ from decimal import Decimal
 import socket
 from django.conf import settings
 from exchange.audit_logging import AuditLogger
+from exchange.thread_local import get_current_logging_info
 
 
 def singleton(cls, *args, **kw):
@@ -59,8 +60,9 @@ class Stock:
         quote_price = response[0]
         self.price = Decimal(quote_price)
 
-        # TODO(cailan): deal with server name and transaction num
-        AuditLogger.log_quote_server_event('BEAVER_1', 1,
+        logging_info = get_current_logging_info()
+        AuditLogger.log_quote_server_event(logging_info['server'], 
+            logging_info['transaction_num'],
             quote_price, self.symbol, user_id, response[3], response[4])
 
     @classmethod
@@ -200,9 +202,11 @@ class User(models.Model):
         self.balance = Decimal(self.balance) + Decimal(change)
         cache.set(self.user_id, self)
         self.save()
-        # TODO(cailan): fix server_name and transaction num
+
         action = 'add' if change >= 0 else 'remove'
-        AuditLogger.log_account_transaction('BEAVER_1', 1,
+        logging_info = get_current_logging_info()
+        AuditLogger.log_account_transaction(logging_info['server'], 
+            logging_info['transaction_num'],
             action, self.user_id, abs(change))
 
     def pop_from_buy_stack(self):
@@ -339,8 +343,16 @@ class SellTrigger(models.Model):
     active = models.BooleanField(default=False)
 
     def check_validity(self, price):
-        if(self.sell.sell_price <= price):
-            self.sell.commit(self.user)
+        sell_object = self.sell
+        user_object = self.user
+        if(sell_object.sell_price <= price):
+            logging_info = get_current_logging_info()
+            AuditLogger.log_system_event(logging_info['server'],
+                logging_info['transaction_num'], logging_info['command'],
+                username=user_object.user_id, 
+                stock_symbol=sell_object.stock_symbol,
+                funds=user_object.balance)
+            sell_object.commit(user_object)
             self.active = False
             self.save()
 
@@ -368,9 +380,17 @@ class BuyTrigger(models.Model):
     active = models.BooleanField(default=False)
 
     def check_validity(self, price):
-        if(self.buy.purchase_price >= price):
-            self.buy.update_price(price)
-            self.buy.commit()
+        buy_object = self.buy
+        user_object = self.user
+        if(buy_object.purchase_price >= price):
+            logging_info = get_current_logging_info()
+            AuditLogger.log_system_event(logging_info['server'],
+                logging_info['transaction_num'], logging_info['command'],
+                username=user_object.user_id, 
+                stock_symbol=buy_object.stock_symbol,
+                funds=user_object.balance)
+            buy_object.update_price(price)
+            buy_object.commit()
             self.active = False
             self.save()
 
