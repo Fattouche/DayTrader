@@ -1,5 +1,7 @@
 import json
+from .thread_local import get_current_request
 from exchange.audit_logging import AuditLogger
+
 
 class LogRequestMiddleware(object):
     def __init__(self, get_response):
@@ -22,7 +24,16 @@ class LogRequestMiddleware(object):
         if 'funds' in params:
             log_input['funds'] = params['funds']
 
+        logging_info = {
+            'transaction_num': params.get('transaction_num', -1),
+            'server': 'BEAVER_1'  # TODO(cailan): get from environment var
+        }
+
+        print('curr_request: {}'.format(get_current_request()))
+
+        # threadLocal.logging_info = logging_info
+
         # TODO(cailan): deal with server_name
-        AuditLogger.log_user_command('BEAVER_1', params['transaction_num'], 
-                                    command, **(log_input))
+        AuditLogger.log_user_command(logging_info['server'], 
+            logging_info['transaction_num'], command, **(log_input))
         return self.get_response(request)
