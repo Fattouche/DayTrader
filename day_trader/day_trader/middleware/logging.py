@@ -1,5 +1,4 @@
 import json
-from .thread_local import get_current_request
 from exchange.audit_logging import AuditLogger
 
 
@@ -28,10 +27,6 @@ class LogRequestMiddleware(object):
             'transaction_num': params.get('transaction_num', -1),
             'server': 'BEAVER_1'  # TODO(cailan): get from environment var
         }
-
-        print('curr_request: {}'.format(get_current_request()))
-
-        # threadLocal.logging_info = logging_info
 
         # TODO(cailan): deal with server_name
         AuditLogger.log_user_command(logging_info['server'], 

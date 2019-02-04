@@ -1,21 +1,41 @@
+import json
+import threading
+
 from django.shortcuts import render
-
 from django.http import HttpResponse
-
 import django_rq
-
-from .models.business_models import *
 from django.core.cache import cache
 from decimal import Decimal
 from django.http import JsonResponse
-import json
+
+from .thread_local import get_current_logging_info, set_current_logging_info
 from .audit_logging import AuditLogger
+from .models.business_models import *
 
 
+def store_logging_info(func):
+    def wrapper(request):
+        if request.method == 'POST':
+            params = json.loads(request.body)
+        elif request.method == 'GET':
+            params = request.GET
+        command = request.path[1:].upper()
+        logging_info = {
+            'transaction_num': params.get('transaction_num', -1),
+            'server': 'BEAVER_1',  # TODO(cailan): get from environment var
+            'command': command
+        }
+        set_current_logging_info(logging_info)
+        return func(request)
+    return wrapper
+
+
+@store_logging_info
 def index(request):
     return HttpResponse("Init view of stock exchange index")
 
 
+@store_logging_info
 def add(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -26,6 +46,7 @@ def add(request):
     return JsonResponse({'action': 'add', 'balance': user.balance}, status=200)
 
 
+@store_logging_info
 def quote(request):
     params = request.GET
     user_id = params.get('user_id')
@@ -35,6 +56,7 @@ def quote(request):
     return JsonResponse({'action': 'quote', 'stock': stock.symbol, 'price': stock.price}, status=200)
 
 
+@store_logging_info
 def buy(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -48,6 +70,7 @@ def buy(request):
     return JsonResponse({'action': 'buy', 'balance': user.balance, 'stock': symbol, 'price': user.buy_stack[-1].purchase_price, 'amount': amount, 'valid_duration': '60'}, status=200)
 
 
+@store_logging_info
 def commit_buy(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -61,6 +84,7 @@ def commit_buy(request):
     return JsonResponse({'action': 'commit_buy', 'stock': buy.stock_symbol, 'amount_bought': buy.stock_bought_amount, 'balance': user.balance}, status=200)
 
 
+@store_logging_info
 def cancel_buy(request):
     params = json.loads(request.body)
     user = User.get(params.get('user_id'))
@@ -68,6 +92,7 @@ def cancel_buy(request):
     return JsonResponse({'action': 'cancel_buy', 'balance': user.balance}, status=200)
 
 
+@store_logging_info
 def sell(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -80,6 +105,7 @@ def sell(request):
     return JsonResponse({'action': 'sell', 'stock': symbol, 'price': user.sell_stack[-1].sell_price, 'amount': amount, 'valid_duration': '60'}, status=200)
 
 
+@store_logging_info
 def commit_sell(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -93,6 +119,7 @@ def commit_sell(request):
     return JsonResponse({'action': 'commit_sell', 'stock': sell.stock_symbol, 'amount_sold': sell.stock_sold_amount, 'balance': user.balance}, status=200)
 
 
+@store_logging_info
 def cancel_sell(request):
     params = json.loads(request.body)
     user = User.get(params.get('user_id'))
@@ -100,6 +127,7 @@ def cancel_sell(request):
     return JsonResponse({'action': 'cancel_sell', 'balance': user.balance}, status=200)
 
 
+@store_logging_info
 def set_buy_amount(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -112,6 +140,7 @@ def set_buy_amount(request):
     return JsonResponse({'action': 'set_buy_amount'}, status=200)
 
 
+@store_logging_info
 def set_sell_amount(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -123,6 +152,7 @@ def set_sell_amount(request):
     return JsonResponse({'action': 'set_sell_amount'}, status=200)
 
 
+@store_logging_info
 def set_buy_trigger(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -135,6 +165,7 @@ def set_buy_trigger(request):
     return JsonResponse({'action': 'set_buy_trigger'}, status=200)
 
 
+@store_logging_info
 def set_sell_trigger(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -147,6 +178,7 @@ def set_sell_trigger(request):
     return JsonResponse({'action': 'set_sell_trigger'}, status=200)
 
 
+@store_logging_info
 def cancel_set_buy(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -158,6 +190,7 @@ def cancel_set_buy(request):
     return JsonResponse({'action': 'cancel_set_buy'}, status=200)
 
 
+@store_logging_info
 def cancel_set_sell(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
@@ -169,6 +202,7 @@ def cancel_set_sell(request):
     return JsonResponse({'action': 'cancel_set_sell'}, status=200)
 
 
+@store_logging_info
 def dumplog(request):
     params = request.GET
     if 'filename' not in params:
@@ -182,5 +216,6 @@ def dumplog(request):
     return HttpResponse("System logs dumped to file {}".format(params['filename']))
 
 
+@store_logging_info
 def display_summary(request):
     return HttpResponse("Init view of stock exchange index")

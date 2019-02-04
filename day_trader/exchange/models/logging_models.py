@@ -5,7 +5,7 @@ class BaseLog(models.Model):
     log_type = models.CharField(max_length=32)
     timestamp = models.DateTimeField(auto_now_add=True)
     server = models.CharField(max_length=8)
-    transaction_num = models.PositiveIntegerField()
+    transaction_num = models.BigIntegerField()
 
 
 class UserCommandLog(models.Model):

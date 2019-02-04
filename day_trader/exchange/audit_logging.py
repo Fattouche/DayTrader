@@ -2,6 +2,7 @@ from lxml import etree
 from .models.logging_models import BaseLog, UserCommandLog, \
                                     QuoteServerLog, AccountTransactionLog, \
                                     SystemEventLog, DebugEventLog, ErrorEventLog
+from exchange.thread_local import get_current_logging_info
 
 
 # TODO: Implement per-user dump
@@ -81,9 +82,8 @@ class AuditLogger:
 
 
     @staticmethod
-    def log_debug_event(server_name, transaction_num, command, 
-            username='', stock_symbol='', filename='', funds=None, 
-            debug_message=''):
+    def log_debug_event(server_name, transaction_num, command, username='', 
+            stock_symbol='', filename='', funds=None, debug_message=''):
         base_log = BaseLog(log_type='debugEvent', 
             server=server_name, transaction_num=transaction_num)
         base_log.save()
