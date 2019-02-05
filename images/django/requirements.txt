@@ -6,3 +6,4 @@ redis
 gunicorn
 django-cachalot
 lxml
+django-debug-toolbar

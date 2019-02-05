@@ -22,11 +22,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '3&3=#)d^7%bj6w6^d^@4#sd044%k_5^%p0wc8thdx*&gyd+1!_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 QUOTE_SERVER_HOST = "quote_server"
 QUOTE_SERVER_PORT = 4442
+INTERNAL_IPS = ('127.0.0.1', 'localhost', )
+
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG
+}
 
 
 # Application definition
@@ -41,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "django_rq",
     "cachalot",
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +61,7 @@ MIDDLEWARE = [
     'day_trader.middleware.filter_bad_requests.FilterBadRequestsMiddleware',
     'day_trader.middleware.create_user.CreateUserMiddleware',
     'day_trader.middleware.logging.LogRequestMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'day_trader.urls'
@@ -89,7 +97,7 @@ DATABASES = {
 }
 
 # Cache
-CACHALOT_ENABLED = False
+CACHALOT_ENABLED = True
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',

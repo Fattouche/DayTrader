@@ -32,7 +32,8 @@ def store_logging_info(func):
 
 @store_logging_info
 def index(request):
-    return HttpResponse("Init view of stock exchange index")
+    return HttpResponse('<body><h1>Hello world'
+                        '</h1></body>')
 
 
 @store_logging_info

@@ -22,13 +22,12 @@ class LogRequestMiddleware(object):
             log_input['filename'] = params['filename']
         if 'funds' in params:
             log_input['funds'] = params['funds']
-
         logging_info = {
             'transaction_num': params.get('transaction_num', -1),
             'server': 'BEAVER_1'  # TODO(cailan): get from environment var
         }
 
         # TODO(cailan): deal with server_name
-        AuditLogger.log_user_command(logging_info['server'], 
-            logging_info['transaction_num'], command, **(log_input))
+        AuditLogger.log_user_command(logging_info['server'],
+                                     logging_info['transaction_num'], command, **(log_input))
         return self.get_response(request)
