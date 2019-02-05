@@ -40,10 +40,10 @@ def add(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     amount = Decimal(params.get('amount'))
-    
+
     user = User.get(user_id)
     user.update_balance(amount)
-    return JsonResponse({'action': 'add', 'balance': user.balance}, status=200)
+    return JsonResponse({'action': 'add', 'balance': user.balance+amount}, status=200)
 
 
 @store_logging_info
@@ -51,7 +51,6 @@ def quote(request):
     params = request.GET
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    
     stock = Stock.quote(symbol, user_id)
     return JsonResponse({'action': 'quote', 'stock': stock.symbol, 'price': stock.price}, status=200)
 
@@ -62,7 +61,7 @@ def buy(request):
     user_id = params.get('user_id')
     symbol = params.get('symbol')
     amount = Decimal(params.get('amount'))
-    
+
     user = User.get(user_id)
     err = user.perform_buy(symbol, amount)
     if err is not None:
@@ -134,10 +133,10 @@ def set_buy_amount(request):
     symbol = params.get('symbol')
     amount = Decimal(params.get('amount'))
     user = User.get(user_id)
-    if(user.balance < amount):
-        return JsonResponse({'action': 'set_buy_amount', 'error': 'user balance too low'}, status=412)
-    user.set_buy_amount(symbol, amount)
-    return JsonResponse({'action': 'set_buy_amount'}, status=200)
+    err = user.set_buy_amount(symbol, amount)
+    if err:
+        return JsonResponse({'action': 'set_buy_amount', 'error': err}, status=412)
+    return JsonResponse({'action': 'set_buy_amount', 'amount': amount}, status=200)
 
 
 @store_logging_info
@@ -147,9 +146,10 @@ def set_sell_amount(request):
     symbol = params.get('symbol')
     amount = Decimal(params.get('amount'))
     user = User.get(user_id)
-    if(not (user.set_sell_amount(symbol, amount))):
-        return JsonResponse({'action': 'set_sell_amount', 'error': 'user stock too low'}, status=412)
-    return JsonResponse({'action': 'set_sell_amount'}, status=200)
+    err = user.set_sell_amount(symbol, amount)
+    if err:
+        return JsonResponse({'action': 'set_buy_amount', 'error': err}, status=412)
+    return JsonResponse({'action': 'set_sell_amount', 'symbol': symbol, 'amount': amount}, status=200)
 
 
 @store_logging_info
@@ -157,12 +157,12 @@ def set_buy_trigger(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = Decimal(params.get('amount'))
+    price = Decimal(params.get('amount'))
     user = User.get(user_id)
-    trigger_set = user.set_buy_trigger(symbol, amount)
-    if not trigger_set:
-        return JsonResponse({'action': 'set_buy_trigger', 'error': 'no existing set buy amount'}, status=412)
-    return JsonResponse({'action': 'set_buy_trigger'}, status=200)
+    err = user.set_buy_trigger(symbol, price)
+    if err:
+        return JsonResponse({'action': 'set_buy_trigger', 'error': err}, status=412)
+    return JsonResponse({'action': 'set_buy_trigger', 'msg': 'buy trigger requires a set_buy_amount, please set one', 'symbol': symbol, 'price': price}, status=200)
 
 
 @store_logging_info
@@ -170,12 +170,12 @@ def set_sell_trigger(request):
     params = json.loads(request.body)
     user_id = params.get('user_id')
     symbol = params.get('symbol')
-    amount = Decimal(params.get('amount'))
+    price = Decimal(params.get('amount'))
     user = User.get(user_id)
-    trigger_set = user.set_sell_trigger(symbol, amount)
-    if not trigger_set:
-        return JsonResponse({'action': 'set_sell_trigger', 'error': 'no existing set sell amount'}, status=412)
-    return JsonResponse({'action': 'set_sell_trigger'}, status=200)
+    err = user.set_sell_trigger(symbol, price)
+    if err:
+        return JsonResponse({'action': 'set_sell_trigger', 'error': err}, status=412)
+    return JsonResponse({'action': 'set_sell_trigger', 'msg': 'sell trigger requires a set_sell_amount, please set one', 'symbol': symbol, 'price': price}, status=200)
 
 
 @store_logging_info
@@ -184,10 +184,10 @@ def cancel_set_buy(request):
     user_id = params.get('user_id')
     symbol = params.get('symbol')
     user = User.get(user_id)
-    set_buy_cancelled = user.cancel_set_buy(symbol)
-    if not set_buy_cancelled:
-        return JsonResponse({'action': 'cancel_set_buy', 'error': 'no set buy to cancel'}, status=412)
-    return JsonResponse({'action': 'cancel_set_buy'}, status=200)
+    err = user.cancel_set_buy(symbol)
+    if err:
+        return JsonResponse({'action': 'cancel_set_buy', 'error': err}, status=404)
+    return JsonResponse({'action': 'cancel_set_buy', 'symbol': symbol}, status=200)
 
 
 @store_logging_info
@@ -199,7 +199,7 @@ def cancel_set_sell(request):
     err = user.cancel_set_sell(symbol)
     if err:
         return JsonResponse({'action': 'cancel_set_sell', 'error': err}, status=404)
-    return JsonResponse({'action': 'cancel_set_sell'}, status=200)
+    return JsonResponse({'action': 'cancel_set_sell', 'symbol': symbol}, status=200)
 
 
 @store_logging_info
