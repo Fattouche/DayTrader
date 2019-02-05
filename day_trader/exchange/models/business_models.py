@@ -135,7 +135,9 @@ class User(models.Model):
                 user__user_id=self.user_id,
                 buy__stock_symbol=symbol
             )
-            buy_trigger.update_cash_amount(amount)
+            err = buy_trigger.update_cash_amount(amount)
+            if err:
+                return err
         except:
             buy, err = Buy.create(stock_symbol=symbol,
                                   cash_amount=amount, user=self)
@@ -153,7 +155,9 @@ class User(models.Model):
                 user__user_id=self.user_id,
                 sell__stock_symbol=symbol,
             )
-            sell_trigger.update_cash_amount(amount)
+            err = sell_trigger.update_cash_amount(amount)
+            if err:
+                return err
         except:
             sell, err = Sell.create(
                 stock_symbol=symbol, cash_amount=amount, user=self)
@@ -371,7 +375,9 @@ class SellTrigger(models.Model):
             self.save()
 
     def update_cash_amount(self, amount):
-        self.sell.update_cash_amount(amount)
+        err = self.sell.update_cash_amount(amount)
+        if err:
+            return err
         self.save()
 
     def update_trigger_price(self, price):
@@ -409,7 +415,9 @@ class BuyTrigger(models.Model):
             self.save()
 
     def update_cash_amount(self, amount):
-        self.buy.update_cash_amount(amount)
+        err = self.buy.update_cash_amount(amount)
+        if err[1]:
+            return err[1]
         self.save()
 
     def update_trigger_price(self, price):
