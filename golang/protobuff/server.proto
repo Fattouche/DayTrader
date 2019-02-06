@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package server;
+
+message command{
+    string user_id=1;
+    float amount=2;
+    string symbol=3;
+    string filename=4;
+    int32 transaction_id=5;
+    string name = 6;
+}
+
+message Response{
+    string message = 1;
+}
+
+service DayTrader{
+    rpc Add(command) returns(Response) {}
+    rpc Quote(command) returns(Response) {}
+    rpc Buy(command) returns(Response) {}
+    rpc Sell(command) returns(Response) {}
+    rpc CommitBuy(command) returns(Response) {}
+    rpc CommitSell(command) returns(Response) {}
+    rpc CancelBuy(command) returns(Response) {}
+    rpc CancelSell(command) returns(Response) {}
+    rpc SetBuyAmount(command) returns(Response) {}
+    rpc SetSellAmount(command) returns(Response) {}
+    rpc SetBuyTrigger(command) returns(Response) {}
+    rpc SetSellTrigger(command) returns(Response) {}
+    rpc CancelSetSell(command) returns(Response) {}
+    rpc CancelSetBuy(command) returns(Response) {}
+    rpc DumpLog(command) returns(Response) {}
+    rpc DisplaySummary(command) returns(Response) {}
+}

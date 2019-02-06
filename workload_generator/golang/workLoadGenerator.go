@@ -2,22 +2,20 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"encoding/json"
+	"context"
 	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	pb "../../golang/protobuff"
+	"google.golang.org/grpc"
 )
 
-var getMap = map[string]int{"QUOTE": 1, "DUMPLOG": 1, "DISPLAY_SUMMARY": 1}
 var symbolCommands = map[string]int{
 	"QUOTE":            1,
 	"BUY":              1,
@@ -38,12 +36,53 @@ var amountCommands = map[string]int{
 	"SET_SELL_AMOUNT":  1,
 	"SET_SELL_TRIGGER": 1,
 }
-var dumpCommand *http.Request
-var userMap = make(map[string][]*http.Request)
-var wg sync.WaitGroup
+
 var baseURL string
-var client = &http.Client{}
-var reqs = make(chan *http.Request, 1000)
+var userMap = make(map[string][]*pb.Command)
+var dumpData *pb.Command
+var wg sync.WaitGroup
+
+func completeCall(command *pb.Command, client pb.DayTraderClient) {
+	ctx := context.Background()
+	var err error
+	switch command.Name {
+	case "ADD":
+		_, err = client.Add(ctx, command)
+	case "QUOTE":
+		_, err = client.Quote(ctx, command)
+	case "BUY":
+		_, err = client.Buy(ctx, command)
+	case "SELL":
+		_, err = client.Sell(ctx, command)
+	case "COMMIT_BUY":
+		_, err = client.CommitBuy(ctx, command)
+	case "COMMIT_SELL":
+		_, err = client.CommitSell(ctx, command)
+	case "CANCEL_BUY":
+		_, err = client.CancelBuy(ctx, command)
+	case "CANCEL_SELL":
+		_, err = client.CancelSell(ctx, command)
+	case "SET_BUY_AMOUNT":
+		_, err = client.SetBuyAmount(ctx, command)
+	case "SET_SELL_AMOUNT":
+		_, err = client.SetSellAmount(ctx, command)
+	case "SET_BUY_TRIGGER":
+		_, err = client.SetBuyTrigger(ctx, command)
+	case "SET_SELL_TRIGGER":
+		_, err = client.SetSellTrigger(ctx, command)
+	case "CANCEL_SET_BUY":
+		_, err = client.CancelSetBuy(ctx, command)
+	case "CANCEL_SET_SELL":
+		_, err = client.CancelSetSell(ctx, command)
+	case "DUMPLOG":
+		_, err = client.DumpLog(ctx, command)
+	case "DISPLAY_SUMMARY":
+		_, err = client.DisplaySummary(ctx, command)
+	}
+	if err != nil {
+		log.Println(err)
+	}
+}
 
 func parseCommands(filename string) {
 	file, err := os.Open(filename)
@@ -54,121 +93,94 @@ func parseCommands(filename string) {
 
 	scanner := bufio.NewScanner(file)
 	var userID string
-	var transactionNum = 1
+	transactionNum := int32(1)
 	for scanner.Scan() {
 		totalCommand := strings.Split(scanner.Text(), " ")
 		userCommands := strings.Split(totalCommand[1], ",")
 		if userCommands[0] == "DUMPLOG" && len(userCommands) == 2 {
-			dumpCommand, _ = http.NewRequest("GET", baseURL+strings.ToLower(userCommands[0]), nil)
-			q := dumpCommand.URL.Query()
-			fileName := userCommands[1]
-			q.Add("filename", fileName)
-			dumpCommand.URL.RawQuery = q.Encode()
+			dumpData = &pb.Command{Filename: userCommands[1], Name: "DUMPLOG"}
 			continue
 		} else {
 			userID = userCommands[1]
 		}
-		req := generateRequest(userID, userCommands, transactionNum)
+		command := generateRequest(userID, userCommands, transactionNum)
 		transactionNum++
 		if _, ok := userMap[userID]; !ok {
-			userMap[userID] = make([]*http.Request, 0)
+			userMap[userID] = make([]*pb.Command, 0)
 		}
-		userMap[userID] = append(userMap[userID], req)
+		userMap[userID] = append(userMap[userID], command)
 	}
 }
 
-func generateRequest(userID string, commands []string, transactionNum int) *http.Request {
-	requestType := "POST"
-	if _, ok := getMap[commands[0]]; ok {
-		requestType = "GET"
-	}
-	params := make(map[string]string)
+func generateRequest(userID string, commands []string, transactionNum int32) *pb.Command {
+	command := &pb.Command{}
 	if len(userID) > 0 {
-		params["user_id"] = userID
+		command.UserId = userID
 	}
 	if commands[0] == "DUMPLOG" {
 		if len(commands) > 2 {
-			params["filename"] = commands[2]
+			command.Filename = commands[2]
 		} else {
-			params["filename"] = commands[1]
+			command.Filename = commands[1]
 		}
 	}
 	if _, ok := symbolCommands[commands[0]]; ok {
 		if len(commands) > 2 {
-			params["symbol"] = commands[2]
+			command.Symbol = commands[2]
 		}
 	}
 	if _, ok := amountCommands[commands[0]]; ok {
 		if commands[0] == "ADD" {
 			if len(commands) > 2 {
-				params["amount"] = commands[2]
+				amount, _ := strconv.ParseFloat(commands[2], 32)
+				command.Amount = float32(amount)
 			}
 		} else {
 			if len(commands) > 3 {
-				params["amount"] = commands[3]
+				amount, _ := strconv.ParseFloat(commands[3], 32)
+				command.Amount = float32(amount)
 			}
 		}
 	}
-	params["transaction_num"] = strconv.Itoa(transactionNum)
-	url := baseURL + strings.ToLower(commands[0])
-	if requestType == "POST" {
-		jsonValue, _ := json.Marshal(params)
-		req, err := http.NewRequest(requestType, url, bytes.NewBuffer(jsonValue))
-		req.Header.Set("Content-Type", "application/json")
-		if err != nil {
-			log.Println("Error creating request: ", err)
-			os.Exit(1)
-		}
-		return req
-	}
-	req, err := http.NewRequest(requestType, url, nil)
+	command.TransactionId = transactionNum
+	command.Name = commands[0]
+	return command
+}
+
+func makeRequest(commands []*pb.Command) {
+	conn, err := grpc.Dial(baseURL, grpc.WithInsecure())
 	if err != nil {
-		log.Println("Error creating request: ", err)
-		os.Exit(1)
+		log.Printf("Failed to dial to %s with %v", baseURL, err)
 	}
-	q := req.URL.Query()
-	for key, val := range params {
-		q.Add(key, val)
+	defer conn.Close()
+	client := pb.NewDayTraderClient(conn)
+	for _, command := range commands {
+		completeCall(command, client)
 	}
-	req.URL.RawQuery = q.Encode()
-	return req
+	wg.Done()
 }
 
-func makeRequest(requests []*http.Request) {
-	for _, req := range requests {
-		reqs <- req
+func makeDumpRequest() {
+	conn, err := grpc.Dial(baseURL, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to dial to %s with %v", baseURL, err)
 	}
-}
-
-func worker() {
-	for {
-		req := <-reqs
-		req.Close = true
-		resp, _ := client.Do(req)
-		io.Copy(ioutil.Discard, resp.Body)
-		resp.Body.Close()
-		if len(reqs) == 0 {
-			wg.Done()
-		}
-	}
+	client := pb.NewDayTraderClient(conn)
+	completeCall(dumpData, client)
 }
 
 func main() {
 	fileName := flag.String("f", "1userWorkLoad", "The name of the workload file")
-	tempBaseURL := flag.String("url", "http://daytraderlb/", "The url of the web server")
-	workers := flag.Int("w", 1, "The number of client workers")
+	tempBaseURL := flag.String("url", "localhost:41000", "The url of the web server")
 	flag.Parse()
 	baseURL = *tempBaseURL
 	parseCommands(*fileName)
-	wg.Add(*workers)
 	start := time.Now()
-	for i := 0; i < *workers; i++ {
-		go worker()
-	}
+	wg.Add(len(userMap))
 	for _, requests := range userMap {
 		go makeRequest(requests)
 	}
 	wg.Wait()
-	client.Do(dumpCommand)
+	makeDumpRequest()
 	fmt.Println("Time taken: ", time.Since(start))
 }
