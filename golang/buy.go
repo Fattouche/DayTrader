@@ -38,9 +38,9 @@ func (buy Buy) updatePrice(stockPrice float32) {
 
 func (buy Buy) commit() (*UserStock, error) {
 	_, err := buy.insertBuy()
-	user_stock, err := getOrCreateUserStock(buy.user_id, buy.stock_symbol)
-	user_stock.updateStockAmount(buy.stock_bought_amount)
-	return user_stock, err
+	userStock, err := getOrCreateUserStock(buy.user_id, buy.stock_symbol)
+	userStock.updateStockAmount(buy.stock_bought_amount)
+	return userStock, err
 }
 
 func (buy Buy) cancel() {

@@ -29,6 +29,20 @@ func toString(msg interface{}) string {
 	return string(bytes)
 }
 
+func (user *User) popFromBuyStack() *Buy {
+	buy := user.BuyStack[len(user.BuyStack)-1]
+	user.BuyStack = user.BuyStack[:len(user.BuyStack)-1]
+	setCache(user.Id, user)
+	return buy
+}
+
+func (user *User) popFromSellStack() *Sell {
+	sell := user.SellStack[len(user.SellStack)-1]
+	user.SellStack = user.SellStack[:len(user.SellStack)-1]
+	setCache(user.Id, user)
+	return sell
+}
+
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
 	user.updateUserBalance(req.Amount)
@@ -59,7 +73,18 @@ func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.Response, erro
 }
 
 func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{Message: "yee"}, nil
+	user := getUser(req.UserId)
+	quote, err := quote(user.Id, req.Symbol)
+	if err != nil {
+		return nil, err
+	}
+	sell, err := createSell(quote.Price, req.Amount, float32(0), 0, req.Symbol, user.Id)
+	if err != nil {
+		return nil, err
+	}
+	user.SellStack = append(user.SellStack, sell)
+	setCache(user.Id, user)
+	return &pb.Response{Message: toString(sell)}, nil
 }
 
 func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -67,22 +92,36 @@ func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, 
 	if len(user.BuyStack) == 0 {
 		return nil, errors.New("No buy on the stack")
 	}
-	buy := user.BuyStack[len(user.BuyStack)-1]
-	user.BuyStack = user.BuyStack[:len(user.BuyStack)-1]
-	setCache(user.Id, user)
+	buy := user.popFromBuyStack()
 	userStock, err := buy.commit()
 	return &pb.Response{Message: toString(userStock)}, err
 }
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{Message: "yee"}, nil
+	user := getUser(req.UserId)
+	if len(user.BuyStack) == 0 {
+		return nil, errors.New("No sell on the stack")
+	}
+	sell := user.popFromSellStack()
+	err := sell.commit()
+	return &pb.Response{Message: toString(user)}, err
 }
 
 func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{Message: "yee"}, nil
+	user := getUser(req.UserId)
+	buy := user.popFromBuyStack()
+	if buy != nil {
+		buy.cancel()
+	}
+	return &pb.Response{Message: toString(user)}, nil
 }
 
 func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{Message: "yee"}, nil
+	user := getUser(req.UserId)
+	sell := user.popFromBuyStack()
+	if sell != nil {
+		sell.cancel()
+	}
+	return &pb.Response{Message: toString(user)}, nil
 }
 
 func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Response, error) {
