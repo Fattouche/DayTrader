@@ -36,10 +36,10 @@ func getCacheStock(key string) (*Stock, error) {
 }
 
 func getCacheUser(key string) (*User, error) {
-	user := &User{}
+	user := &User{Id: key}
 	item, err := cache.Get(key)
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	err = json.Unmarshal(item.Value, user)
 	return user, err

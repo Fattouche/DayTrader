@@ -155,22 +155,15 @@ func executeRequest(userID, symbol string) (float32, string, error) {
 	return float32(price), infoArr[4], nil
 }
 
-func getUser(userID string) (*User, error) {
-	user := &User{Id: userID}
-	err := db.QueryRow("SELECT balance from User where id=?", user.Id).Scan(&user.Balance)
+func getUser(userID string) *User {
+	user, err := getCacheUser(userID)
 	if err != nil {
-		return nil, err
-	}
-	temp, _ := getCacheUser(user.Id)
-	if temp != nil {
-		user.SellStack = temp.SellStack
-		user.BuyStack = temp.BuyStack
-	} else {
+		db.QueryRow("SELECT balance from User where id=?", user.Id).Scan(&user.Balance)
 		user.SellStack = make([]*Sell, 0)
 		user.BuyStack = make([]*Buy, 0)
 		setCache(userID, user)
 	}
-	return user, nil
+	return user
 }
 
 func createUser(userID string) error {

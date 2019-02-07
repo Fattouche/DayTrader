@@ -47,7 +47,7 @@ func (sell *Sell) updatePrice(stockPrice float32) error {
 }
 
 func (sell *Sell) commit() error {
-	user, _ := getUser(sell.user_id)
+	user := getUser(sell.user_id)
 	user.updateUserBalance(sell.actual_cash_amount)
 	_, err := sell.insertSell()
 	return err

@@ -19,7 +19,7 @@ func createBuy(price, intendedCashAmount, actualCashAmount float32, stockBoughtA
 }
 
 func (buy Buy) updateCashAmount(amount float32) error {
-	user, _ := getUser(buy.user_id)
+	user := getUser(buy.user_id)
 	if amount > user.Balance {
 		msg := fmt.Sprintf("Not enough balance, have %f need %f", user.Balance, amount)
 		return errors.New(msg)
@@ -44,6 +44,6 @@ func (buy Buy) commit() (*UserStock, error) {
 }
 
 func (buy Buy) cancel() {
-	user, _ := getUser(buy.user_id)
+	user := getUser(buy.user_id)
 	user.updateUserBalance(buy.intended_cash_amount)
 }

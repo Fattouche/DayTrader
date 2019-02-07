@@ -30,19 +30,13 @@ func toString(msg interface{}) string {
 }
 
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	user, err := getUser(req.UserId)
-	if err != nil {
-		return nil, err
-	}
+	user := getUser(req.UserId)
 	user.updateUserBalance(req.Amount)
 	return &pb.Response{Message: toString(user)}, nil
 }
 
 func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	user, err := getUser(req.UserId)
-	if err != nil {
-		return nil, err
-	}
+	user := getUser(req.UserId)
 	quote, err := quote(user.Id, req.Symbol)
 	if err != nil {
 		return nil, err
@@ -68,10 +62,7 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error
 }
 
 func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	user, err := getUser(req.UserId)
-	if err != nil {
-		return nil, err
-	}
+	user := getUser(req.UserId)
 	if len(user.BuyStack) == 0 {
 		return nil, errors.New("No buy on the stack")
 	}
