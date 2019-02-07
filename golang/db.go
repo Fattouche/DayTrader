@@ -272,12 +272,13 @@ func (userStock *UserStock) updateStockAmount(amount int) error {
 	return err
 }
 
-func (user User) updateUserBalance(amount float32) (User, error) {
+func (user *User) updateUserBalance(amount float32) (*User, error) {
 	user.Balance += amount
 	_, err := db.Exec("update User set balance=? where id=?", user.Balance, user.Id)
 	if err != nil {
 		return user, err
 	}
+	setCache(user.Id, user)
 	return user, nil
 }
 

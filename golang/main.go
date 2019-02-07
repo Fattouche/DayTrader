@@ -46,6 +46,7 @@ func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.Response, error)
 		return nil, err
 	}
 	user.BuyStack = append(user.BuyStack, buy)
+	setCache(user.Id, user)
 	return &pb.Response{Message: toString(buy)}, nil
 }
 

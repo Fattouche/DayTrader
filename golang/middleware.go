@@ -28,10 +28,7 @@ func serverInterceptor(ctx context.Context,
 
 // make sure user exists
 func checks(req *pb.Command) error {
-	err := createUser(req.UserId)
-	if err != nil {
-		return err
-	}
+	createUser(req.UserId)
 	if req.Name != "DUMPLOG" && req.Name != "DISPLAY_SUMMARY" {
 		if req.UserId == "" {
 			return errors.New("No user Id specified")
