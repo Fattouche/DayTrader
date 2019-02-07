@@ -63,6 +63,7 @@ func parseCommands(filename string) {
 			q := dumpCommand.URL.Query()
 			fileName := userCommands[1]
 			q.Add("filename", fileName)
+			q.Add("transaction_num", strconv.Itoa(transactionNum))
 			dumpCommand.URL.RawQuery = q.Encode()
 			continue
 		} else {
