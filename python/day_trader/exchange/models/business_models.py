@@ -7,7 +7,8 @@ from decimal import Decimal
 import socket
 from django.conf import settings
 from exchange.audit_logging import AuditLogger
-from exchange.thread_local import get_current_logging_info
+from exchange.thread_local import get_current_logging_info, \
+    set_current_logging_info
 
 
 def singleton(cls, *args, **kw):
@@ -47,7 +48,10 @@ class Stock:
         for trigger in buy_trigger:
             trigger.check_validity(self.price)
 
-    def verify_triggers(self):
+    def verify_triggers(self, logging_info):
+        # Set logging info, since this is executed in a different thread than
+        # the views
+        set_current_logging_info(logging_info)
         self.check_sell_trigger()
         self.check_buy_trigger()
 
@@ -63,7 +67,8 @@ class Stock:
         logging_info = get_current_logging_info()
         AuditLogger.log_quote_server_event(logging_info['server'],
                                            logging_info['transaction_num'],
-                                           quote_price, self.symbol, user_id, response[3], response[4])
+                                           quote_price, self.symbol, user_id,
+                                           response[3], response[4])
 
     @classmethod
     def quote(cls, symbol, user_id):
@@ -72,7 +77,8 @@ class Stock:
             stock = cls(symbol=symbol, price=0)
             stock.execute_quote_request(user_id)
             cache.set(symbol, stock, 60)
-            django_rq.enqueue(stock.verify_triggers)
+            logging_info = get_current_logging_info()
+            django_rq.enqueue(stock.verify_triggers, logging_info)
         return stock
 
 
@@ -130,18 +136,27 @@ class User(models.Model):
             sell.cancel()
 
     def set_buy_amount(self, symbol, amount):
+        if(self.balance < amount):
+            return "user balance too low"
+
         try:
             buy_trigger = BuyTrigger.objects.get(
                 user__user_id=self.user_id,
                 buy__stock_symbol=symbol
             )
-            buy_trigger.update_cash_amount(amount)
-        except:
+            err = buy_trigger.update_cash_amount(amount)
+            if err:
+                return err
+        except ObjectDoesNotExist:
             buy, err = Buy.create(stock_symbol=symbol,
                                   cash_amount=amount, user=self)
             if(err):
                 return err
             buy.save()
+            a = BuyTrigger.objects.filter(
+                user__user_id=self.user_id,
+                buy__stock_symbol=symbol
+            )
             buy_trigger = BuyTrigger.objects.create(
                 user=self,
                 buy=buy
@@ -153,8 +168,10 @@ class User(models.Model):
                 user__user_id=self.user_id,
                 sell__stock_symbol=symbol,
             )
-            sell_trigger.update_cash_amount(amount)
-        except:
+            err = sell_trigger.update_cash_amount(amount)
+            if err:
+                return err
+        except ObjectDoesNotExist:
             sell, err = Sell.create(
                 stock_symbol=symbol, cash_amount=amount, user=self)
             if(err):
@@ -168,7 +185,7 @@ class User(models.Model):
     def set_buy_trigger(self, symbol, price):
         try:
             buy_trigger = BuyTrigger.objects.get(
-                buy__stock_symbol=symbol, user=self)
+                buy__stock_symbol=symbol, user__user_id=self.user_id)
             buy_trigger.update_trigger_price(price)
         except ObjectDoesNotExist:
             return "Trigger requires a buy amount first, please make one"
@@ -176,7 +193,7 @@ class User(models.Model):
     def set_sell_trigger(self, symbol, price):
         try:
             sell_trigger = SellTrigger.objects.get(
-                sell__stock_symbol=symbol, user=self)
+                sell__stock_symbol=symbol, user__user_id=self.user_id)
             sell_trigger.update_trigger_price(price)
         except ObjectDoesNotExist:
             return "Trigger requires a sell amount first, please make one"
@@ -184,18 +201,32 @@ class User(models.Model):
     def cancel_set_buy(self, symbol):
         try:
             buy_trigger = BuyTrigger.objects.get(
-                buy__stock_symbol=symbol, user=self)
+                buy__stock_symbol=symbol, user__user_id=self.user_id)
+            err = None
+            if not buy_trigger.active:
+                err = "No active trigger found for set_buy corresponding to {0}".format(
+                    symbol)
+            else:
+                err = "Disabling trigger for {0}".format(symbol)
             buy_trigger.cancel()
+            return err
         except ObjectDoesNotExist:
-            return "buy trigger not found"
+            return "set buy not found"
 
     def cancel_set_sell(self, symbol):
         try:
             sell_trigger = SellTrigger.objects.get(
-                sell__stock_symbol=symbol, user=self)
+                sell__stock_symbol=symbol, user__user_id=self.user_id)
+            err = None
+            if not sell_trigger.active:
+                err = "No active trigger found for set_sell corresponding to {0}".format(
+                    symbol)
+            else:
+                err = "Disabling trigger for {0}".format(symbol)
             sell_trigger.cancel()
+            return err
         except ObjectDoesNotExist:
-            return "sell trigger not found"
+            return "sell sell not found"
 
     def update_balance(self, change):
         self = User.get(self.user_id)
@@ -267,7 +298,7 @@ class Sell(models.Model):
         if(self.stock_sold_amount <= 0):
             return "Update trigger price failed"
         self.actual_cash_amount = self.stock_sold_amount*stock_price
-        self.stock_sold_amount*stock_price
+        self.stock_sold_amount = self.actual_cash_amount//stock_price
         self.timestamp = time.time()
         self.sell_price = stock_price
         user_stock.update_amount(self.stock_sold_amount*-1)
@@ -316,7 +347,7 @@ class Buy(models.Model):
 
     def update_cash_amount(self, amount):
         if amount > self.user.balance:
-            return None, "Not enough balance, have {0} need {1}".format(self.user.balance, amount)
+            return "Not enough balance, have {0} need {1}".format(self.user.balance, amount)
         updated_amount = (self.intended_cash_amount - amount)
         self.user.update_balance(updated_amount)
         self.intended_cash_amount = abs(updated_amount)
@@ -348,7 +379,8 @@ class SellTrigger(models.Model):
         if(sell_object.sell_price <= price):
             logging_info = get_current_logging_info()
             AuditLogger.log_system_event(logging_info['server'],
-                                         logging_info['transaction_num'], logging_info['command'],
+                                         logging_info['transaction_num'],
+                                         logging_info['command'],
                                          username=user_object.user_id,
                                          stock_symbol=sell_object.stock_symbol,
                                          funds=user_object.balance)
@@ -357,7 +389,10 @@ class SellTrigger(models.Model):
             self.save()
 
     def update_cash_amount(self, amount):
-        self.sell.update_cash_amount(amount)
+        err = self.sell.update_cash_amount(amount)
+        if err:
+            return err
+        self.sell.save()
         self.save()
 
     def update_trigger_price(self, price):
@@ -395,8 +430,10 @@ class BuyTrigger(models.Model):
             self.save()
 
     def update_cash_amount(self, amount):
-        self.buy.update_cash_amount(amount)
+        err = self.buy.update_cash_amount(amount)
+        self.buy.save()
         self.save()
+        return err
 
     def update_trigger_price(self, price):
         self.buy.update_price(price)
