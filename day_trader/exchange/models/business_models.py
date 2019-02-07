@@ -8,7 +8,7 @@ import socket
 from django.conf import settings
 from exchange.audit_logging import AuditLogger
 from exchange.thread_local import get_current_logging_info, \
-                                    set_current_logging_info
+    set_current_logging_info
 
 
 def singleton(cls, *args, **kw):
@@ -67,7 +67,7 @@ class Stock:
         logging_info = get_current_logging_info()
         AuditLogger.log_quote_server_event(logging_info['server'],
                                            logging_info['transaction_num'],
-                                           quote_price, self.symbol, user_id, 
+                                           quote_price, self.symbol, user_id,
                                            response[3], response[4])
 
     @classmethod
@@ -276,7 +276,7 @@ class Sell(models.Model):
         if(self.stock_sold_amount <= 0):
             return "Update trigger price failed"
         self.actual_cash_amount = self.stock_sold_amount*stock_price
-        self.stock_sold_amount*stock_price
+        self.stock_sold_amount = self.actual_cash_amount//stock_price
         self.timestamp = time.time()
         self.sell_price = stock_price
         user_stock.update_amount(self.stock_sold_amount*-1)
@@ -357,7 +357,7 @@ class SellTrigger(models.Model):
         if(sell_object.sell_price <= price):
             logging_info = get_current_logging_info()
             AuditLogger.log_system_event(logging_info['server'],
-                                         logging_info['transaction_num'], 
+                                         logging_info['transaction_num'],
                                          logging_info['command'],
                                          username=user_object.user_id,
                                          stock_symbol=sell_object.stock_symbol,
