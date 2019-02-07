@@ -81,6 +81,7 @@ type Buy struct {
 	actual_cash_amount   float32
 	stock_bought_amount  int
 	user_id              string
+	timestamp            time.Time
 }
 
 type Sell struct {
@@ -91,6 +92,7 @@ type Sell struct {
 	actual_cash_amount   float32
 	stock_sold_amount    int
 	user_id              string
+	timestamp            time.Time
 }
 
 type SellTrigger struct {

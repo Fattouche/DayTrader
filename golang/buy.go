@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"time"
 )
 
 func createBuy(price, intendedCashAmount, actualCashAmount float32, stockBoughtAmount int, symbol, userID string) (*Buy, error) {
@@ -13,6 +14,7 @@ func createBuy(price, intendedCashAmount, actualCashAmount float32, stockBoughtA
 		return nil, err
 	}
 	buy.updatePrice(price)
+	buy.timestamp = time.Now()
 	return buy, err
 }
 
