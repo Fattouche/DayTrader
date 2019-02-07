@@ -96,7 +96,50 @@ class AuditLogger:
 
     @staticmethod
     def dump_user_log(username, filename):
-        pass
+        with etree.xmlfile(filename) as xf:
+            with xf.element('log'):
+                for user_command_log in UserCommandLog.objects \
+                                        .select_related('base_log') \
+                                        .filter(username=username):
+                    base_log = user_command_log.base_log
+                    AuditLogger._write_user_command_to_xml(xf, base_log, 
+                        user_command_log)
+
+                for quote_server_log in QuoteServerLog.objects \
+                                        .select_related('base_log') \
+                                        .filter(username=username):
+                    base_log = quote_server_log.base_log
+                    AuditLogger._write_quote_server_event_to_xml(xf, 
+                        base_log, quote_server_log)
+
+                for account_transaction_log in AccountTransactionLog\
+                                                .objects \
+                                                .select_related('base_log') \
+                                                .filter(username=username):
+                    base_log = account_transaction_log.base_log
+                    AuditLogger._write_account_transaction_to_xml(xf, 
+                        base_log, account_transaction_log)
+
+                for system_event_log in SystemEventLog.objects \
+                                        .select_related('base_log') \
+                                        .filter(username=username):
+                    base_log = system_event_log.base_log
+                    AuditLogger._write_system_event_to_xml(xf, base_log, 
+                        system_event_log)
+
+                for error_event_log in ErrorEventLog.objects \
+                                        .select_related('base_log') \
+                                        .filter(username=username):
+                    base_log = error_event_log.base_log
+                    AuditLogger._write_error_event_to_xml(xf, base_log, 
+                        error_event_log)
+
+                for debug_event_log in DebugEventLog.objects \
+                                        .select_related('base_log') \
+                                        .filter(username=username):
+                    base_log = debug_event_log.base_log
+                    AuditLogger._write_debug_event_to_xml(xf, base_log, 
+                        debug_event_log)
 
 
     @staticmethod
