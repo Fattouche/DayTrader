@@ -1,0 +1,7 @@
+mysqlclient
+django
+python-memcached
+django-rq
+redis
+django-cachalot
+lxml
