@@ -144,13 +144,19 @@ class User(models.Model):
                 user__user_id=self.user_id,
                 buy__stock_symbol=symbol
             )
-            buy_trigger.update_cash_amount(amount)
-        except:
+            err = buy_trigger.update_cash_amount(amount)
+            if err:
+                return err
+        except ObjectDoesNotExist:
             buy, err = Buy.create(stock_symbol=symbol,
                                   cash_amount=amount, user=self)
             if(err):
                 return err
             buy.save()
+            a = BuyTrigger.objects.filter(
+                user__user_id=self.user_id,
+                buy__stock_symbol=symbol
+            )
             buy_trigger = BuyTrigger.objects.create(
                 user=self,
                 buy=buy
@@ -162,8 +168,10 @@ class User(models.Model):
                 user__user_id=self.user_id,
                 sell__stock_symbol=symbol,
             )
-            sell_trigger.update_cash_amount(amount)
-        except:
+            err = sell_trigger.update_cash_amount(amount)
+            if err:
+                return err
+        except ObjectDoesNotExist:
             sell, err = Sell.create(
                 stock_symbol=symbol, cash_amount=amount, user=self)
             if(err):
@@ -177,7 +185,7 @@ class User(models.Model):
     def set_buy_trigger(self, symbol, price):
         try:
             buy_trigger = BuyTrigger.objects.get(
-                buy__stock_symbol=symbol, user=self)
+                buy__stock_symbol=symbol, user__user_id=self.user_id)
             buy_trigger.update_trigger_price(price)
         except ObjectDoesNotExist:
             return "Trigger requires a buy amount first, please make one"
@@ -185,7 +193,7 @@ class User(models.Model):
     def set_sell_trigger(self, symbol, price):
         try:
             sell_trigger = SellTrigger.objects.get(
-                sell__stock_symbol=symbol, user=self)
+                sell__stock_symbol=symbol, user__user_id=self.user_id)
             sell_trigger.update_trigger_price(price)
         except ObjectDoesNotExist:
             return "Trigger requires a sell amount first, please make one"
@@ -193,18 +201,32 @@ class User(models.Model):
     def cancel_set_buy(self, symbol):
         try:
             buy_trigger = BuyTrigger.objects.get(
-                buy__stock_symbol=symbol, user=self)
+                buy__stock_symbol=symbol, user__user_id=self.user_id)
+            err = None
+            if not buy_trigger.active:
+                err = "No active trigger found for set_buy corresponding to {0}".format(
+                    symbol)
+            else:
+                err = "Disabling trigger for {0}".format(symbol)
             buy_trigger.cancel()
+            return err
         except ObjectDoesNotExist:
-            return "buy trigger not found"
+            return "set buy not found"
 
     def cancel_set_sell(self, symbol):
         try:
             sell_trigger = SellTrigger.objects.get(
-                sell__stock_symbol=symbol, user=self)
+                sell__stock_symbol=symbol, user__user_id=self.user_id)
+            err = None
+            if not sell_trigger.active:
+                err = "No active trigger found for set_sell corresponding to {0}".format(
+                    symbol)
+            else:
+                err = "Disabling trigger for {0}".format(symbol)
             sell_trigger.cancel()
+            return err
         except ObjectDoesNotExist:
-            return "sell trigger not found"
+            return "sell sell not found"
 
     def update_balance(self, change):
         self = User.get(self.user_id)
@@ -325,7 +347,7 @@ class Buy(models.Model):
 
     def update_cash_amount(self, amount):
         if amount > self.user.balance:
-            return None, "Not enough balance, have {0} need {1}".format(self.user.balance, amount)
+            return "Not enough balance, have {0} need {1}".format(self.user.balance, amount)
         updated_amount = (self.intended_cash_amount - amount)
         self.user.update_balance(updated_amount)
         self.intended_cash_amount = abs(updated_amount)
@@ -367,7 +389,9 @@ class SellTrigger(models.Model):
             self.save()
 
     def update_cash_amount(self, amount):
-        self.sell.update_cash_amount(amount)
+        err = self.sell.update_cash_amount(amount)
+        if err:
+            return err
         self.sell.save()
         self.save()
 
@@ -406,9 +430,10 @@ class BuyTrigger(models.Model):
             self.save()
 
     def update_cash_amount(self, amount):
-        self.buy.update_cash_amount(amount)
+        err = self.buy.update_cash_amount(amount)
         self.buy.save()
         self.save()
+        return err
 
     def update_trigger_price(self, price):
         self.buy.update_price(price)
