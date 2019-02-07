@@ -5,7 +5,7 @@ services:
     container_name: workload_generator
     image: golang
     volumes:
-    - ./golang/workLoadGenerator.go:/service/workLoadGenerator.go
+    - ./workLoadGenerator.go:/service/workLoadGenerator.go
     - ./workload_files:/service/workload_files
     networks:
       - day_trader_default
