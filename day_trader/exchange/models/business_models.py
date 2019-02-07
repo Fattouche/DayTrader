@@ -130,6 +130,9 @@ class User(models.Model):
             sell.cancel()
 
     def set_buy_amount(self, symbol, amount):
+        if(self.balance < amount):
+            return "user balance too low"
+
         try:
             buy_trigger = BuyTrigger.objects.get(
                 user__user_id=self.user_id,
