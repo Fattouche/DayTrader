@@ -61,9 +61,9 @@ class Stock:
         self.price = Decimal(quote_price)
 
         logging_info = get_current_logging_info()
-        AuditLogger.log_quote_server_event(logging_info['server'], 
-            logging_info['transaction_num'],
-            quote_price, self.symbol, user_id, response[3], response[4])
+        AuditLogger.log_quote_server_event(logging_info['server'],
+                                           logging_info['transaction_num'],
+                                           quote_price, self.symbol, user_id, response[3], response[4])
 
     @classmethod
     def quote(cls, symbol, user_id):
@@ -205,9 +205,9 @@ class User(models.Model):
 
         action = 'add' if change >= 0 else 'remove'
         logging_info = get_current_logging_info()
-        AuditLogger.log_account_transaction(logging_info['server'], 
-            logging_info['transaction_num'],
-            action, self.user_id, abs(change))
+        AuditLogger.log_account_transaction(logging_info['server'],
+                                            logging_info['transaction_num'],
+                                            action, self.user_id, abs(change))
 
     def pop_from_buy_stack(self):
         if hasattr(self, 'buy_stack'):
@@ -348,10 +348,10 @@ class SellTrigger(models.Model):
         if(sell_object.sell_price <= price):
             logging_info = get_current_logging_info()
             AuditLogger.log_system_event(logging_info['server'],
-                logging_info['transaction_num'], logging_info['command'],
-                username=user_object.user_id, 
-                stock_symbol=sell_object.stock_symbol,
-                funds=user_object.balance)
+                                         logging_info['transaction_num'], logging_info['command'],
+                                         username=user_object.user_id,
+                                         stock_symbol=sell_object.stock_symbol,
+                                         funds=user_object.balance)
             sell_object.commit(user_object)
             self.active = False
             self.save()
@@ -385,10 +385,10 @@ class BuyTrigger(models.Model):
         if(buy_object.purchase_price >= price):
             logging_info = get_current_logging_info()
             AuditLogger.log_system_event(logging_info['server'],
-                logging_info['transaction_num'], logging_info['command'],
-                username=user_object.user_id, 
-                stock_symbol=buy_object.stock_symbol,
-                funds=user_object.balance)
+                                         logging_info['transaction_num'], logging_info['command'],
+                                         username=user_object.user_id,
+                                         stock_symbol=buy_object.stock_symbol,
+                                         funds=user_object.balance)
             buy_object.update_price(price)
             buy_object.commit()
             self.active = False

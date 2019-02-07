@@ -58,6 +58,13 @@ var createTableStatements = []string{
 		FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE,
 		FOREIGN KEY (buy_id) REFERENCES Buy(id) ON DELETE CASCADE
 	)`,
+	`CREATE TABLE IF NOT EXISTS User_Stock(
+		user_id varchar(32) NOT NULL,
+		stock_symbol varchar(3) NULL
+		amount int DEFAULT 0,
+		UNIQUE(user_id, stock_symbol),
+		FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE,
+	)`,
 }
 
 type Stock struct {
@@ -102,8 +109,14 @@ type User struct {
 	Balance   float32
 	Name      string
 	Id        string
-	BuyStack  []Buy
-	SellStack []Sell
+	BuyStack  []*Buy
+	SellStack []*Sell
+}
+
+type UserStock struct {
+	user_id      string
+	stock_symbol string
+	amount       int
 }
 
 func quote(userID, symbol string) (*Stock, error) {
@@ -151,8 +164,8 @@ func getUser(userID string) (*User, error) {
 		user.SellStack = temp.SellStack
 		user.BuyStack = temp.BuyStack
 	} else {
-		user.SellStack = make([]Sell, 0)
-		user.BuyStack = make([]Buy, 0)
+		user.SellStack = make([]*Sell, 0)
+		user.BuyStack = make([]*Buy, 0)
 		setCache(userID, user)
 	}
 	return user, nil
@@ -163,9 +176,16 @@ func createUser(userID string) error {
 	return err
 }
 
-func createBuy(price, intendedCashAmount, actualCashAmount float32, stockBoughtAmount int, symbol, userID string) (*Buy, error) {
-	buy := &Buy{price: price, intended_cash_amount: intendedCashAmount, actual_cash_amount: actualCashAmount, stock_bought_amount: stockBoughtAmount, stock_symbol: symbol, user_id: userID}
-	res, err := db.Exec("insert into Buy(price,stock_symbol,user_id,intended_cash_amount,actual_cash_amount,stock_bought_amount) values(?,?,?,?,?,?)", price, symbol, userID, intendedCashAmount, actualCashAmount, stockBoughtAmount)
+func (buy *Buy) updateBuy() error {
+	_, err := db.Exec("update Buy set intended_cash_amount=?, price=?, actual_cash_amount=?, stock_bought_amount = ? where id=?", buy.intended_cash_amount, buy.price, buy.actual_cash_amount, buy.stock_bought_amount, buy.id)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (buy *Buy) insertBuy() (*Buy, error) {
+	res, err := db.Exec("insert into Buy(price,stock_symbol,user_id,intended_cash_amount,actual_cash_amount,stock_bought_amount) values(?,?,?,?,?,?)", buy.price, buy.stock_symbol, buy.user_id, buy.intended_cash_amount, buy.actual_cash_amount, buy.stock_bought_amount)
 	if err != nil {
 		return buy, err
 	}
@@ -187,9 +207,16 @@ func getBuys(userID, symbol string) ([]*Buy, error) {
 	return buys, nil
 }
 
-func createSell(price, intendedCashAmount, actualCashAmount float32, stockSoldAmount int, symbol, userID string) (*Sell, error) {
-	sell := &Sell{price: price, intended_cash_amount: intendedCashAmount, actual_cash_amount: actualCashAmount, stock_sold_amount: stockSoldAmount, stock_symbol: symbol, user_id: userID}
-	res, err := db.Exec("insert into Buy(price,stock_symbol,user_id,intended_cash_amount,actual_cash_amount,stock_sold_amount) values(?,?,?,?,?,?)", price, symbol, userID, intendedCashAmount, actualCashAmount, stockSoldAmount)
+func (sell *Sell) updateSell() error {
+	_, err := db.Exec("update Sell set intended_cash_amount=?, price=?, actual_cash_amount=?, stock_sold_amount = ? where id=?", sell.intended_cash_amount, sell.price, sell.actual_cash_amount, sell.stock_sold_amount, sell.id)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (sell *Sell) insertSell() (*Sell, error) {
+	res, err := db.Exec("insert into Sell(price,stock_symbol,user_id,intended_cash_amount,actual_cash_amount,stock_sold_amount) values(?,?,?,?,?,?)", sell.price, sell.stock_symbol, sell.user_id, sell.intended_cash_amount, sell.actual_cash_amount, sell.stock_sold_amount)
 	if err != nil {
 		return sell, err
 	}
@@ -235,6 +262,19 @@ func createSellTrigger(userID, symbol string, amount float32) (*SellTrigger, err
 	_, err = db.Exec("insert into Sell_Trigger(user_id,buy_id) values(?,?)", userID, sell.id)
 	sellTrigger := &SellTrigger{user_id: userID, sell_id: sell.id, active: false}
 	return sellTrigger, err
+}
+
+func getOrCreateUserStock(userID, symbol string) (*UserStock, error) {
+	userStock := &UserStock{user_id: userID, stock_symbol: symbol, amount: 0}
+	db.Exec("insert ignore into User_Stock(user_id,stock_symbol) values(?,?)", userID, symbol)
+	err := db.QueryRow("SELECT amount from User_Stock where user_id=? and stock_symbol=?", userID, symbol).Scan(&userStock.amount)
+	return userStock, err
+}
+
+func (userStock *UserStock) updateStockAmount(amount int) error {
+	userStock.amount += amount
+	_, err := db.Exec("update User_Stock set amount=? where user_id=? and stock_symbol=?", userStock.amount, userStock.user_id, userStock.stock_symbol)
+	return err
 }
 
 func (user User) updateUserBalance(amount float32) (User, error) {

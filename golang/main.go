@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"errors"
 	"log"
 	"net"
 
@@ -23,18 +24,35 @@ const (
 	QUOTE_PORT = "4442"
 )
 
+func toString(msg interface{}) string {
+	bytes, _ := json.Marshal(msg)
+	return string(bytes)
+}
+
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user, err := getUser(req.UserId)
 	if err != nil {
 		return nil, err
 	}
 	user.updateUserBalance(req.Amount)
-	msg := fmt.Sprintf("New balance %f", user.Balance)
-	return &pb.Response{Message: msg}, nil
+	return &pb.Response{Message: toString(user)}, nil
 }
 
 func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{Message: "yee"}, nil
+	user, err := getUser(req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	quote, err := quote(user.Id, req.Symbol)
+	if err != nil {
+		return nil, err
+	}
+	buy, err := createBuy(quote.Price, req.Amount, float32(0), 0, req.Symbol, user.Id)
+	if err != nil {
+		return nil, err
+	}
+	user.BuyStack = append(user.BuyStack, buy)
+	return &pb.Response{Message: toString(buy)}, nil
 }
 
 func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -42,8 +60,7 @@ func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.Response, erro
 	if err != nil {
 		return nil, err
 	}
-	msg := fmt.Sprintf("Stock: %s, price: %f", stock.Symbol, stock.Price)
-	return &pb.Response{Message: msg}, nil
+	return &pb.Response{Message: toString(stock)}, nil
 }
 
 func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -51,7 +68,18 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error
 }
 
 func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{Message: "yee"}, nil
+	user, err := getUser(req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	if len(user.BuyStack) == 0 {
+		return nil, errors.New("No buy on the stack")
+	}
+	buy := user.BuyStack[len(user.BuyStack)-1]
+	user.BuyStack = user.BuyStack[:len(user.BuyStack)-1]
+	setCache(user.Id, user)
+	userStock, err := buy.commit()
+	return &pb.Response{Message: toString(userStock)}, err
 }
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	return &pb.Response{Message: "yee"}, nil
