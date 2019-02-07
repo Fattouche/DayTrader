@@ -64,7 +64,7 @@ def buy(request):
 
     user = User.get(user_id)
     err = user.perform_buy(symbol, amount)
-    if err is not None:
+    if err:
         return JsonResponse({'action': 'buy', 'error': err}, status=400)
     return JsonResponse({'action': 'buy', 'balance': user.balance, 'stock': symbol, 'price': user.buy_stack[-1].purchase_price, 'amount': amount, 'valid_duration': '60'}, status=200)
 
@@ -75,7 +75,7 @@ def commit_buy(request):
     user_id = params.get('user_id')
     user = User.get(user_id)
     buy = user.pop_from_buy_stack()
-    if(buy is None):
+    if(not buy):
         return JsonResponse({'action': 'commit_buy', 'error': 'no buy currently exists'}, status=404)
     if(is_expired(buy.timestamp)):
         return JsonResponse({'action': 'commit_buy', 'stock': buy.stock_symbol, 'error': 'buy has expired, please re-buy in order to commit'}, status=408)
@@ -99,7 +99,7 @@ def sell(request):
     amount = Decimal(params.get('amount'))
     user = User.get(user_id)
     err = user.perform_sell(symbol, amount)
-    if err is not None:
+    if err:
         return JsonResponse({'action': 'sell', 'error': err}, status=400)
     return JsonResponse({'action': 'sell', 'stock': symbol, 'price': user.sell_stack[-1].sell_price, 'amount': amount, 'valid_duration': '60'}, status=200)
 
@@ -110,7 +110,7 @@ def commit_sell(request):
     user_id = params.get('user_id')
     user = User.get(user_id)
     sell = user.pop_from_sell_stack()
-    if(sell is None):
+    if(not sell):
         return JsonResponse({'action': 'commit_sell', 'error': 'no sell currently exists'}, status=404)
     if(is_expired(sell.timestamp)):
         return JsonResponse({'action': 'commit_sell', 'stock': sell.stock_symbol, 'error': 'sell has expired, please re-buy in order to commit'}, status=408)
@@ -188,7 +188,6 @@ def cancel_set_buy(request):
     if err:
         return JsonResponse({'action': 'cancel_set_buy', 'error': err}, status=404)
     return JsonResponse({'action': 'cancel_set_buy', 'symbol': symbol}, status=200)
-
 
 @store_logging_info
 def cancel_set_sell(request):
