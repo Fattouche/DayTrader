@@ -1,0 +1,42 @@
+services:
+  web:
+    command: go run .
+    container_name: day_trader_web
+    environment:
+     PYTHONUNBUFFERED: 1
+    build:
+      context: ./images/web
+    ports:
+    - '41000'
+    volumes:
+    - ./day_trader:/day_trader
+  cache:
+    container_name: day_trader_cache
+    image: memcached
+    ports:
+    - '11211:11211'
+  db:
+    image: mysql
+    command: mysqld --max_allowed_packet=256M --max_connections=1024 --default-authentication-plugin=mysql_native_password
+    container_name: day_trader_db
+    environment:
+      MYSQL_DATABASE: day_trader_db
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+    - '3306:3306'
+  lb:
+    build:
+      context: ./images/nginx
+    command: /service/entrypoint.sh
+    container_name: daytraderlb
+    volumes:
+      - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - '80:80'
+      - '443:443'
+
+networks:
+  default:
+    name: day_trader_default
+
+version: '3.6'

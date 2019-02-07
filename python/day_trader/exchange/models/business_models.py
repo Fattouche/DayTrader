@@ -7,8 +7,7 @@ from decimal import Decimal
 import socket
 from django.conf import settings
 from exchange.audit_logging import AuditLogger
-from exchange.thread_local import get_current_logging_info, \
-    set_current_logging_info
+from exchange.thread_local import get_current_logging_info
 
 
 def singleton(cls, *args, **kw):
@@ -48,10 +47,7 @@ class Stock:
         for trigger in buy_trigger:
             trigger.check_validity(self.price)
 
-    def verify_triggers(self, logging_info):
-        # Set logging info, since this is executed in a different thread than
-        # the views
-        set_current_logging_info(logging_info)
+    def verify_triggers(self):
         self.check_sell_trigger()
         self.check_buy_trigger()
 
@@ -67,8 +63,7 @@ class Stock:
         logging_info = get_current_logging_info()
         AuditLogger.log_quote_server_event(logging_info['server'],
                                            logging_info['transaction_num'],
-                                           quote_price, self.symbol, user_id,
-                                           response[3], response[4])
+                                           quote_price, self.symbol, user_id, response[3], response[4])
 
     @classmethod
     def quote(cls, symbol, user_id):
@@ -77,8 +72,7 @@ class Stock:
             stock = cls(symbol=symbol, price=0)
             stock.execute_quote_request(user_id)
             cache.set(symbol, stock, 60)
-            logging_info = get_current_logging_info()
-            django_rq.enqueue(stock.verify_triggers, logging_info)
+            django_rq.enqueue(stock.verify_triggers)
         return stock
 
 
@@ -136,9 +130,6 @@ class User(models.Model):
             sell.cancel()
 
     def set_buy_amount(self, symbol, amount):
-        if(self.balance < amount):
-            return "user balance too low"
-
         try:
             buy_trigger = BuyTrigger.objects.get(
                 user__user_id=self.user_id,
@@ -298,7 +289,7 @@ class Sell(models.Model):
         if(self.stock_sold_amount <= 0):
             return "Update trigger price failed"
         self.actual_cash_amount = self.stock_sold_amount*stock_price
-        self.stock_sold_amount = self.actual_cash_amount//stock_price
+        self.stock_sold_amount*stock_price
         self.timestamp = time.time()
         self.sell_price = stock_price
         user_stock.update_amount(self.stock_sold_amount*-1)
@@ -379,8 +370,7 @@ class SellTrigger(models.Model):
         if(sell_object.sell_price <= price):
             logging_info = get_current_logging_info()
             AuditLogger.log_system_event(logging_info['server'],
-                                         logging_info['transaction_num'],
-                                         logging_info['command'],
+                                         logging_info['transaction_num'], logging_info['command'],
                                          username=user_object.user_id,
                                          stock_symbol=sell_object.stock_symbol,
                                          funds=user_object.balance)
@@ -392,7 +382,6 @@ class SellTrigger(models.Model):
         err = self.sell.update_cash_amount(amount)
         if err:
             return err
-        self.sell.save()
         self.save()
 
     def update_trigger_price(self, price):
@@ -431,7 +420,6 @@ class BuyTrigger(models.Model):
 
     def update_cash_amount(self, amount):
         err = self.buy.update_cash_amount(amount)
-        self.buy.save()
         self.save()
         return err
 

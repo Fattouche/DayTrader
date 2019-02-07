@@ -1,8 +1,0 @@
-mysqlclient
-django
-python-memcached
-django-rq
-redis
-gunicorn
-django-cachalot
-lxml
