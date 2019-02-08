@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	pb "../../golang/protobuff"
+	pb "github.com/Fattouche/DayTrader/golang/day_trader/protobuff"
 	"google.golang.org/grpc"
 )
 
@@ -45,43 +45,49 @@ var wg sync.WaitGroup
 func completeCall(command *pb.Command, client pb.DayTraderClient) {
 	ctx := context.Background()
 	var err error
+	var resp *pb.Response
 	switch command.Name {
 	case "ADD":
-		_, err = client.Add(ctx, command)
+		resp, err = client.Add(ctx, command)
 	case "QUOTE":
-		_, err = client.Quote(ctx, command)
+		resp, err = client.Quote(ctx, command)
 	case "BUY":
-		_, err = client.Buy(ctx, command)
+		resp, err = client.Buy(ctx, command)
 	case "SELL":
-		_, err = client.Sell(ctx, command)
+		resp, err = client.Sell(ctx, command)
 	case "COMMIT_BUY":
-		_, err = client.CommitBuy(ctx, command)
+		resp, err = client.CommitBuy(ctx, command)
 	case "COMMIT_SELL":
-		_, err = client.CommitSell(ctx, command)
+		resp, err = client.CommitSell(ctx, command)
 	case "CANCEL_BUY":
-		_, err = client.CancelBuy(ctx, command)
+		resp, err = client.CancelBuy(ctx, command)
 	case "CANCEL_SELL":
-		_, err = client.CancelSell(ctx, command)
+		resp, err = client.CancelSell(ctx, command)
 	case "SET_BUY_AMOUNT":
-		_, err = client.SetBuyAmount(ctx, command)
+		resp, err = client.SetBuyAmount(ctx, command)
 	case "SET_SELL_AMOUNT":
-		_, err = client.SetSellAmount(ctx, command)
+		resp, err = client.SetSellAmount(ctx, command)
 	case "SET_BUY_TRIGGER":
-		_, err = client.SetBuyTrigger(ctx, command)
+		resp, err = client.SetBuyTrigger(ctx, command)
 	case "SET_SELL_TRIGGER":
-		_, err = client.SetSellTrigger(ctx, command)
+		resp, err = client.SetSellTrigger(ctx, command)
 	case "CANCEL_SET_BUY":
-		_, err = client.CancelSetBuy(ctx, command)
+		resp, err = client.CancelSetBuy(ctx, command)
 	case "CANCEL_SET_SELL":
-		_, err = client.CancelSetSell(ctx, command)
+		resp, err = client.CancelSetSell(ctx, command)
 	case "DUMPLOG":
-		_, err = client.DumpLog(ctx, command)
+		resp, err = client.DumpLog(ctx, command)
 	case "DISPLAY_SUMMARY":
-		_, err = client.DisplaySummary(ctx, command)
+		resp, err = client.DisplaySummary(ctx, command)
 	}
+	_, _ = resp, err
+	//UNCOMMENT FOR RESPONSES
+	/*fmt.Print(command.Name + " ")
+	log.Print("RESP: " + resp.String())
 	if err != nil {
-		log.Println(err)
-	}
+		fmt.Println(" ERRPR: " + err.Error())
+	}*/
+
 }
 
 func parseCommands(filename string) {
@@ -171,7 +177,7 @@ func makeDumpRequest() {
 
 func main() {
 	fileName := flag.String("f", "1userWorkLoad", "The name of the workload file")
-	tempBaseURL := flag.String("url", "localhost:41000", "The url of the web server")
+	tempBaseURL := flag.String("url", "localhost/", "The url of the web server")
 	flag.Parse()
 	baseURL = *tempBaseURL
 	parseCommands(*fileName)

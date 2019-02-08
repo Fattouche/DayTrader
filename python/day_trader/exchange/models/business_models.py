@@ -297,7 +297,6 @@ class Sell(models.Model):
         if(self.stock_sold_amount <= 0):
             return "Update trigger price failed"
         self.actual_cash_amount = self.stock_sold_amount*stock_price
-        self.stock_sold_amount*stock_price
         self.timestamp = time.time()
         self.sell_price = stock_price
         user_stock.update_amount(self.stock_sold_amount*-1)

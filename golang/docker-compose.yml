@@ -1,15 +1,15 @@
 services:
-  web:
-    command: go run .
-    container_name: day_trader_web
-    environment:
-     PYTHONUNBUFFERED: 1
-    build:
-      context: ./images/web
-    ports:
-    - '41000'
-    volumes:
-    - ./day_trader:/day_trader
+  #web:
+  #  command: go run .
+  #  container_name: day_trader_web
+  #  environment:
+  #   PYTHONUNBUFFERED: 1
+  #  build:
+  #    context: ./images/web
+  #  ports:
+  #  - '41000'
+  #  volumes:
+  #  - ./day_trader:/day_trader
   cache:
     container_name: day_trader_cache
     image: memcached

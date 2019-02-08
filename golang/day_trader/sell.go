@@ -3,17 +3,33 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"time"
 )
 
-func createSell(price, intendedCashAmount, actualCashAmount float32, stockSoldAmount int, symbol, userID string) (*Sell, error) {
-	sell := &Sell{price: price, intended_cash_amount: intendedCashAmount, actual_cash_amount: actualCashAmount, stock_sold_amount: stockSoldAmount, stock_symbol: symbol, user_id: userID}
-	err := sell.updateCashAmount(intendedCashAmount)
+type Sell struct {
+	Id                 int64
+	Price              float32
+	StockSymbol        string
+	IntendedCashAmount float32
+	ActualCashAmount   float32
+	StockSoldAmount    int
+	UserId             string
+	Timestamp          time.Time
+}
+
+func createSell(intendedCashAmount float32, symbol, userID string) (*Sell, error) {
+	stock, err := quote(userID, symbol)
 	if err != nil {
 		return nil, err
 	}
-	err = sell.updatePrice(price)
+	sell := &Sell{Price: stock.Price, StockSymbol: symbol, UserId: userID}
+	err = sell.updateCashAmount(intendedCashAmount)
+	if err != nil {
+		return nil, err
+	}
+	err = sell.updatePrice(stock.Price)
 	if err != nil {
 		return nil, err
 	}
@@ -21,39 +37,64 @@ func createSell(price, intendedCashAmount, actualCashAmount float32, stockSoldAm
 }
 
 func (sell *Sell) updateCashAmount(amount float32) error {
-	stock, _ := quote(sell.user_id, sell.stock_symbol)
-	userStock, _ := getOrCreateUserStock(sell.user_id, sell.stock_symbol)
+	stock, _ := quote(sell.UserId, sell.StockSymbol)
+	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
 	stockSoldAmount := int(math.Floor(float64(amount / stock.Price)))
-	if stockSoldAmount > userStock.amount {
-		return errors.New(fmt.Sprint("Not enough stock, have %f need %f", userStock.amount, stockSoldAmount))
+	if stockSoldAmount > userStock.Amount {
+		return fmt.Errorf("Not enough stock, have %d need %d", userStock.Amount, stockSoldAmount)
 	}
-	sell.intended_cash_amount = amount
+	sell.IntendedCashAmount = amount
 	return nil
 }
 
 func (sell *Sell) updatePrice(stockPrice float32) error {
 	sell.cancel()
-	userStock, _ := getOrCreateUserStock(sell.user_id, sell.stock_symbol)
-	sell.stock_sold_amount = int(math.Min(math.Floor(float64(sell.intended_cash_amount/stockPrice)), float64(userStock.amount)))
-	if sell.stock_sold_amount <= 0 {
+	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	sell.StockSoldAmount = int(math.Min(math.Floor(float64(sell.IntendedCashAmount/stockPrice)), float64(userStock.Amount)))
+	if sell.StockSoldAmount <= 0 {
 		return errors.New("Update trigger price failed")
 	}
-	sell.actual_cash_amount = float32(sell.stock_sold_amount) * stockPrice
-	sell.stock_sold_amount = int(float32(sell.stock_sold_amount) * stockPrice)
-	sell.timestamp = time.Now()
-	sell.price = stockPrice
-	userStock.updateStockAmount(sell.stock_sold_amount * -1)
+	sell.ActualCashAmount = float32(sell.StockSoldAmount) * stockPrice
+	sell.Timestamp = time.Now()
+	sell.Price = stockPrice
+	userStock.updateStockAmount(sell.StockSoldAmount * -1)
 	return nil
 }
 
 func (sell *Sell) commit() error {
-	user := getUser(sell.user_id)
-	user.updateUserBalance(sell.actual_cash_amount)
+	user := getUser(sell.UserId)
+	user.updateUserBalance(sell.ActualCashAmount)
 	_, err := sell.insertSell()
 	return err
 }
 
 func (sell *Sell) cancel() {
-	userStock, _ := getOrCreateUserStock(sell.user_id, sell.stock_symbol)
-	userStock.updateStockAmount(sell.stock_sold_amount)
+	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	userStock.updateStockAmount(sell.StockSoldAmount)
+}
+
+func (sell *Sell) updateSell() error {
+	_, err := db.Exec("update Sell set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockSoldAmount = ? where Id=?", sell.IntendedCashAmount, sell.Price, sell.ActualCashAmount, sell.StockSoldAmount, sell.Id)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (sell *Sell) insertSell() (*Sell, error) {
+	res, err := db.Exec("insert into Sell(Price,StockSymbol,UserId,IntendedCashAmount,ActualCashAmount,StockSoldAmount) values(?,?,?,?,?,?)", sell.Price, sell.StockSymbol, sell.UserId, sell.IntendedCashAmount, sell.ActualCashAmount, sell.StockSoldAmount)
+	if err != nil {
+		return sell, err
+	}
+	sell.Id, err = res.LastInsertId()
+	return sell, err
+}
+
+func getSell(id int64) *Sell {
+	sell := &Sell{}
+	err := db.QueryRow("Select * from Sell where Id=?", id).Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount)
+	if err != nil {
+		log.Println(err)
+	}
+	return sell
 }
