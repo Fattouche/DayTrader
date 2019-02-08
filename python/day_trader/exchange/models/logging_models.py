@@ -22,7 +22,7 @@ class QuoteServerLog(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=32)
     stock_symbol = models.CharField(max_length=3)
     username = models.CharField(max_length=128)
-    quote_server_time = models.PositiveIntegerField()
+    quote_server_time = models.BigIntegerField()
     # TODO: what is crypto key length?
     crypto_key = models.CharField(max_length=256)
 
