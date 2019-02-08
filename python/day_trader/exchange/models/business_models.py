@@ -7,7 +7,8 @@ from decimal import Decimal
 import socket
 from django.conf import settings
 from exchange.audit_logging import AuditLogger
-from exchange.thread_local import get_current_logging_info
+from exchange.thread_local import get_current_logging_info, \
+                                    set_current_logging_info
 
 
 def singleton(cls, *args, **kw):
@@ -47,7 +48,10 @@ class Stock:
         for trigger in buy_trigger:
             trigger.check_validity(self.price)
 
-    def verify_triggers(self):
+    def verify_triggers(self, logging_info):
+        # Set logging info, since this is executed in a different thread than
+        # the views
+        set_current_logging_info(logging_info)
         self.check_sell_trigger()
         self.check_buy_trigger()
 
@@ -63,7 +67,8 @@ class Stock:
         logging_info = get_current_logging_info()
         AuditLogger.log_quote_server_event(logging_info['server'],
                                            logging_info['transaction_num'],
-                                           quote_price, self.symbol, user_id, response[3], response[4])
+                                           quote_price, self.symbol, user_id, 
+                                           response[3], response[4])
 
     @classmethod
     def quote(cls, symbol, user_id):
@@ -72,7 +77,8 @@ class Stock:
             stock = cls(symbol=symbol, price=0)
             stock.execute_quote_request(user_id)
             cache.set(symbol, stock, 60)
-            django_rq.enqueue(stock.verify_triggers)
+            logging_info = get_current_logging_info()
+            django_rq.enqueue(stock.verify_triggers, logging_info)
         return stock
 
 
@@ -130,6 +136,8 @@ class User(models.Model):
             sell.cancel()
 
     def set_buy_amount(self, symbol, amount):
+        if(self.balance < amount):
+            return "user balance too low"
         try:
             buy_trigger = BuyTrigger.objects.get(
                 user__user_id=self.user_id,
