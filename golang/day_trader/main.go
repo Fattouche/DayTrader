@@ -22,7 +22,7 @@ type server struct{}
 const (
 	GRPC_PORT  = ":41000"
 	DB_NAME    = "daytrader"
-	QUOTE_HOST = "localhost:"
+	QUOTE_HOST = "quote_server:"
 	QUOTE_PORT = "4442"
 )
 
@@ -70,19 +70,19 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error
 
 func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	if len(user.BuyStack) == 0 {
+	buy := user.popFromBuyStack()
+	if buy == nil {
 		return nil, errors.New("No buy on the stack")
 	}
-	buy := user.popFromBuyStack()
 	userStock, err := buy.commit()
 	return &pb.Response{Message: toString(userStock)}, err
 }
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	if len(user.SellStack) == 0 {
+	sell := user.popFromSellStack()
+	if sell == nil {
 		return nil, errors.New("No sell on the stack")
 	}
-	sell := user.popFromSellStack()
 	err := sell.commit()
 	return &pb.Response{Message: toString(user)}, err
 }
@@ -100,7 +100,7 @@ func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.Response, 
 
 func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	sell := user.popFromBuyStack()
+	sell := user.popFromSellStack()
 	if sell != nil {
 		sell.cancel()
 	} else {

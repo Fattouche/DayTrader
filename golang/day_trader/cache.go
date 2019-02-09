@@ -10,7 +10,7 @@ import (
 var cache *memcache.Client
 
 func initCache() {
-	cache = memcache.New("127.0.0.1:11211")
+	cache = memcache.New("cache:11211")
 }
 
 func setCache(key string, val interface{}) error {

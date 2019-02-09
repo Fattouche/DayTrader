@@ -9,6 +9,9 @@ type User struct {
 }
 
 func (user *User) popFromBuyStack() *Buy {
+	if len(user.BuyStack) == 0 {
+		return nil
+	}
 	buy := user.BuyStack[len(user.BuyStack)-1]
 	user.BuyStack = user.BuyStack[:len(user.BuyStack)-1]
 	setCache(user.Id, user)
@@ -16,6 +19,9 @@ func (user *User) popFromBuyStack() *Buy {
 }
 
 func (user *User) popFromSellStack() *Sell {
+	if len(user.SellStack) == 0 {
+		return nil
+	}
 	sell := user.SellStack[len(user.SellStack)-1]
 	user.SellStack = user.SellStack[:len(user.SellStack)-1]
 	setCache(user.Id, user)

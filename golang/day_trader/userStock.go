@@ -7,9 +7,12 @@ type UserStock struct {
 }
 
 func getOrCreateUserStock(userID, symbol string) (*UserStock, error) {
-	userStock := &UserStock{UserId: userID, StockSymbol: symbol, Amount: 0}
-	db.Exec("insert ignore into User_Stock(UserId,StockSymbol) values(?,?)", userID, symbol)
-	err := db.QueryRow("SELECT amount from User_Stock where UserId=? and StockSymbol=?", userID, symbol).Scan(&userStock.Amount)
+	userStock := &UserStock{UserId: userID, StockSymbol: symbol}
+	err := db.QueryRow("SELECT Amount from User_Stock where UserId=? and StockSymbol=?", userID, symbol).Scan(&userStock.Amount)
+	if err != nil {
+		db.Exec("insert into User_Stock(UserId,StockSymbol) values(?,?)", userID, symbol)
+		userStock.Amount = 0
+	}
 	return userStock, err
 }
 

@@ -85,9 +85,8 @@ func completeCall(command *pb.Command, client pb.DayTraderClient) {
 	/*fmt.Print(command.Name + " ")
 	log.Print("RESP: " + resp.String())
 	if err != nil {
-		fmt.Println(" ERRPR: " + err.Error())
+		fmt.Println(" ERROR: " + err.Error())
 	}*/
-
 }
 
 func parseCommands(filename string) {
@@ -176,8 +175,8 @@ func makeDumpRequest() {
 }
 
 func main() {
-	fileName := flag.String("f", "1userWorkLoad", "The name of the workload file")
-	tempBaseURL := flag.String("url", "localhost/", "The url of the web server")
+	fileName := flag.String("f", "./workload_files/1000_user_workload.workload", "The name of the workload file")
+	tempBaseURL := flag.String("url", "daytraderlb:80", "The url of the web server")
 	flag.Parse()
 	baseURL = *tempBaseURL
 	parseCommands(*fileName)

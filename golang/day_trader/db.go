@@ -65,7 +65,7 @@ var createTableStatements = []string{
 
 func createAndOpenDB() {
 	var err error
-	db, err = sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/")
+	db, err = sql.Open("mysql", "root:@tcp(db:3306)/")
 	if err != nil {
 		panic(err)
 	}
@@ -78,7 +78,7 @@ func createAndOpenDB() {
 			}
 		}
 	}
-	db, err = sql.Open("mysql", "root@tcp(127.0.0.1:3306)/daytrader")
+	db, err = sql.Open("mysql", "root@tcp(db:3306)/daytrader")
 	if err != nil {
 		panic(err)
 	}
