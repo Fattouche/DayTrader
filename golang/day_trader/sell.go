@@ -38,7 +38,7 @@ func createSell(intendedCashAmount float32, symbol, userID string) (*Sell, error
 
 func (sell *Sell) updateCashAmount(amount float32) error {
 	stock, _ := quote(sell.UserId, sell.StockSymbol)
-	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	userStock := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
 	stockSoldAmount := int(math.Floor(float64(amount / stock.Price)))
 	if stockSoldAmount > userStock.Amount {
 		return fmt.Errorf("Not enough stock, have %d need %d", userStock.Amount, stockSoldAmount)
@@ -49,7 +49,7 @@ func (sell *Sell) updateCashAmount(amount float32) error {
 
 func (sell *Sell) updatePrice(stockPrice float32) error {
 	sell.cancel()
-	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	userStock := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
 	sell.StockSoldAmount = int(math.Min(math.Floor(float64(sell.IntendedCashAmount/stockPrice)), float64(userStock.Amount)))
 	if sell.StockSoldAmount <= 0 {
 		return errors.New("Update trigger price failed")
@@ -69,7 +69,7 @@ func (sell *Sell) commit() error {
 }
 
 func (sell *Sell) cancel() {
-	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	userStock := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
 	userStock.updateStockAmount(sell.StockSoldAmount)
 }
 

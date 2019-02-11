@@ -54,7 +54,7 @@ func (buy *Buy) updatePrice(stockPrice float32) {
 
 func (buy *Buy) commit() (*UserStock, error) {
 	_, err := buy.insertBuy()
-	userStock, err := getOrCreateUserStock(buy.UserId, buy.StockSymbol)
+	userStock := getOrCreateUserStock(buy.UserId, buy.StockSymbol)
 	userStock.updateStockAmount(buy.StockBoughtAmount)
 	return userStock, err
 }
