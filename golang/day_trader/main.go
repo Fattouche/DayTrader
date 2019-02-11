@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 
 	pb "./protobuff"
 
+	"github.com/bradfitz/gomemcache/memcache"
 	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -19,11 +21,30 @@ import (
 // This server implements the protobuff Node type
 type server struct{}
 
-const (
+type cacheInterface interface {
+	setCache(key string, val interface{}) error
+	getCacheStock(key string) (*Stock, error)
+	getCacheUser(key string) (*User, error)
+}
+
+type dbInterface interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	SetConnMaxLifetime(d time.Duration)
+	SetMaxIdleConns(n int)
+}
+
+var c cacheInterface
+var db dbInterface
+
+var (
 	GRPC_PORT  = ":41000"
 	DB_NAME    = "daytrader"
-	QUOTE_HOST = "quote_server:"
-	QUOTE_PORT = "4442"
+	QUOTE_HOST = "quote_server"
+	QUOTE_PORT = ":4442"
+	CACHE_HOST = "cache"
+	CACHE_PORT = ":21111"
 )
 
 func toString(msg interface{}) string {
@@ -45,7 +66,7 @@ func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.Response, error)
 	}
 
 	user.BuyStack = append(user.BuyStack, buy)
-	setCache(user.Id, user)
+	c.setCache(user.Id, user)
 	return &pb.Response{Message: toString(buy)}, nil
 }
 
@@ -64,7 +85,7 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error
 		return nil, err
 	}
 	user.SellStack = append(user.SellStack, sell)
-	setCache(user.Id, user)
+	c.setCache(user.Id, user)
 	return &pb.Response{Message: toString(sell)}, nil
 }
 
@@ -219,7 +240,7 @@ func watchTriggers() {
 
 func main() {
 	createAndOpenDB()
-	initCache()
+	c = &cache{Client: memcache.New(CACHE_HOST + CACHE_PORT)}
 	startGRPCServer()
 	go watchTriggers()
 }

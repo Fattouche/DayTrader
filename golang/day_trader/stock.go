@@ -16,13 +16,13 @@ type Stock struct {
 }
 
 func quote(userID, symbol string) (*Stock, error) {
-	stock, err := getCacheStock(symbol)
+	stock, err := c.getCacheStock(symbol)
 	if err != nil || (stock != nil && stock.isExpired()) {
 		//TODO: Do something with this hash
 		stock = &Stock{Symbol: symbol}
 		stock.Price, stock.Hash, err = executeRequest(userID, symbol)
 		stock.TimeStamp = time.Now()
-		setCache(stock.Symbol, stock)
+		c.setCache(stock.Symbol, stock)
 		return stock, err
 	}
 	return stock, err

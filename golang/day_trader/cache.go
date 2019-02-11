@@ -7,13 +7,11 @@ import (
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
-var cache *memcache.Client
-
-func initCache() {
-	cache = memcache.New("cache:11211")
+type cache struct {
+	Client *memcache.Client
 }
 
-func setCache(key string, val interface{}) error {
+func (c *cache) setCache(key string, val interface{}) error {
 	bytes, err := json.Marshal(val)
 	if err != nil {
 		log.Println("Error converting value to byte array")
@@ -22,12 +20,12 @@ func setCache(key string, val interface{}) error {
 		Key:   key,
 		Value: bytes,
 	}
-	return cache.Set(item)
+	return c.Client.Set(item)
 }
 
-func getCacheStock(key string) (*Stock, error) {
+func (c *cache) getCacheStock(key string) (*Stock, error) {
 	var stock Stock
-	item, err := cache.Get(key)
+	item, err := c.Client.Get(key)
 	if err != nil {
 		return nil, err
 	}
@@ -35,9 +33,9 @@ func getCacheStock(key string) (*Stock, error) {
 	return &stock, err
 }
 
-func getCacheUser(key string) (*User, error) {
+func (c *cache) getCacheUser(key string) (*User, error) {
 	user := &User{Id: key}
-	item, err := cache.Get(key)
+	item, err := c.Client.Get(key)
 	if err != nil {
 		return user, err
 	}

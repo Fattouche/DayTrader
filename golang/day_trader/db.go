@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-var db *sql.DB
-
 var createTableStatements = []string{
 	`CREATE DATABASE IF NOT EXISTS ` + DB_NAME,
 	`USE ` + DB_NAME,
