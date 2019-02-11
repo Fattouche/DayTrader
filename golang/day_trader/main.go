@@ -44,7 +44,7 @@ var (
 	QUOTE_HOST = "quote_server"
 	QUOTE_PORT = ":4442"
 	CACHE_HOST = "cache"
-	CACHE_PORT = ":21111"
+	CACHE_PORT = ":11211"
 )
 
 func toString(msg interface{}) string {

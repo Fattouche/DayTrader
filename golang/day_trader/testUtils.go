@@ -11,6 +11,7 @@ type mockCache struct{}
 type mockDB struct{}
 type mockResult struct{}
 
+var s server
 var symbol = "ABC"
 var userId = "tester"
 var filename = "dumplog"
@@ -19,6 +20,8 @@ var transactionId = int32(1)
 var quotePrice = float32(5.21)
 var hash = "lod23EP0lofFCkEd0ilcUpjL0MuBcIh3HiwAq9QSXdU="
 var name = "tester"
+var userCache = make(map[string]*User)
+var stockCache = make(map[string]*Stock)
 
 func genGrpcRequest(name string) *pb.Command {
 	req := &pb.Command{UserId: userId, Symbol: symbol, Amount: amount, TransactionId: transactionId, Name: name, Filename: filename}
@@ -26,17 +29,20 @@ func genGrpcRequest(name string) *pb.Command {
 }
 
 func (c *mockCache) setCache(key string, value interface{}) error {
+	if v, ok := value.(*User); ok {
+		userCache[key] = v
+	} else if v, ok := value.(*Stock); ok {
+		stockCache[key] = v
+	}
 	return nil
 }
 
 func (c *mockCache) getCacheUser(key string) (*User, error) {
-	user := &User{Id: key, Name: name, BuyStack: []*Buy{}, SellStack: []*Sell{}, Balance: 0}
-	return user, nil
+	return userCache[key], nil
 }
 
 func (c *mockCache) getCacheStock(key string) (*Stock, error) {
-	stock := &Stock{Symbol: symbol, Price: quotePrice, Hash: hash, TimeStamp: time.Now()}
-	return stock, nil
+	return stockCache[key], nil
 }
 
 func (db *mockDB) Exec(query string, args ...interface{}) (sql.Result, error) {
