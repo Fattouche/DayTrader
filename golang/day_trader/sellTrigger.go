@@ -26,6 +26,7 @@ func (trigger *SellTrigger) updatePrice(price float32) error {
 	err := sell.updatePrice(price)
 	if err == nil {
 		trigger.Active = true
+		sell.updateSell()
 		db.Exec("UPDATE Sell_Trigger set Active=true where UserId=? and SellId=?", trigger.UserId, trigger.SellId)
 	}
 	return err
@@ -34,8 +35,8 @@ func (trigger *SellTrigger) updatePrice(price float32) error {
 func (trigger *SellTrigger) cancel() {
 	sell := getSell(trigger.SellId)
 	sell.cancel()
-	trigger.Active = false
-	db.Exec("UPDATE Sell_Trigger set Active=false where UserId=? and SellId=?", trigger.UserId, trigger.SellId)
+	db.Exec("DELETE from Sell_Trigger UserId=? and SellId=?", trigger.UserId, trigger.SellId)
+	db.Exec("DELETE From Sell where Id=?", trigger.SellId)
 }
 
 func getSellTrigger(userID, symbol string) (*SellTrigger, error) {
@@ -57,27 +58,26 @@ func createSellTrigger(userID, symbol string, sellID int64, amount float32) *Sel
 }
 
 func checkSellTriggers() {
-	rows, err := db.Query("SELECT Sell.Id, Sell.StockSymbol, Sell.UserId from Sell inner join Sell_Trigger on Sell_Trigger.SellId=Sell.Id where Sell_Trigger.Active=true")
+	rows, err := db.Query("SELECT Sell.Id, Sell.StockSymbol, Sell.IntendedCashAmount,Sell.StockSoldAmount, Sell.Price,Sell.UserId from Sell inner join Sell_Trigger on Sell_Trigger.SellId=Sell.Id where Sell_Trigger.Active=true")
 	if err != nil {
 		log.Println(err)
 	}
 	sells := make([]*Sell, 0)
 	for rows.Next() {
 		sell := &Sell{}
-		err = rows.Scan(&sell.Id, &sell.StockSymbol, sell.UserId)
+		err = rows.Scan(&sell.Id, &sell.StockSymbol, &sell.IntendedCashAmount, &sell.StockSoldAmount, &sell.Price, &sell.UserId)
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
 		sells = append(sells, sell)
 	}
 	rows.Close()
-	//TODO: Improve this preformance
 	for _, sell := range sells {
 		stock, _ := quote(sell.UserId, sell.StockSymbol)
-		if sell.Price >= stock.Price {
+		if sell.Price <= stock.Price {
 			sell.updatePrice(stock.Price)
-			sell.commit()
-			db.Exec("Update Sell_Trigger set Active=false where SellId=? and UserId=?", sell.Id, sell.UserId)
+			sell.commit(true)
+			db.Exec("Delete From Sell_Trigger where SellId=? and UserId=?", sell.Id, sell.UserId)
 		}
 	}
 }

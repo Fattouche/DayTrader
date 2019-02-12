@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-var db *sql.DB
-
 var createTableStatements = []string{
 	`CREATE DATABASE IF NOT EXISTS ` + DB_NAME,
 	`USE ` + DB_NAME,
@@ -62,6 +60,7 @@ var createTableStatements = []string{
 		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
 	)`,
 }
+var db *sql.DB
 
 func createAndOpenDB() {
 	var err error

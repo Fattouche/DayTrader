@@ -20,7 +20,7 @@ services:
     command: mysqld --max_allowed_packet=256M --max_connections=1024 --default-authentication-plugin=mysql_native_password
     container_name: day_trader_db
     environment:
-      MYSQL_DATABASE: day_trader_db
+      MYSQL_DATABASE: daytrader
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     ports:
     - '3306:3306'

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -38,7 +37,7 @@ func createSell(intendedCashAmount float32, symbol, userID string) (*Sell, error
 
 func (sell *Sell) updateCashAmount(amount float32) error {
 	stock, _ := quote(sell.UserId, sell.StockSymbol)
-	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	userStock := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
 	stockSoldAmount := int(math.Floor(float64(amount / stock.Price)))
 	if stockSoldAmount > userStock.Amount {
 		return fmt.Errorf("Not enough stock, have %d need %d", userStock.Amount, stockSoldAmount)
@@ -48,28 +47,30 @@ func (sell *Sell) updateCashAmount(amount float32) error {
 }
 
 func (sell *Sell) updatePrice(stockPrice float32) error {
-	sell.cancel()
-	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
-	sell.StockSoldAmount = int(math.Min(math.Floor(float64(sell.IntendedCashAmount/stockPrice)), float64(userStock.Amount)))
-	if sell.StockSoldAmount <= 0 {
-		return errors.New("Update trigger price failed")
-	}
+	userStock := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	updateSoldAmount := int(math.Min(math.Floor(float64(sell.IntendedCashAmount/stockPrice)), float64(userStock.Amount+sell.StockSoldAmount)))
+	updated := updateSoldAmount - sell.StockSoldAmount
+	sell.StockSoldAmount += updated
 	sell.ActualCashAmount = float32(sell.StockSoldAmount) * stockPrice
 	sell.Timestamp = time.Now()
 	sell.Price = stockPrice
-	userStock.updateStockAmount(sell.StockSoldAmount * -1)
+	userStock.updateStockAmount(updated * -1)
 	return nil
 }
 
-func (sell *Sell) commit() error {
+func (sell *Sell) commit(update bool) (err error) {
 	user := getUser(sell.UserId)
 	user.updateUserBalance(sell.ActualCashAmount)
-	_, err := sell.insertSell()
-	return err
+	if update {
+		err = sell.updateSell()
+	} else {
+		_, err = sell.insertSell()
+	}
+	return
 }
 
 func (sell *Sell) cancel() {
-	userStock, _ := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
+	userStock := getOrCreateUserStock(sell.UserId, sell.StockSymbol)
 	userStock.updateStockAmount(sell.StockSoldAmount)
 }
 
