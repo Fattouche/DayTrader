@@ -32,3 +32,11 @@ To run the generator, cd into the respective directory and then `cd workload_gen
 ## Quote server
 
 To run the quote server, `cd quote_server` and run `docker-compose up`
+
+## Testing
+
+### Golang
+
+To test the golang app, `cd golang/day_trader/test_infrastructure` then run `docker-compose up`
+
+__Note - Since this uses a real db and cache, you must docker-compose down every time you want to retest__
