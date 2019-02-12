@@ -1,7 +1,7 @@
 package main
 
 import (
-	pb "./protobuff"
+	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 )
 
 var s server

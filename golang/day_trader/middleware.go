@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	pb "./protobuff"
+	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 	"google.golang.org/grpc"
 )
 

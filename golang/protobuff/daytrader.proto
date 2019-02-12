@@ -1,6 +1,5 @@
 syntax = "proto3";
-
-package server;
+package daytrader;
 
 message command{
     string user_id=1;
@@ -9,6 +8,31 @@ message command{
     string filename=4;
     int32 transaction_id=5;
     string name = 6;
+}
+
+message log{
+    string log_type = 1;
+    string timestamp = 2;
+    string server_name = 3;
+    int32 transaction_id = 4;
+    string username = 5;
+    string stock_symbol = 6;
+    float funds = 7;
+    string filename = 8;
+    string crypto_key = 9;
+    int32 quote_server_time = 10;
+    string action = 11;
+    string error_message = 12;
+    string debug_message = 13;
+}
+
+service Logger{
+    rpc LogUserCommand(log) returns (Response){} 
+    rpc LogQuoteServerEvent(log) returns (Response){} 
+    rpc LogAccountTransaction(log) returns (Response){} 
+    rpc LogSystemEvent(log) returns (Response){} 
+    rpc LogErrorEvent(log) returns (Response){} 
+    rpc LogDebugEvent(log) returns (Response){} 
 }
 
 message Response{

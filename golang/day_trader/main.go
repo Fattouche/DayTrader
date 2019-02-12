@@ -9,7 +9,7 @@ import (
 	"net"
 	"time"
 
-	pb "./protobuff"
+	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 
 	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/grpc"
