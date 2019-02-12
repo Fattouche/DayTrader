@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	pb "github.com/Fattouche/DayTrader/golang/day_trader/protobuff"
+	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 	"google.golang.org/grpc"
 )
 
@@ -82,11 +82,11 @@ func completeCall(command *pb.Command, client pb.DayTraderClient) {
 	}
 	_, _ = resp, err
 	//UNCOMMENT FOR RESPONSES
-	/*fmt.Print(command.Name + " ")
-	log.Print("RESP: " + resp.String())
-	if err != nil {
-		fmt.Println(" ERROR: " + err.Error())
-	}*/
+	// fmt.Print(command.Name + " ")
+	// log.Print("RESP: " + resp.String())
+	// if err != nil {
+	// 	fmt.Println(" ERROR: " + err.Error())
+	// }
 }
 
 func parseCommands(filename string) {
