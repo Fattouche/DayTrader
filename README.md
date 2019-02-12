@@ -2,15 +2,32 @@
 
 Day trader is a stock exchange platform built for performance and reliability.
 
+## Design
+
+This project is implemented in 2 different ways:
+
+1. Django(Python)
+- Rest communication
+- Nginx LB
+- Redis job queue
+- Django_rq workers
+- Memcached for caching
+- Mysql DB
+
+
+2. Golang
+- GRPC communication
+- Nginx LB
+- Memcached for caching
+- Mysql Db
+
 ## Development
 
-To start using the django app simply run `docker-compose up`. This will create one replica
-of the web app. The nginx loadbalancer will be responsible for loadbalancing requests towards the web application. To test that the
-app is working properly simply go to `localhost` which shows the site through the loadbalancer. If you want to see each individual web app, run `docker-compose ps` and copy the port number on the left side of the colon and use that as the hostname `localhost<port>`.
+To start using either app cd into the respective directory and run `docker-compose up`
 
 ## Generator
 
-To run the generator, `cd workload_generator/golang` and run `docker-compose up`
+To run the generator, cd into the respective directory and then `cd workload_generator` and run `docker-compose up`
 
 ## Quote server
 
