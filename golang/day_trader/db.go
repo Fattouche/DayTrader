@@ -60,6 +60,7 @@ var createTableStatements = []string{
 		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
 	)`,
 }
+var db *sql.DB
 
 func createAndOpenDB() {
 	var err error

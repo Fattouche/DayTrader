@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 
 	pb "./protobuff"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -20,23 +18,6 @@ import (
 
 // This server implements the protobuff Node type
 type server struct{}
-
-type cacheInterface interface {
-	setCache(key string, val interface{}) error
-	getCacheStock(key string) (*Stock, error)
-	getCacheUser(key string) (*User, error)
-}
-
-type dbInterface interface {
-	Exec(query string, args ...interface{}) (sql.Result, error)
-	QueryRow(query string, args ...interface{}) *sql.Row
-	Query(query string, args ...interface{}) (*sql.Rows, error)
-	SetConnMaxLifetime(d time.Duration)
-	SetMaxIdleConns(n int)
-}
-
-var c cacheInterface
-var db dbInterface
 
 var (
 	GRPC_PORT  = ":41000"
@@ -61,13 +42,7 @@ func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.Response, error)
 func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
 	buy, err := createBuy(req.Amount, req.Symbol, user.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	user.BuyStack = append(user.BuyStack, buy)
-	c.setCache(user.Id, user)
-	return &pb.Response{Message: toString(buy)}, nil
+	return &pb.Response{Message: toString(buy)}, err
 }
 
 func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -85,7 +60,7 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error
 		return nil, err
 	}
 	user.SellStack = append(user.SellStack, sell)
-	c.setCache(user.Id, user)
+	setCache(user.Id, user)
 	return &pb.Response{Message: toString(sell)}, nil
 }
 
@@ -95,7 +70,7 @@ func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, 
 	if buy == nil {
 		return nil, errors.New("No buy on the stack")
 	}
-	userStock, err := buy.commit()
+	userStock, err := buy.commit(false)
 	return &pb.Response{Message: toString(userStock)}, err
 }
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -104,7 +79,7 @@ func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response,
 	if sell == nil {
 		return nil, errors.New("No sell on the stack")
 	}
-	err := sell.commit()
+	err := sell.commit(false)
 	return &pb.Response{Message: toString(user)}, err
 }
 
@@ -154,7 +129,8 @@ func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Respons
 func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	trigger, err := getSellTrigger(req.UserId, req.Symbol)
 	if err != nil {
-		sell, err := createSell(req.Amount, req.Symbol, req.UserId)
+		sell := &Sell{StockSymbol: req.Symbol, UserId: req.UserId}
+		err = sell.updateCashAmount(req.Amount)
 		if err != nil {
 			return nil, err
 		}
@@ -167,7 +143,7 @@ func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Respon
 
 func (s *server) SetBuyTrigger(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	trigger, err := getBuyTrigger(req.UserId, req.Symbol)
-	if err != nil || !trigger.Active {
+	if err != nil {
 		return nil, errors.New("Trigger requires a buy amount first, please make one")
 	}
 	trigger.updatePrice(req.Amount)
@@ -176,7 +152,7 @@ func (s *server) SetBuyTrigger(ctx context.Context, req *pb.Command) (*pb.Respon
 
 func (s *server) SetSellTrigger(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	trigger, err := getSellTrigger(req.UserId, req.Symbol)
-	if err != nil || !trigger.Active {
+	if err != nil {
 		return nil, errors.New("Trigger requires a sell amount first, please make one")
 	}
 	trigger.updatePrice(req.Amount)
@@ -188,9 +164,6 @@ func (s *server) CancelSetBuy(ctx context.Context, req *pb.Command) (*pb.Respons
 	if err != nil {
 		return nil, errors.New("Set buy not found")
 	}
-	if !trigger.Active {
-		return nil, fmt.Errorf("No active trigger found for set_buy corresponding to %s", req.Symbol)
-	}
 	trigger.cancel()
 	return &pb.Response{Message: "Disabling trigger"}, nil
 }
@@ -199,9 +172,6 @@ func (s *server) CancelSetSell(ctx context.Context, req *pb.Command) (*pb.Respon
 	trigger, err := getSellTrigger(req.UserId, req.Symbol)
 	if err != nil {
 		return nil, errors.New("Set sell not found")
-	}
-	if !trigger.Active {
-		return nil, fmt.Errorf("No active trigger found for set_sell corresponding to %s", req.Symbol)
 	}
 	trigger.cancel()
 	return &pb.Response{Message: "Disabling trigger"}, nil
@@ -240,7 +210,7 @@ func watchTriggers() {
 
 func main() {
 	createAndOpenDB()
-	c = &cache{Client: memcache.New(CACHE_HOST + CACHE_PORT)}
+	initCache()
 	startGRPCServer()
 	go watchTriggers()
 }

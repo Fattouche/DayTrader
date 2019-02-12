@@ -25,25 +25,27 @@ func createBuy(intendedCashAmount float32, symbol, userID string) (*Buy, error) 
 		return nil, err
 	}
 	buy := &Buy{Price: stock.Price, StockSymbol: symbol, UserId: userID}
-	err = buy.updateCashAmount(intendedCashAmount)
+	user, err := buy.updateCashAmount(intendedCashAmount)
 	if err != nil {
 		return nil, err
 	}
 	buy.updatePrice(stock.Price)
 	buy.Timestamp = time.Now()
+	user.BuyStack = append(user.BuyStack, buy)
+	setCache(user.Id, user)
 	return buy, err
 }
 
-func (buy *Buy) updateCashAmount(amount float32) error {
+func (buy *Buy) updateCashAmount(amount float32) (*User, error) {
 	user := getUser(buy.UserId)
 	if amount > user.Balance {
 		msg := fmt.Sprintf("Not enough balance, have %f need %f", user.Balance, amount)
-		return errors.New(msg)
+		return nil, errors.New(msg)
 	}
-	updatedAmount := amount - buy.IntendedCashAmount
+	updatedAmount := buy.IntendedCashAmount - amount
 	user.updateUserBalance(updatedAmount)
 	buy.IntendedCashAmount = float32(math.Abs(float64(updatedAmount)))
-	return nil
+	return user, nil
 }
 
 func (buy *Buy) updatePrice(stockPrice float32) {
@@ -52,8 +54,13 @@ func (buy *Buy) updatePrice(stockPrice float32) {
 	buy.ActualCashAmount = float32(buy.StockBoughtAmount) * buy.Price
 }
 
-func (buy *Buy) commit() (*UserStock, error) {
-	_, err := buy.insertBuy()
+func (buy *Buy) commit(update bool) (*UserStock, error) {
+	var err error
+	if update {
+		err = buy.updateBuy()
+	} else {
+		_, err = buy.insertBuy()
+	}
 	userStock := getOrCreateUserStock(buy.UserId, buy.StockSymbol)
 	userStock.updateStockAmount(buy.StockBoughtAmount)
 	return userStock, err

@@ -1,0 +1,21 @@
+services:
+  web:
+   command: go test .
+   environment:
+    PYTHONUNBUFFERED: 1
+   build:
+     context: ../../images/web
+   volumes:
+   - ../../day_trader:/day_trader
+  cache:
+    image: memcached
+  db:
+    image: mysql
+    command: mysqld --max_allowed_packet=256M --max_connections=1024 --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: daytrader
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+    - '3307:3306'
+
+version: '3.6'
