@@ -11,17 +11,17 @@ message command{
 }
 
 message log{
-    string log_type = 1;
-    string timestamp = 2;
-    string server_name = 3;
-    int32 transaction_id = 4;
-    string username = 5;
-    string stock_symbol = 6;
+    string command = 1;
+    string server_name = 2;
+    int32 transaction_num = 3;
+    string username = 4;
+    string stock_symbol = 5;
+    float price = 6;
     float funds = 7;
     string filename = 8;
     string crypto_key = 9;
     int32 quote_server_time = 10;
-    string action = 11;
+    string account_action = 11;
     string error_message = 12;
     string debug_message = 13;
 }
