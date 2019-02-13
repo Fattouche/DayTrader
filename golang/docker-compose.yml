@@ -35,6 +35,14 @@ services:
     ports:
       - '80:80'
       - '443:443'
+  logging:
+    build:
+      context: ./images/logging
+    # command:  go run .
+    ports: 
+      - '40000:40000'
+    volumes:
+      - ./logging:/go/src/logging
 
 networks:
   default:
