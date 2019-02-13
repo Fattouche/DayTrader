@@ -1,7 +1,8 @@
 #!/bin/bash
 
 cd day_trader
-easyjson -all main.go
+#If you change the schema you need to run this
+#easyjson -all main.go  
 
 bash /startup/wait-for-it.sh db:3306 --timeout=300
 
