@@ -6,7 +6,7 @@ services:
    build:
      context: ../../images/web
    volumes:
-   - ../../day_trader:/day_trader
+   - ../../day_trader:/go/src/day_trader
   cache:
     image: memcached
   db:

@@ -118,7 +118,7 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error
 		return nil, err
 	}
 	user.SellStack = append(user.SellStack, sell)
-	setCache(user.Id, user)
+	user.setCache()
 	return &pb.Response{Message: sell.toString()}, nil
 }
 

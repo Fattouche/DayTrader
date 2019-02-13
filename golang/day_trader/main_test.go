@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"os"
-	"strings"
 	"testing"
 	"time"
 )
@@ -14,7 +13,7 @@ func TestMain(m *testing.M) {
 	initCache()
 	createUser(userId)
 	stock := &Stock{Symbol: symbol, Price: quotePrice, Hash: hash, TimeStamp: time.Now()}
-	setCache(stock.Symbol, stock)
+	stock.setCache()
 	os.Exit(m.Run())
 }
 
@@ -23,19 +22,23 @@ func TestQuote(t *testing.T) {
 	if err != nil {
 		t.Error("TestQuote got unexpected error: ", err)
 	}
-	if !strings.Contains(resp.Message, hash) {
-		t.Errorf("TestQuote %v didnt contain %v", resp.Message, hash)
+	stock := &Stock{}
+	stock.UnmarshalJSON([]byte(resp.Message))
+	if stock.Hash != hash {
+		t.Errorf("TestQuote Expected Hash to be %v but was %v", hash, stock.Hash)
+	}
+	if stock.Price != quotePrice {
+		t.Errorf("TestQuote Expected Price to be %v but was %v", quotePrice, stock.Price)
+	}
+	if stock.Symbol != symbol {
+		t.Errorf("TestQuote Expected Symbol to be %v but was %v", symbol, stock.Symbol)
 	}
 }
 
 func TestAdd(t *testing.T) {
-	resp, err := s.Add(context.Background(), genGrpcRequest("ADD"))
-	exp := &User{Balance: amount, Id: userId, BuyStack: []*Buy{}, SellStack: []*Sell{}}
+	_, err := s.Add(context.Background(), genGrpcRequest("ADD"))
 	if err != nil {
 		t.Error("TestAdd got unexpected error: ", err)
-	}
-	if resp.Message != toString(exp) {
-		t.Errorf("TestAdd got %v wanted %v", resp.Message, toString(exp))
 	}
 	var balance float32
 	db.QueryRow("SELECT Balance from User where Id=?", userId).Scan(&balance)

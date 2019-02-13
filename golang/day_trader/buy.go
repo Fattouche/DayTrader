@@ -29,7 +29,7 @@ func createBuy(intendedCashAmount float32, symbol, userID string) (*Buy, error) 
 	buy.updatePrice(stock.Price)
 	buy.Timestamp = time.Now()
 	user.BuyStack = append(user.BuyStack, buy)
-	setCache(user.Id, user)
+	user.setCache()
 	return buy, err
 }
 

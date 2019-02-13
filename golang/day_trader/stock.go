@@ -23,7 +23,7 @@ func quote(userID, symbol string) (*Stock, error) {
 		stock = &Stock{Symbol: symbol}
 		stock.Price, stock.Hash, err = executeRequest(userID, symbol)
 		stock.TimeStamp = time.Now()
-		setCache(stock.Symbol, stock)
+		stock.setCache()
 		return stock, err
 	}
 	return stock, err

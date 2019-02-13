@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 )
 
@@ -17,4 +19,9 @@ var name = "tester"
 func genGrpcRequest(name string) *pb.Command {
 	req := &pb.Command{UserId: userId, Symbol: symbol, Amount: amount, TransactionId: transactionId, Name: name, Filename: filename}
 	return req
+}
+
+func toString(msg interface{}) string {
+	bytes, _ := json.Marshal(msg)
+	return string(bytes)
 }

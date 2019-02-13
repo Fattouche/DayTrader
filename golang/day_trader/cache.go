@@ -10,16 +10,19 @@ func initCache() {
 	cache = memcache.New("cache:11211")
 }
 
-func setCache(key string, val interface{}) error {
-	var bytes []byte
-	if user, ok := val.(*User); ok {
-		bytes, _ = user.MarshalJSON()
-	}
-	if stock, ok := val.(*Stock); ok {
-		bytes, _ = stock.MarshalJSON()
-	}
+func (user *User) setCache() error {
+	bytes, _ := user.MarshalJSON()
 	item := &memcache.Item{
-		Key:   key,
+		Key:   user.Id,
+		Value: bytes,
+	}
+	return cache.Set(item)
+}
+
+func (stock *Stock) setCache() error {
+	bytes, _ := stock.MarshalJSON()
+	item := &memcache.Item{
+		Key:   stock.Symbol,
 		Value: bytes,
 	}
 	return cache.Set(item)
@@ -36,7 +39,7 @@ func getCacheStock(key string) (*Stock, error) {
 }
 
 func getCacheUser(key string) (*User, error) {
-	user := &User{}
+	user := &User{Id: key}
 	item, err := cache.Get(key)
 	if err != nil {
 		return user, err
