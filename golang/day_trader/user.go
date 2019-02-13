@@ -1,11 +1,11 @@
 package main
 
-type User struct {
-	Balance   float32
-	Name      string
-	Id        string
-	BuyStack  []*Buy
-	SellStack []*Sell
+func (user *User) toString() string {
+	if user == nil {
+		return ""
+	}
+	bytes, _ := user.MarshalJSON()
+	return string(bytes)
 }
 
 func (user *User) popFromBuyStack() *Buy {
@@ -14,7 +14,7 @@ func (user *User) popFromBuyStack() *Buy {
 	}
 	buy := user.BuyStack[len(user.BuyStack)-1]
 	user.BuyStack = user.BuyStack[:len(user.BuyStack)-1]
-	setCache(user.Id, user)
+	user.setCache()
 	return buy
 }
 
@@ -24,7 +24,7 @@ func (user *User) popFromSellStack() *Sell {
 	}
 	sell := user.SellStack[len(user.SellStack)-1]
 	user.SellStack = user.SellStack[:len(user.SellStack)-1]
-	setCache(user.Id, user)
+	user.setCache()
 	return sell
 }
 
@@ -34,7 +34,7 @@ func getUser(userID string) *User {
 		db.QueryRow("SELECT Balance from User where Id=?", user.Id).Scan(&user.Balance)
 		user.SellStack = make([]*Sell, 0)
 		user.BuyStack = make([]*Buy, 0)
-		setCache(userID, user)
+		user.setCache()
 	}
 	return user
 }
@@ -50,6 +50,6 @@ func (user *User) updateUserBalance(amount float32) (*User, error) {
 	if err != nil {
 		return user, err
 	}
-	setCache(user.Id, user)
+	user.setCache()
 	return user, nil
 }

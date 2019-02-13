@@ -8,8 +8,9 @@ services:
      context: ./images/web
    ports:
    - '41000'
+   - '6060:6060'
    volumes:
-   - ./day_trader:/day_trader
+   - ./day_trader:/go/src/day_trader
   cache:
     container_name: day_trader_cache
     image: memcached

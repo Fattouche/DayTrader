@@ -7,15 +7,12 @@ import (
 	"time"
 )
 
-type Sell struct {
-	Id                 int64
-	Price              float32
-	StockSymbol        string
-	IntendedCashAmount float32
-	ActualCashAmount   float32
-	StockSoldAmount    int
-	UserId             string
-	Timestamp          time.Time
+func (sell *Sell) toString() string {
+	if sell == nil {
+		return ""
+	}
+	bytes, _ := sell.MarshalJSON()
+	return string(bytes)
 }
 
 func createSell(intendedCashAmount float32, symbol, userID string) (*Sell, error) {

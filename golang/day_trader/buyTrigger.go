@@ -5,10 +5,12 @@ import (
 	"log"
 )
 
-type BuyTrigger struct {
-	UserId string
-	BuyId  int64
-	Active bool
+func (trigger *BuyTrigger) toString() string {
+	if trigger == nil {
+		return ""
+	}
+	bytes, _ := trigger.MarshalJSON()
+	return string(bytes)
 }
 
 func getBuyTrigger(userID, symbol string) (*BuyTrigger, error) {

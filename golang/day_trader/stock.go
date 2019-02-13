@@ -8,11 +8,12 @@ import (
 	"time"
 )
 
-type Stock struct {
-	Symbol    string
-	Price     float32
-	Hash      string
-	TimeStamp time.Time
+func (stock *Stock) toString() string {
+	if stock == nil {
+		return ""
+	}
+	bytes, _ := stock.MarshalJSON()
+	return string(bytes)
 }
 
 func quote(userID, symbol string) (*Stock, error) {
@@ -22,7 +23,7 @@ func quote(userID, symbol string) (*Stock, error) {
 		stock = &Stock{Symbol: symbol}
 		stock.Price, stock.Hash, err = executeRequest(userID, symbol)
 		stock.TimeStamp = time.Now()
-		setCache(stock.Symbol, stock)
+		stock.setCache()
 		return stock, err
 	}
 	return stock, err

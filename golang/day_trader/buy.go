@@ -8,15 +8,12 @@ import (
 	"time"
 )
 
-type Buy struct {
-	Id                 int64
-	Price              float32
-	StockSymbol        string
-	IntendedCashAmount float32
-	ActualCashAmount   float32
-	StockBoughtAmount  int
-	UserId             string
-	Timestamp          time.Time
+func (buy *Buy) toString() string {
+	if buy == nil {
+		return ""
+	}
+	bytes, _ := buy.MarshalJSON()
+	return string(bytes)
 }
 
 func createBuy(intendedCashAmount float32, symbol, userID string) (*Buy, error) {
@@ -32,7 +29,7 @@ func createBuy(intendedCashAmount float32, symbol, userID string) (*Buy, error) 
 	buy.updatePrice(stock.Price)
 	buy.Timestamp = time.Now()
 	user.BuyStack = append(user.BuyStack, buy)
-	setCache(user.Id, user)
+	user.setCache()
 	return buy, err
 }
 

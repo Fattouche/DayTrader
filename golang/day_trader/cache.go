@@ -1,9 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
-
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -13,26 +10,32 @@ func initCache() {
 	cache = memcache.New("cache:11211")
 }
 
-func setCache(key string, val interface{}) error {
-	bytes, err := json.Marshal(val)
-	if err != nil {
-		log.Println("Error converting value to byte array")
-	}
+func (user *User) setCache() error {
+	bytes, _ := user.MarshalJSON()
 	item := &memcache.Item{
-		Key:   key,
+		Key:   user.Id,
+		Value: bytes,
+	}
+	return cache.Set(item)
+}
+
+func (stock *Stock) setCache() error {
+	bytes, _ := stock.MarshalJSON()
+	item := &memcache.Item{
+		Key:   stock.Symbol,
 		Value: bytes,
 	}
 	return cache.Set(item)
 }
 
 func getCacheStock(key string) (*Stock, error) {
-	var stock Stock
+	stock := &Stock{}
 	item, err := cache.Get(key)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(item.Value, &stock)
-	return &stock, err
+	err = stock.UnmarshalJSON(item.Value)
+	return stock, err
 }
 
 func getCacheUser(key string) (*User, error) {
@@ -41,6 +44,6 @@ func getCacheUser(key string) (*User, error) {
 	if err != nil {
 		return user, err
 	}
-	err = json.Unmarshal(item.Value, user)
+	err = user.UnmarshalJSON(item.Value)
 	return user, err
 }
