@@ -3,7 +3,7 @@ FROM golang
 WORKDIR /startup
 COPY . /startup
 
-RUN go get github.com/bradfitz/gomemcache/memcache
+RUN go get github.com/rainycape/memcache
 RUN go get github.com/go-sql-driver/mysql
 RUN go get google.golang.org/grpc
 RUN go get google.golang.org/grpc/reflection

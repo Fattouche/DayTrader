@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/rainycape/memcache"
 )
 
 var cache *memcache.Client
 
 func initCache() {
-	cache = memcache.New("cache:11211")
+	cache, _ = memcache.New("cache:11211")
 }
 
 func (user *User) setCache() error {
