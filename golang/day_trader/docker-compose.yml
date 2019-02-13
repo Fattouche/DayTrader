@@ -10,7 +10,7 @@ services:
    - '41000'
    - '6060:6060'
    volumes:
-   - ./day_trader:/go/src/day_trader
+   - ./src:/go/src/day_trader
   cache:
     container_name: day_trader_cache
     image: memcached
@@ -29,20 +29,12 @@ services:
     build:
       context: ./images/nginx
     command: /service/entrypoint.sh
-    container_name: daytraderlb
+    container_name: day_trader_lb
     volumes:
       - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - '80:80'
       - '443:443'
-  logging:
-    build:
-      context: ./images/logging
-    # command:  go run .
-    ports: 
-      - '40000:40000'
-    volumes:
-      - ./logging:/go/src/logging
 
 networks:
   default:
