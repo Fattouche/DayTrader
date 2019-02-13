@@ -1,13 +1,5 @@
 package main
 
-type User struct {
-	Balance   float32
-	Name      string
-	Id        string
-	BuyStack  []*Buy
-	SellStack []*Sell
-}
-
 func (user *User) popFromBuyStack() *Buy {
 	if len(user.BuyStack) == 0 {
 		return nil

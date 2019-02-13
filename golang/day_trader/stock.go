@@ -8,13 +8,6 @@ import (
 	"time"
 )
 
-type Stock struct {
-	Symbol    string
-	Price     float32
-	Hash      string
-	TimeStamp time.Time
-}
-
 func quote(userID, symbol string) (*Stock, error) {
 	stock, err := getCacheStock(symbol)
 	if err != nil || (stock != nil && stock.isExpired()) {

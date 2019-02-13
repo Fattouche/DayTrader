@@ -8,17 +8,6 @@ import (
 	"time"
 )
 
-type Buy struct {
-	Id                 int64
-	Price              float32
-	StockSymbol        string
-	IntendedCashAmount float32
-	ActualCashAmount   float32
-	StockBoughtAmount  int
-	UserId             string
-	Timestamp          time.Time
-}
-
 func createBuy(intendedCashAmount float32, symbol, userID string) (*Buy, error) {
 	stock, err := quote(userID, symbol)
 	if err != nil {

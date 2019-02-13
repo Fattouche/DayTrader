@@ -7,17 +7,6 @@ import (
 	"time"
 )
 
-type Sell struct {
-	Id                 int64
-	Price              float32
-	StockSymbol        string
-	IntendedCashAmount float32
-	ActualCashAmount   float32
-	StockSoldAmount    int
-	UserId             string
-	Timestamp          time.Time
-}
-
 func createSell(intendedCashAmount float32, symbol, userID string) (*Sell, error) {
 	stock, err := quote(userID, symbol)
 	if err != nil {
