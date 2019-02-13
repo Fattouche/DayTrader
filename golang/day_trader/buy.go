@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+func (buy *Buy) toString() string {
+	if buy == nil {
+		return ""
+	}
+	bytes, _ := buy.MarshalJSON()
+	return string(bytes)
+}
+
 func createBuy(intendedCashAmount float32, symbol, userID string) (*Buy, error) {
 	stock, err := quote(userID, symbol)
 	if err != nil {

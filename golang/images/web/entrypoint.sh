@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd day_trader
-easyjson -all cache.go
+easyjson -all main.go
 
 bash /startup/wait-for-it.sh db:3306 --timeout=300
 

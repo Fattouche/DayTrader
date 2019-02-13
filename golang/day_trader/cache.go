@@ -1,51 +1,8 @@
 package main
 
 import (
-	"time"
-
 	"github.com/bradfitz/gomemcache/memcache"
 )
-
-//easyjson:json
-type Stock struct {
-	Symbol    string
-	Price     float32
-	Hash      string
-	TimeStamp time.Time
-}
-
-//easyjson:json
-type User struct {
-	Balance   float32
-	Name      string
-	Id        string
-	BuyStack  []*Buy
-	SellStack []*Sell
-}
-
-//easyjson:json
-type Buy struct {
-	Id                 int64
-	Price              float32
-	StockSymbol        string
-	IntendedCashAmount float32
-	ActualCashAmount   float32
-	StockBoughtAmount  int
-	UserId             string
-	Timestamp          time.Time
-}
-
-//easyjson:json
-type Sell struct {
-	Id                 int64
-	Price              float32
-	StockSymbol        string
-	IntendedCashAmount float32
-	ActualCashAmount   float32
-	StockSoldAmount    int
-	UserId             string
-	Timestamp          time.Time
-}
 
 var cache *memcache.Client
 

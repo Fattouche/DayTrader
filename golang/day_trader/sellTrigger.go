@@ -5,10 +5,12 @@ import (
 	"log"
 )
 
-type SellTrigger struct {
-	UserId string
-	SellId int64
-	Active bool
+func (trigger *SellTrigger) toString() string {
+	if trigger == nil {
+		return ""
+	}
+	bytes, _ := trigger.MarshalJSON()
+	return string(bytes)
 }
 
 func (trigger *SellTrigger) updateCashAmount(amount float32) error {

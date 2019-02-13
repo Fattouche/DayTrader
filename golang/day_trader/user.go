@@ -1,5 +1,13 @@
 package main
 
+func (user *User) toString() string {
+	if user == nil {
+		return ""
+	}
+	bytes, _ := user.MarshalJSON()
+	return string(bytes)
+}
+
 func (user *User) popFromBuyStack() *Buy {
 	if len(user.BuyStack) == 0 {
 		return nil

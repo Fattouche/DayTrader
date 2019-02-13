@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+func (stock *Stock) toString() string {
+	if stock == nil {
+		return ""
+	}
+	bytes, _ := stock.MarshalJSON()
+	return string(bytes)
+}
+
 func quote(userID, symbol string) (*Stock, error) {
 	stock, err := getCacheStock(symbol)
 	if err != nil || (stock != nil && stock.isExpired()) {

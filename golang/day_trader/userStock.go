@@ -1,9 +1,11 @@
 package main
 
-type UserStock struct {
-	UserId      string
-	StockSymbol string
-	Amount      int
+func (userStock *UserStock) toString() string {
+	if userStock == nil {
+		return ""
+	}
+	bytes, _ := userStock.MarshalJSON()
+	return string(bytes)
 }
 
 func getOrCreateUserStock(userID, symbol string) *UserStock {

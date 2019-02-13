@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -18,6 +17,68 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+//easyjson:json
+type Stock struct {
+	Symbol    string
+	Price     float32
+	Hash      string
+	TimeStamp time.Time
+}
+
+//easyjson:json
+type User struct {
+	Balance   float32
+	Name      string
+	Id        string
+	BuyStack  []*Buy
+	SellStack []*Sell
+}
+
+//easyjson:json
+type Buy struct {
+	Id                 int64
+	Price              float32
+	StockSymbol        string
+	IntendedCashAmount float32
+	ActualCashAmount   float32
+	StockBoughtAmount  int
+	UserId             string
+	Timestamp          time.Time
+}
+
+//easyjson:json
+type Sell struct {
+	Id                 int64
+	Price              float32
+	StockSymbol        string
+	IntendedCashAmount float32
+	ActualCashAmount   float32
+	StockSoldAmount    int
+	UserId             string
+	Timestamp          time.Time
+}
+
+//easyjson:json
+type BuyTrigger struct {
+	UserId string
+	BuyId  int64
+	Active bool
+}
+
+//easyjson:json
+type SellTrigger struct {
+	UserId string
+	SellId int64
+	Active bool
+}
+
+//easyjson:json
+type UserStock struct {
+	UserId      string
+	StockSymbol string
+	Amount      int
+}
+
 // This server implements the protobuff Node type
 type server struct{}
 
@@ -30,21 +91,16 @@ var (
 	CACHE_PORT = ":11211"
 )
 
-func toString(msg interface{}) string {
-	bytes, _ := json.Marshal(msg)
-	return string(bytes)
-}
-
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
 	user.updateUserBalance(req.Amount)
-	return &pb.Response{Message: toString(user)}, nil
+	return &pb.Response{Message: user.toString()}, nil
 }
 
 func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
 	buy, err := createBuy(req.Amount, req.Symbol, user.Id)
-	return &pb.Response{Message: toString(buy)}, err
+	return &pb.Response{Message: buy.toString()}, err
 }
 
 func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -52,7 +108,7 @@ func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.Response, erro
 	if err != nil {
 		return nil, err
 	}
-	return &pb.Response{Message: toString(stock)}, nil
+	return &pb.Response{Message: stock.toString()}, nil
 }
 
 func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -63,7 +119,7 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error
 	}
 	user.SellStack = append(user.SellStack, sell)
 	setCache(user.Id, user)
-	return &pb.Response{Message: toString(sell)}, nil
+	return &pb.Response{Message: sell.toString()}, nil
 }
 
 func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -73,7 +129,7 @@ func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, 
 		return nil, errors.New("No buy on the stack")
 	}
 	userStock, err := buy.commit(false)
-	return &pb.Response{Message: toString(userStock)}, err
+	return &pb.Response{Message: userStock.toString()}, err
 }
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
@@ -82,7 +138,7 @@ func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response,
 		return nil, errors.New("No sell on the stack")
 	}
 	err := sell.commit(false)
-	return &pb.Response{Message: toString(user)}, err
+	return &pb.Response{Message: user.toString()}, err
 }
 
 func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -93,7 +149,7 @@ func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.Response, 
 	} else {
 		return nil, errors.New("No buy on stack")
 	}
-	return &pb.Response{Message: toString(user)}, nil
+	return &pb.Response{Message: user.toString()}, nil
 }
 
 func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -104,7 +160,7 @@ func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.Response,
 	} else {
 		return nil, errors.New("No sell on stack")
 	}
-	return &pb.Response{Message: toString(user)}, nil
+	return &pb.Response{Message: user.toString()}, nil
 }
 
 func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -123,9 +179,9 @@ func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Respons
 			log.Println(err)
 		}
 		trigger := createBuyTrigger(user.Id, req.Symbol, buy.Id, req.Amount)
-		return &pb.Response{Message: toString(trigger)}, nil
+		return &pb.Response{Message: trigger.toString()}, nil
 	}
-	return &pb.Response{Message: toString(trigger)}, trigger.updateCashAmount(req.Amount)
+	return &pb.Response{Message: trigger.toString()}, trigger.updateCashAmount(req.Amount)
 }
 
 func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -138,9 +194,9 @@ func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Respon
 		}
 		sell.insertSell()
 		trigger := createSellTrigger(req.UserId, req.Symbol, sell.Id, req.Amount)
-		return &pb.Response{Message: toString(trigger)}, nil
+		return &pb.Response{Message: trigger.toString()}, nil
 	}
-	return &pb.Response{Message: toString(trigger)}, trigger.updateCashAmount(req.Amount)
+	return &pb.Response{Message: trigger.toString()}, trigger.updateCashAmount(req.Amount)
 }
 
 func (s *server) SetBuyTrigger(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -149,7 +205,7 @@ func (s *server) SetBuyTrigger(ctx context.Context, req *pb.Command) (*pb.Respon
 		return nil, errors.New("Trigger requires a buy amount first, please make one")
 	}
 	trigger.updatePrice(req.Amount)
-	return &pb.Response{Message: toString(trigger)}, nil
+	return &pb.Response{Message: trigger.toString()}, nil
 }
 
 func (s *server) SetSellTrigger(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -158,7 +214,7 @@ func (s *server) SetSellTrigger(ctx context.Context, req *pb.Command) (*pb.Respo
 		return nil, errors.New("Trigger requires a sell amount first, please make one")
 	}
 	trigger.updatePrice(req.Amount)
-	return &pb.Response{Message: toString(trigger)}, nil
+	return &pb.Response{Message: trigger.toString()}, nil
 }
 
 func (s *server) CancelSetBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
