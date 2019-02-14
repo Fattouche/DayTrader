@@ -1,15 +1,15 @@
 services:
-  web:
+  daytrader_web:
    command: go test .
    environment:
     PYTHONUNBUFFERED: 1
    build:
      context: ../images/web
    volumes:
-   - ../src/day_trader:/go/src/day_trader
-  cache:
+   - ../src/:/go/src/day_trader
+  daytrader_cache:
     image: memcached
-  db:
+  daytrader_db:
     image: mysql
     command: mysqld --max_allowed_packet=256M --max_connections=1024 --default-authentication-plugin=mysql_native_password
     environment:
