@@ -20,7 +20,7 @@ message log{
     float funds = 7;
     string filename = 8;
     string crypto_key = 9;
-    int32 quote_server_time = 10;
+    int64 quote_server_time = 10;
     string account_action = 11;
     string error_message = 12;
     string debug_message = 13;
