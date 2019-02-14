@@ -21,27 +21,15 @@ var (
 )
 
 func LogBase(ctx context.Context, req *pb.Log) int {
-	// Need to establish a connection, so that we can faithfully retrieve the ID
-	connection, errCon := db.Conn(ctx)
-	if errCon != nil {
-		log.Println(errCon)
+	res, err := db.Exec("INSERT INTO BaseLog(LogType, Server, TransactionNum) VALUES(?,?,?)", "userCommand", req.ServerName, req.TransactionNum)
+	if err != nil {
+		log.Println(err)
 	}
-	_, errExec := connection.ExecContext(ctx,
-		"INSERT INTO BaseLog(LogType, Server, TransactionNum) VALUES(?,?,?)",
-		"userCommand", req.ServerName, req.TransactionNum,
-	)
-	if errExec != nil {
-		log.Println(errExec)
+	id, err := res.LastInsertId()
+	if err != nil {
+		log.Println(err)
 	}
-	row := connection.QueryRowContext(ctx,
-		"SELECT LAST_INSERT_ID()",
-	)
-	var logID int
-	errScan := row.Scan(&logID)
-	if errScan != nil {
-		log.Println(errScan)
-	}
-	return logID
+	return int(id)
 }
 
 func (s *server) LogUserCommand(ctx context.Context, req *pb.Log) (*pb.Response, error) {
