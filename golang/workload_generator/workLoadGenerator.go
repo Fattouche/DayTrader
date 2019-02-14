@@ -176,7 +176,7 @@ func makeDumpRequest() {
 
 func main() {
 	fileName := flag.String("f", "./workload_files/45_user_workload.workload", "The name of the workload file")
-	tempBaseURL := flag.String("url", "daytraderlb:80", "The url of the web server")
+	tempBaseURL := flag.String("url", "daytrader_lb:80", "The url of the web server")
 	flag.Parse()
 	baseURL = *tempBaseURL
 	parseCommands(*fileName)
