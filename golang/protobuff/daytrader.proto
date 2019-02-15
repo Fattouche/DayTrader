@@ -26,13 +26,18 @@ message log{
     string debug_message = 13;
 }
 
+message dumplog_user{
+    string user_id=1;
+}
+
 service Logger{
     rpc LogUserCommand(log) returns (Response){} 
     rpc LogQuoteServerEvent(log) returns (Response){} 
     rpc LogAccountTransaction(log) returns (Response){} 
     rpc LogSystemEvent(log) returns (Response){} 
     rpc LogErrorEvent(log) returns (Response){} 
-    rpc LogDebugEvent(log) returns (Response){} 
+    rpc LogDebugEvent(log) returns (Response){}
+    rpc DumpLogs(dumplog_user) returns (Response){} 
 }
 
 message Response{
@@ -40,6 +45,7 @@ message Response{
 }
 
 service DayTrader{
+    rpc CreateUser(command) returns(Response){}
     rpc Add(command) returns(Response) {}
     rpc Quote(command) returns(Response) {}
     rpc Buy(command) returns(Response) {}
