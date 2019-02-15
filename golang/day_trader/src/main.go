@@ -91,6 +91,11 @@ var (
 	CACHE_PORT = ":11211"
 )
 
+func (s *server) CreateUser(ctx context.Context, req *pb.Command) (*pb.Response, error) {
+	createUser(req.UserId)
+	return &pb.Response{Message: "Created user with id" + req.UserId}, nil
+}
+
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
 	user.updateUserBalance(ctx, req.Amount)
