@@ -21,7 +21,7 @@ var createTableStatements = []string{
 		Username VARCHAR(32),
 		StockSymbol VARCHAR(3),
 		Filename VARCHAR(255),
-		Funds DECIMAL(32, 2),
+		Funds DECIMAL(32, 2)
 	)`,
 	`CREATE TABLE IF NOT EXISTS QuoteServerLog(
 		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -31,7 +31,7 @@ var createTableStatements = []string{
 		StockSymbol VARCHAR(3) NOT NULL,
 		Username VARCHAR(32) NOT NULL,
 		QuoteServerTime BIGINT NOT NULL,
-		CryptoKey VARCHAR(128) NOT NULL,
+		CryptoKey VARCHAR(128) NOT NULL
 	)`,
 	`CREATE TABLE IF NOT EXISTS AccountTransactionLog(
 		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -39,7 +39,7 @@ var createTableStatements = []string{
 		TransactionNum BIGINT NOT NULL,
 		Action VARCHAR(32) NOT NULL,
 		Username VARCHAR(32) NOT NULL,
-		Funds DECIMAL(32, 2) NOT NULL,
+		Funds DECIMAL(32, 2) NOT NULL
 	)`,
 	`CREATE TABLE IF NOT EXISTS SystemEventLog(
 		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,7 +49,7 @@ var createTableStatements = []string{
 		Username VARCHAR(32),
 		StockSymbol VARCHAR(3),
 		Filename VARCHAR(255),
-		Funds DECIMAL(32, 2),
+		Funds DECIMAL(32, 2)
 	)`,
 	`CREATE TABLE IF NOT EXISTS ErrorEventLog(
 		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -60,7 +60,7 @@ var createTableStatements = []string{
 		StockSymbol VARCHAR(3),
 		Filename VARCHAR(255),
 		Funds DECIMAL(32, 2),
-		ErrorMessage TINYTEXT,
+		ErrorMessage TINYTEXT
 	)`,
 	`CREATE TABLE IF NOT EXISTS DebugEventLog(
 		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -71,7 +71,7 @@ var createTableStatements = []string{
 		StockSymbol VARCHAR(3),
 		Filename VARCHAR(255),
 		Funds DECIMAL(32, 2),
-		DebugMessage TINYTEXT,
+		DebugMessage TINYTEXT
 	)`,
 }
 

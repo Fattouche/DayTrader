@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/xml"
 	"log"
 	"net"
+	"os"
+	"path/filepath"
 
 	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 
@@ -98,6 +101,69 @@ func (s *server) LogDebugEvent(ctx context.Context, req *pb.Log) (*pb.Response, 
 		log.Println(err)
 	}
 	return &pb.Response{Message: "Inserted"}, err
+}
+
+type UserCommandLog struct {
+	XMLName        xml.Name `xml:"userCommand"`
+	Timestamp      int64    `xml:"timestamp"`
+	Server         string   `xml:"server"`
+	TransactionNum int      `xml:"transactionNum"`
+	Command        string   `xml:"command"`
+	Username       string   `xml:"username"`
+	StockSymbol    string   `xml:"stockSymbol"`
+	Filename       string   `xml:"filename"`
+	Funds          float32  `xml:"funds"`
+}
+
+func dumpLogsToXML(userID string, filename string) {
+	userFilter := "*"
+	if userID != "" {
+		userFilter = userID
+	}
+
+	executable, err := os.Executable()
+	if err != nil {
+		log.Println("Error getting executable: ", err)
+	}
+	currDir := filepath.Dir(executable)
+	sanitizedFilename := filepath.Join(currDir, "dumplogs", filepath.Clean(filename))
+	f, err := os.Create(sanitizedFilename)
+	if err != nil {
+		log.Println("Error scanning trigger: ", err)
+	}
+	defer f.Close()
+
+	f.WriteString("<?xml version=\"1.0\"?>\n")
+	f.WriteString("<log>\n")
+
+	rows, err := db.Query("SELECT * FROM UserCommandLog WHERE Username = ?",
+		userFilter)
+	for rows.Next() {
+		xmlLog := &UserCommandLog{}
+		err = rows.Scan(
+			&xmlLog.Timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
+			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
+			&xmlLog.Filename, &xmlLog.Funds,
+		)
+		if err != nil {
+			log.Println("Error scanning trigger: ", err)
+		}
+		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
+		if err != nil {
+			log.Println("Error marshalling to XML: ", err)
+		}
+		f.Write(output)
+		f.WriteString("\n")
+	}
+	rows.Close()
+
+	f.WriteString("</log>\n")
+}
+
+func (s *server) DumpLogs(ctx context.Context, req *pb.Command) (*pb.Response, error) {
+	go dumpLogsToXML(req.UserId, req.Filename)
+
+	return &pb.Response{Message: "Writing to XML"}, nil
 }
 
 func startGRPCServer() {
