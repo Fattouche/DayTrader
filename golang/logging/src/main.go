@@ -166,6 +166,10 @@ func (s *server) DumpLogs(ctx context.Context, req *pb.Command) (*pb.Response, e
 	return &pb.Response{Message: "Writing to XML"}, nil
 }
 
+func (s *server) DumpLogs(ctx context.Context, req *pb.Command) (*pb.Response, error) {
+	return &pb.Response{Message: "yee dump"}, nil
+}
+
 func startGRPCServer() {
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {

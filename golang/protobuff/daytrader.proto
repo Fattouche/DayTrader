@@ -41,6 +41,7 @@ message Response{
 }
 
 service DayTrader{
+    rpc CreateUser(command) returns(Response){}
     rpc Add(command) returns(Response) {}
     rpc Quote(command) returns(Response) {}
     rpc Buy(command) returns(Response) {}
