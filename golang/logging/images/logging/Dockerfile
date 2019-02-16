@@ -1,16 +1,5 @@
 FROM golang
 
-# ENV http_proxy 'http://192.168.1.1:3128'
-# ENV https_proxy 'https://192.168.1.1:3128'
-# COPY ./Engineering.crt /usr/local/share/ca-certificates/Engineering.crt
-# COPY ./Engineering.crt /etc/ca-certificates/Engineering.crt
-# RUN mkdir /usr/local/share/ca-certificates/engineering
-# COPY ./Engineering.crt /usr/local/share/ca-certificates/engineering/Engineering.crt
-# RUN update-ca-certificates 
-# RUN apk update && apk add --no-cache bash git
-# RUN git config --global http.proxy http://192.168.1.1:3128
-# RUN git config --global https.proxy https://192.168.1.1:3128
-
 WORKDIR /startup
 COPY . /startup
 
