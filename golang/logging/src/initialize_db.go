@@ -90,7 +90,9 @@ func createAndOpenDB() {
 			}
 		}
 	}
-	db, err = sql.Open("mysql", "root@tcp(logging_db:3306)/logging")
+	db, err = sql.Open(
+		"mysql", "root@tcp(logging_db:3306)/logging?parseTime=true",
+	)
 	if err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"strconv"
 	"strings"
@@ -34,8 +35,10 @@ func quote(ctx context.Context, userID, symbol string) (*Stock, error) {
 
 func logQuoteServerEvent(ctx context.Context, price float32, userID string,
 	symbol string, hash string, quoteServerTimestamp int64) error {
+	log.Println("We is logging quote server event")
 	pbLog, err := makeLogFromContext(ctx)
 	if err != nil {
+		log.Println("Error making log from context: ", err)
 		return err
 	}
 	pbLog.Price = price
@@ -43,7 +46,7 @@ func logQuoteServerEvent(ctx context.Context, price float32, userID string,
 	pbLog.Username = userID
 	pbLog.QuoteServerTime = quoteServerTimestamp
 	pbLog.CryptoKey = hash
-	logEvent := &logObj{log: &pbLog, funcName: "logQuoteServerEvent"}
+	logEvent := &logObj{log: &pbLog, funcName: "LogQuoteServerEvent"}
 	logChan <- logEvent
 	return nil
 }
