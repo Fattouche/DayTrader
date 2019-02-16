@@ -247,7 +247,16 @@ func (s *server) CancelSetSell(ctx context.Context, req *pb.Command) (*pb.Respon
 }
 
 func (s *server) DumpLog(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{Message: "yee"}, nil
+	conn, err := grpc.Dial(logUrl, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to dial to %s with %v", logUrl, err)
+	}
+	client := pb.NewLoggerClient(conn)
+	response, err := client.DumpLogs(ctx, req)
+	if err != nil {
+		log.Printf("Dumplog failed: ", err)
+	}
+	return response, err
 }
 
 func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.Response, error) {
