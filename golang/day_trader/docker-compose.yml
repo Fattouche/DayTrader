@@ -5,6 +5,7 @@ services:
     PYTHONUNBUFFERED: 1
    build:
      context: ./images/web
+     #dockerfile: Dockerfile-lab
    ports:
    - '41000'
    - '6060:6060'

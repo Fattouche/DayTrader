@@ -5,6 +5,7 @@ services:
     container_name: workload_generator
     build:
       context: .
+      #dockerfile: Dockerfile-lab
     volumes:
     - ./workLoadGenerator.go:/service/workLoadGenerator.go
     - ./workload_files:/service/workload_files

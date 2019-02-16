@@ -2,6 +2,7 @@ services:
   logging_server:
     build:
       context: ./images/logging
+      #dockerfile: Dockerfile-lab
     command:  go run .
     ports: 
       - '40000:40000'
