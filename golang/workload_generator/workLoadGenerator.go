@@ -41,6 +41,7 @@ var baseURL string
 var userMap = make(map[string][]*pb.Command)
 var dumpData *pb.Command
 var wg sync.WaitGroup
+var transactionNum = int32(1)
 
 func completeCall(command *pb.Command, client pb.DayTraderClient) {
 	ctx := context.Background()
@@ -98,7 +99,6 @@ func parseCommands(filename string) {
 
 	scanner := bufio.NewScanner(file)
 	var userID string
-	transactionNum := int32(1)
 	for scanner.Scan() {
 		totalCommand := strings.Split(scanner.Text(), " ")
 		userCommands := strings.Split(totalCommand[1], ",")
@@ -170,6 +170,7 @@ func makeDumpRequest() {
 	if err != nil {
 		log.Printf("Failed to dial to %s with %v", baseURL, err)
 	}
+	dumpData.TransactionId = transactionNum
 	client := pb.NewDayTraderClient(conn)
 	completeCall(dumpData, client)
 }
