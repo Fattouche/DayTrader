@@ -127,7 +127,7 @@ func dumpLogsToXML(userID string, filename string) {
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
 		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
 		if err != nil {
 			log.Println("Error marshalling to XML: ", err)
@@ -154,7 +154,7 @@ func dumpLogsToXML(userID string, filename string) {
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
 		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
 		if err != nil {
 			log.Println("Error marshalling to XML: ", err)
@@ -180,7 +180,7 @@ func dumpLogsToXML(userID string, filename string) {
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
 		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
 		if err != nil {
 			log.Println("Error marshalling to XML: ", err)
@@ -207,7 +207,7 @@ func dumpLogsToXML(userID string, filename string) {
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
 		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
 		if err != nil {
 			log.Println("Error marshalling to XML: ", err)
@@ -234,7 +234,7 @@ func dumpLogsToXML(userID string, filename string) {
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
 		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
 		if err != nil {
 			log.Println("Error marshalling to XML: ", err)
@@ -261,7 +261,7 @@ func dumpLogsToXML(userID string, filename string) {
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
 		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
 		if err != nil {
 			log.Println("Error marshalling to XML: ", err)
