@@ -19,6 +19,8 @@ RUN go get -insecure google.golang.org/grpc
 RUN go get -insecure google.golang.org/grpc/reflection
 RUN go get -insecure -u github.com/Fattouche/DayTrader/golang/protobuff
 
+ENV no_proxy '*'
+
 WORKDIR /go/src/logging
 
 ENTRYPOINT ["bash", "/startup/entrypoint.sh"]

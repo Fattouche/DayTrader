@@ -22,6 +22,8 @@ RUN go get -insecure -u github.com/Fattouche/DayTrader/golang/protobuff
 RUN go get -insecure github.com/pkg/profile
 RUN go get -insecure github.com/mailru/easyjson/...
 
+ENV no_proxy '*'
+
 WORKDIR /go/src/
 
 ENTRYPOINT ["bash", "/startup/entrypoint.sh"]
