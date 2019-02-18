@@ -107,7 +107,7 @@ func getRows(tableName, userID string) (*sql.Rows, error) {
 func dumpLogsToXML(userID string, filename string) {
 	// For final dumplog, do a wait to make sure all logs are in the DB
 	if userID == "" {
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Second * 5)
 	}
 
 	dumplogsDir := "/go/src/logging/dumplogs"
