@@ -8,7 +8,7 @@ services:
      #dockerfile: Dockerfile-lab
    ports:
    - '41000'
-   - '6060:6060'
+   - '6060'
    volumes:
    - ./src:/go/src/day_trader
   daytrader_cache:
@@ -23,12 +23,21 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     ports:
     - '3306:3306'
+  # daytrader_lb:
+  #     build:
+  #       context: ./images/nginx
+  #     command: /service/entrypoint.sh
+  #     volumes:
+  #       - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     ports:
+  #       - '80:80'
+  #       - '443:443'
   daytrader_lb:
     build:
-      context: ./images/nginx
+      context: ./images/envoy
     command: /service/entrypoint.sh
     volumes:
-      - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./images/envoy/envoy.yaml:/etc/envoy/envoy.yaml
     ports:
       - '80:80'
       - '443:443'
