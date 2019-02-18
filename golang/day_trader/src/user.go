@@ -73,6 +73,7 @@ func (user *User) updateUserBalance(ctx context.Context, amount float32, writeTh
 	if err != nil {
 		log.Println(err)
 	}
+	pbLog.Username = user.Id
 	pbLog.AccountAction = accountAction
 	pbLog.Funds = user.Balance
 	logEvent := &logObj{log: &pbLog, funcName: "LogAccountTransaction"}

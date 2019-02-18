@@ -29,7 +29,7 @@ func makeLogFromContext(ctx context.Context) (pb.Log, error) {
 	// This is needed because triggers can cause logs, which are run by a job
 	// rather than a transaction/user command
 	return pb.Log{
-		TransactionNum: -1,
+		TransactionNum: 1,
 		Username:       "__no_user__",
 		ServerName:     "Beaver_1", // TODO(cailan): use environment variable
 		Command:        "__no_command__",

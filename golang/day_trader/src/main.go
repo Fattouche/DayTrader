@@ -254,7 +254,7 @@ func (s *server) DumpLog(ctx context.Context, req *pb.Command) (*pb.Response, er
 	client := pb.NewLoggerClient(conn)
 	response, err := client.DumpLogs(ctx, req)
 	if err != nil {
-		log.Printf("Dumplog failed: ", err)
+		log.Println("Dumplog failed: ", err)
 	}
 	return response, err
 }
