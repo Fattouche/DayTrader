@@ -16,9 +16,9 @@ type userCommandLog struct {
 	TransactionNum int      `xml:"transactionNum"`
 	Command        string   `xml:"command"`
 	Username       string   `xml:"username,omitempty"`
-	StockSymbol    string   `xml:"stockSymbol"`
-	Filename       string   `xml:"filename"`
-	Funds          float32  `xml:"funds"`
+	StockSymbol    string   `xml:"stockSymbol,omitempty"`
+	Filename       string   `xml:"filename,omitempty"`
+	Funds          float32  `xml:"funds,omitempty"`
 }
 
 type quoteServerLog struct {
@@ -49,10 +49,10 @@ type systemEventLog struct {
 	Server         string   `xml:"server"`
 	TransactionNum int      `xml:"transactionNum"`
 	Command        string   `xml:"command"`
-	Username       string   `xml:"username"`
-	StockSymbol    string   `xml:"stockSymbol"`
-	Filename       string   `xml:"filename"`
-	Funds          float32  `xml:"funds"`
+	Username       string   `xml:"username,omitempty"`
+	StockSymbol    string   `xml:"stockSymbol,omitempty"`
+	Filename       string   `xml:"filename,omitempty"`
+	Funds          float32  `xml:"funds,omitempty"`
 }
 
 type errorEventLog struct {
@@ -61,11 +61,11 @@ type errorEventLog struct {
 	Server         string   `xml:"server"`
 	TransactionNum int      `xml:"transactionNum"`
 	Command        string   `xml:"command"`
-	Username       string   `xml:"username"`
-	StockSymbol    string   `xml:"stockSymbol"`
-	Filename       string   `xml:"filename"`
-	Funds          float32  `xml:"funds"`
-	ErrorMessage   string   `xml:"errorMessage"`
+	Username       string   `xml:"username,omitempty"`
+	StockSymbol    string   `xml:"stockSymbol,omitempty"`
+	Filename       string   `xml:"filename,omitempty"`
+	Funds          float32  `xml:"funds,omitempty"`
+	ErrorMessage   string   `xml:"errorMessage,omitempty"`
 }
 
 type debugEventLog struct {
@@ -74,11 +74,11 @@ type debugEventLog struct {
 	Server         string   `xml:"server"`
 	TransactionNum int      `xml:"transactionNum"`
 	Command        string   `xml:"command"`
-	Username       string   `xml:"username"`
-	StockSymbol    string   `xml:"stockSymbol"`
-	Filename       string   `xml:"filename"`
-	Funds          float32  `xml:"funds"`
-	DebugMessage   string   `xml:"debugMessage"`
+	Username       string   `xml:"username,omitempty"`
+	StockSymbol    string   `xml:"stockSymbol,omitempty"`
+	Filename       string   `xml:"filename,omitempty"`
+	Funds          float32  `xml:"funds,omitempty"`
+	DebugMessage   string   `xml:"debugMessage,omitempty"`
 }
 
 func getRows(tableName, userID string) (*sql.Rows, error) {
