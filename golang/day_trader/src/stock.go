@@ -35,7 +35,6 @@ func quote(ctx context.Context, userID, symbol string) (*Stock, error) {
 
 func logQuoteServerEvent(ctx context.Context, price float32, userID string,
 	symbol string, hash string, quoteServerTimestamp int64) error {
-	log.Println("We is logging quote server event")
 	pbLog, err := makeLogFromContext(ctx)
 	if err != nil {
 		log.Println("Error making log from context: ", err)
