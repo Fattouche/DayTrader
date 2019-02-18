@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/xml"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,75 +11,82 @@ import (
 )
 
 type userCommandLog struct {
-	XMLName        xml.Name `xml:"userCommand"`
-	Timestamp      int64    `xml:"timestamp"`
-	Server         string   `xml:"server"`
-	TransactionNum int      `xml:"transactionNum"`
-	Command        string   `xml:"command"`
-	Username       string   `xml:"username,omitempty"`
-	StockSymbol    string   `xml:"stockSymbol,omitempty"`
-	Filename       string   `xml:"filename,omitempty"`
-	Funds          float32  `xml:"funds,omitempty"`
+	XMLName        xml.Name      `xml:"userCommand"`
+	Timestamp      int64         `xml:"timestamp"`
+	Server         string        `xml:"server"`
+	TransactionNum int           `xml:"transactionNum"`
+	Command        string        `xml:"command"`
+	Username       string        `xml:"username,omitempty"`
+	StockSymbol    string        `xml:"stockSymbol,omitempty"`
+	Filename       string        `xml:"filename,omitempty"`
+	Funds          monetaryFloat `xml:"funds,omitempty"`
 }
 
 type quoteServerLog struct {
-	XMLName         xml.Name `xml:"quoteServer"`
-	Timestamp       int64    `xml:"timestamp"`
-	Server          string   `xml:"server"`
-	TransactionNum  int      `xml:"transactionNum"`
-	Price           float32  `xml:"price"`
-	StockSymbol     string   `xml:"stockSymbol"`
-	Username        string   `xml:"username"`
-	QuoteServerTime int64    `xml:"quoteServerTime"`
-	CryptoKey       string   `xml:"cryptokey"`
+	XMLName         xml.Name      `xml:"quoteServer"`
+	Timestamp       int64         `xml:"timestamp"`
+	Server          string        `xml:"server"`
+	TransactionNum  int           `xml:"transactionNum"`
+	Price           monetaryFloat `xml:"price"`
+	StockSymbol     string        `xml:"stockSymbol"`
+	Username        string        `xml:"username"`
+	QuoteServerTime int64         `xml:"quoteServerTime"`
+	CryptoKey       string        `xml:"cryptokey"`
 }
 
 type accountTransactionLog struct {
-	XMLName        xml.Name `xml:"accountTransaction"`
-	Timestamp      int64    `xml:"timestamp"`
-	Server         string   `xml:"server"`
-	TransactionNum int      `xml:"transactionNum"`
-	Action         string   `xml:"action"`
-	Username       string   `xml:"username"`
-	Funds          float32  `xml:"funds"`
+	XMLName        xml.Name      `xml:"accountTransaction"`
+	Timestamp      int64         `xml:"timestamp"`
+	Server         string        `xml:"server"`
+	TransactionNum int           `xml:"transactionNum"`
+	Action         string        `xml:"action"`
+	Username       string        `xml:"username"`
+	Funds          monetaryFloat `xml:"funds"`
 }
 
 type systemEventLog struct {
-	XMLName        xml.Name `xml:"systemEvent"`
-	Timestamp      int64    `xml:"timestamp"`
-	Server         string   `xml:"server"`
-	TransactionNum int      `xml:"transactionNum"`
-	Command        string   `xml:"command"`
-	Username       string   `xml:"username,omitempty"`
-	StockSymbol    string   `xml:"stockSymbol,omitempty"`
-	Filename       string   `xml:"filename,omitempty"`
-	Funds          float32  `xml:"funds,omitempty"`
+	XMLName        xml.Name      `xml:"systemEvent"`
+	Timestamp      int64         `xml:"timestamp"`
+	Server         string        `xml:"server"`
+	TransactionNum int           `xml:"transactionNum"`
+	Command        string        `xml:"command"`
+	Username       string        `xml:"username,omitempty"`
+	StockSymbol    string        `xml:"stockSymbol,omitempty"`
+	Filename       string        `xml:"filename,omitempty"`
+	Funds          monetaryFloat `xml:"funds,omitempty"`
 }
 
 type errorEventLog struct {
-	XMLName        xml.Name `xml:"errorEvent"`
-	Timestamp      int64    `xml:"timestamp"`
-	Server         string   `xml:"server"`
-	TransactionNum int      `xml:"transactionNum"`
-	Command        string   `xml:"command"`
-	Username       string   `xml:"username,omitempty"`
-	StockSymbol    string   `xml:"stockSymbol,omitempty"`
-	Filename       string   `xml:"filename,omitempty"`
-	Funds          float32  `xml:"funds,omitempty"`
-	ErrorMessage   string   `xml:"errorMessage,omitempty"`
+	XMLName        xml.Name      `xml:"errorEvent"`
+	Timestamp      int64         `xml:"timestamp"`
+	Server         string        `xml:"server"`
+	TransactionNum int           `xml:"transactionNum"`
+	Command        string        `xml:"command"`
+	Username       string        `xml:"username,omitempty"`
+	StockSymbol    string        `xml:"stockSymbol,omitempty"`
+	Filename       string        `xml:"filename,omitempty"`
+	Funds          monetaryFloat `xml:"funds,omitempty"`
+	ErrorMessage   string        `xml:"errorMessage,omitempty"`
 }
 
 type debugEventLog struct {
-	XMLName        xml.Name `xml:"debugEvent"`
-	Timestamp      int64    `xml:"timestamp"`
-	Server         string   `xml:"server"`
-	TransactionNum int      `xml:"transactionNum"`
-	Command        string   `xml:"command"`
-	Username       string   `xml:"username,omitempty"`
-	StockSymbol    string   `xml:"stockSymbol,omitempty"`
-	Filename       string   `xml:"filename,omitempty"`
-	Funds          float32  `xml:"funds,omitempty"`
-	DebugMessage   string   `xml:"debugMessage,omitempty"`
+	XMLName        xml.Name      `xml:"debugEvent"`
+	Timestamp      int64         `xml:"timestamp"`
+	Server         string        `xml:"server"`
+	TransactionNum int           `xml:"transactionNum"`
+	Command        string        `xml:"command"`
+	Username       string        `xml:"username,omitempty"`
+	StockSymbol    string        `xml:"stockSymbol,omitempty"`
+	Filename       string        `xml:"filename,omitempty"`
+	Funds          monetaryFloat `xml:"funds,omitempty"`
+	DebugMessage   string        `xml:"debugMessage,omitempty"`
+}
+
+type monetaryFloat float64
+
+func (f monetaryFloat) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	s := fmt.Sprintf("%.2f", f)
+	return e.EncodeElement(s, start)
 }
 
 func getRows(tableName, userID string) (*sql.Rows, error) {
