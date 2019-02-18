@@ -191,7 +191,7 @@ func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Respons
 }
 
 func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	user := getUser(userId)
+	user := getUser(req.UserId)
 	trigger, err := getSellTrigger(ctx, req.UserId, req.Symbol)
 	if err != nil {
 		user := getUser(req.UserId)
@@ -227,7 +227,7 @@ func (s *server) SetSellTrigger(ctx context.Context, req *pb.Command) (*pb.Respo
 }
 
 func (s *server) CancelSetBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	user := getUser(userId)
+	user := getUser(req.UserId)
 	trigger, err := getBuyTrigger(ctx, req.UserId, req.Symbol)
 	if err != nil {
 		return nil, errors.New("Set buy not found")
@@ -237,7 +237,7 @@ func (s *server) CancelSetBuy(ctx context.Context, req *pb.Command) (*pb.Respons
 }
 
 func (s *server) CancelSetSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	user := getUser(userId)
+	user := getUser(req.UserId)
 	trigger, err := getSellTrigger(ctx, req.UserId, req.Symbol)
 	if err != nil {
 		return nil, errors.New("Set sell not found")

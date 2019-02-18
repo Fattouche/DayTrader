@@ -76,7 +76,7 @@ func checkBuyTriggers() {
 		stock, _ := quote(context.Background(), buy.UserId, buy.StockSymbol)
 		if buy.Price >= stock.Price {
 			buy.updatePrice(stock.Price)
-			buy.commit(context.Background(), getUser(userId), true)
+			buy.commit(context.Background(), getUser(buy.UserId), true)
 			db.Exec("Delete From Buy_Trigger where BuyId=? and UserId=?", buy.Id, buy.UserId)
 		}
 	}
