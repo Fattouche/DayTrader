@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var connChan = make(chan net.Conn, 20)
+
 func (stock *Stock) toString() string {
 	if stock == nil {
 		return ""
@@ -59,11 +61,8 @@ func (stock *Stock) isExpired() bool {
 }
 
 func executeRequest(ctx context.Context, userID, symbol string) (float32, int64, string, error) {
-	ln, err := net.Dial("tcp", QUOTE_HOST+QUOTE_PORT)
+	ln := <-connChan
 	defer ln.Close()
-	if err != nil {
-		return 0, 0, "", err
-	}
 	buf := make([]byte, 300)
 	str := fmt.Sprintf("%s,%s\r", symbol, userID)
 	ln.Write([]byte(str))
@@ -82,4 +81,14 @@ func executeRequest(ctx context.Context, userID, symbol string) (float32, int64,
 		return 0, 0, "", err
 	}
 	return float32(price), quoteServerTimestamp, infoArr[4], nil
+}
+
+func generateSocketConnections() {
+	for {
+		ln, err := net.Dial("tcp", QUOTE_HOST+QUOTE_PORT)
+		if err != nil {
+			log.Println(err)
+		}
+		connChan <- ln
+	}
 }
