@@ -124,15 +124,24 @@ func dumpLogsToXML(userID string, filename string) {
 	for rows.Next() {
 		xmlLog := &userCommandLog{}
 		var timestamp time.Time
+		var userID string
 		err = rows.Scan(
 			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
-			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
+			&xmlLog.Command, &userID, &xmlLog.StockSymbol,
 			&xmlLog.Filename, &xmlLog.Funds,
 		)
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
 		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
+
+		// Write userID to temp, since we don't want to log a username field at
+		// all if there is no user ID (otherwise, validation gets the user count
+		// wrong due to final dumplog)
+		if userID != "" {
+			xmlLog.Username = userID
+		}
+
 		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
 		if err != nil {
 			log.Println("Error marshalling to XML: ", err)
