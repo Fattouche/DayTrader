@@ -33,7 +33,6 @@ func (s *server) LogUserCommand(ctx context.Context, req *pb.Log) (*pb.Response,
 }
 
 func (s *server) LogQuoteServerEvent(ctx context.Context, req *pb.Log) (*pb.Response, error) {
-	log.Println("Logging quote server event")
 	_, err := db.Exec(
 		"INSERT INTO QuoteServerLog(Server, TransactionNum, Price,"+
 			"StockSymbol, Username, QuoteServerTime, CryptoKey)"+

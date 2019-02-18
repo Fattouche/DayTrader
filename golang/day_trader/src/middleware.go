@@ -55,14 +55,15 @@ func populateContextWithLogInfo(ctx context.Context, command *pb.Command) contex
 }
 
 func logUserCommand(ctx context.Context, command *pb.Command) error {
-	log, err := makeLogFromContext(ctx)
+	logObject, err := makeLogFromContext(ctx)
 	if err != nil {
+		log.Println("Error making log from context: ", err)
 		return err
 	}
-	log.StockSymbol = command.Symbol
-	log.Filename = command.Filename
-	log.Funds = command.Amount
-	logEvent := &logObj{log: &log, funcName: "LogUserCommand"}
+	logObject.StockSymbol = command.Symbol
+	logObject.Filename = command.Filename
+	logObject.Funds = command.Amount
+	logEvent := &logObj{log: &logObject, funcName: "LogUserCommand"}
 	logChan <- logEvent
 	return nil
 }
