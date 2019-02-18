@@ -19,15 +19,17 @@ func serverInterceptor(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
 	if command, ok := req.(*pb.Command); ok {
-		ctx = populateContextWithLogInfo(ctx, command)
-		err := logUserCommand(ctx, command)
-		if err != nil {
-			log.Println("Error logging: ", err)
-			return nil, err
-		}
-		if err := checks(command); err != nil {
-			log.Println("Error creating user: ", err)
-			return nil, err
+		if command.Name != "CREATE_USER" {
+			ctx = populateContextWithLogInfo(ctx, command)
+			err := logUserCommand(ctx, command)
+			if err != nil {
+				log.Println("Error logging: ", err)
+				return nil, err
+			}
+			if err := checks(command); err != nil {
+				log.Println("Error creating user: ", err)
+				return nil, err
+			}
 		}
 	}
 	// Calls the handler

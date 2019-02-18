@@ -182,7 +182,7 @@ func createUsers(userMap map[string][]*pb.Command) {
 	defer conn.Close()
 	client := pb.NewDayTraderClient(conn)
 	for userId := range userMap {
-		cmd := &pb.Command{UserId: userId}
+		cmd := &pb.Command{UserId: userId, Name: "CREATE_USER"}
 		client.CreateUser(context.Background(), cmd)
 	}
 }
