@@ -23,8 +23,11 @@ func getOrCreateUserStock(ctx context.Context, userID, symbol string, user *User
 	return userStock
 }
 
-func (userStock *UserStock) updateStockAmount(ctx context.Context, amount int, user *User) {
+func (userStock *UserStock) updateStockAmount(ctx context.Context, amount int, user *User, writeThrough bool) {
 	userStock.Amount += amount
 	user.StockMap[userStock.StockSymbol] = userStock.Amount
 	user.setCache()
+	if writeThrough {
+		user.updateStockBalance(ctx, userStock.StockSymbol)
+	}
 }

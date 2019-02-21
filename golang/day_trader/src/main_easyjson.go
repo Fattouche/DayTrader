@@ -533,102 +533,7 @@ func (v *Stock) UnmarshalJSON(data []byte) error {
 func (v *Stock) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson89aae3efDecodeDayTrader3(l, v)
 }
-func easyjson89aae3efDecodeDayTrader4(in *jlexer.Lexer, out *SellTrigger) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "UserId":
-			out.UserId = string(in.String())
-		case "SellId":
-			out.SellId = int64(in.Int64())
-		case "Active":
-			out.Active = bool(in.Bool())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson89aae3efEncodeDayTrader4(out *jwriter.Writer, in SellTrigger) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"UserId\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.UserId))
-	}
-	{
-		const prefix string = ",\"SellId\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int64(int64(in.SellId))
-	}
-	{
-		const prefix string = ",\"Active\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Bool(bool(in.Active))
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v SellTrigger) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson89aae3efEncodeDayTrader4(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v SellTrigger) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson89aae3efEncodeDayTrader4(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *SellTrigger) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson89aae3efDecodeDayTrader4(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *SellTrigger) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson89aae3efDecodeDayTrader4(l, v)
-}
-func easyjson89aae3efDecodeDayTrader5(in *jlexer.Lexer, out *Sell) {
+func easyjson89aae3efDecodeDayTrader4(in *jlexer.Lexer, out *Sell) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -675,7 +580,7 @@ func easyjson89aae3efDecodeDayTrader5(in *jlexer.Lexer, out *Sell) {
 		in.Consumed()
 	}
 }
-func easyjson89aae3efEncodeDayTrader5(out *jwriter.Writer, in Sell) {
+func easyjson89aae3efEncodeDayTrader4(out *jwriter.Writer, in Sell) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -765,122 +670,27 @@ func easyjson89aae3efEncodeDayTrader5(out *jwriter.Writer, in Sell) {
 // MarshalJSON supports json.Marshaler interface
 func (v Sell) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson89aae3efEncodeDayTrader5(&w, v)
+	easyjson89aae3efEncodeDayTrader4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Sell) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson89aae3efEncodeDayTrader5(w, v)
+	easyjson89aae3efEncodeDayTrader4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Sell) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson89aae3efDecodeDayTrader5(&r, v)
+	easyjson89aae3efDecodeDayTrader4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Sell) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson89aae3efDecodeDayTrader5(l, v)
+	easyjson89aae3efDecodeDayTrader4(l, v)
 }
-func easyjson89aae3efDecodeDayTrader6(in *jlexer.Lexer, out *BuyTrigger) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "UserId":
-			out.UserId = string(in.String())
-		case "BuyId":
-			out.BuyId = int64(in.Int64())
-		case "Active":
-			out.Active = bool(in.Bool())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson89aae3efEncodeDayTrader6(out *jwriter.Writer, in BuyTrigger) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"UserId\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.UserId))
-	}
-	{
-		const prefix string = ",\"BuyId\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int64(int64(in.BuyId))
-	}
-	{
-		const prefix string = ",\"Active\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Bool(bool(in.Active))
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v BuyTrigger) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson89aae3efEncodeDayTrader6(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v BuyTrigger) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson89aae3efEncodeDayTrader6(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *BuyTrigger) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson89aae3efDecodeDayTrader6(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *BuyTrigger) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson89aae3efDecodeDayTrader6(l, v)
-}
-func easyjson89aae3efDecodeDayTrader7(in *jlexer.Lexer, out *Buy) {
+func easyjson89aae3efDecodeDayTrader5(in *jlexer.Lexer, out *Buy) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -927,7 +737,7 @@ func easyjson89aae3efDecodeDayTrader7(in *jlexer.Lexer, out *Buy) {
 		in.Consumed()
 	}
 }
-func easyjson89aae3efEncodeDayTrader7(out *jwriter.Writer, in Buy) {
+func easyjson89aae3efEncodeDayTrader5(out *jwriter.Writer, in Buy) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1017,23 +827,23 @@ func easyjson89aae3efEncodeDayTrader7(out *jwriter.Writer, in Buy) {
 // MarshalJSON supports json.Marshaler interface
 func (v Buy) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson89aae3efEncodeDayTrader7(&w, v)
+	easyjson89aae3efEncodeDayTrader5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Buy) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson89aae3efEncodeDayTrader7(w, v)
+	easyjson89aae3efEncodeDayTrader5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Buy) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson89aae3efDecodeDayTrader7(&r, v)
+	easyjson89aae3efDecodeDayTrader5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Buy) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson89aae3efDecodeDayTrader7(l, v)
+	easyjson89aae3efDecodeDayTrader5(l, v)
 }
