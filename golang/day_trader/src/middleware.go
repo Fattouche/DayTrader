@@ -73,9 +73,6 @@ func checks(req *pb.Command) error {
 		if req.UserId == "" {
 			return errors.New("No user Id specified")
 		}
-		if len(req.Symbol) == 0 {
-			return errors.New("Must have a symbol")
-		}
 	}
 	if req.Amount < 0 {
 		return errors.New("Amount must be a positive number")
