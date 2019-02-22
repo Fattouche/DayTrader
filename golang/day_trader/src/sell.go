@@ -64,8 +64,9 @@ func (sell *Sell) commit(ctx context.Context, update bool, user *User) *User {
 		return nil
 	}
 	user.updateUserBalance(ctx, sell.ActualCashAmount, true)
+	sell.Committed = true
 	if update {
-		go sell.updateSell(ctx, true)
+		go sell.updateSell(ctx)
 	} else {
 		go sell.insertSell(ctx)
 	}
@@ -77,8 +78,8 @@ func (sell *Sell) cancel(ctx context.Context, user *User, writeThrough bool) {
 	userStock.updateStockAmount(ctx, sell.StockSoldAmount, user, writeThrough)
 }
 
-func (sell *Sell) updateSell(ctx context.Context, committed bool) error {
-	_, err := db.Exec("update Sell set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockSoldAmount = ?, Committed=? where Id=?", sell.IntendedCashAmount, sell.Price, sell.ActualCashAmount, sell.StockSoldAmount, sell.Id, committed)
+func (sell *Sell) updateSell(ctx context.Context) error {
+	_, err := db.Exec("update Sell set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockSoldAmount = ?, Committed=? where Id=?", sell.IntendedCashAmount, sell.Price, sell.ActualCashAmount, sell.StockSoldAmount, sell.Committed, sell.Id)
 	if err != nil {
 		return err
 	}
@@ -96,7 +97,7 @@ func (sell *Sell) insertSell(ctx context.Context) (*Sell, error) {
 
 func getSell(ctx context.Context, id int64) *Sell {
 	sell := &Sell{}
-	err := db.QueryRow("Select * from Sell where Id=?", id).Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount)
+	err := db.QueryRow("Select * from Sell where Id=?", id).Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount, &sell.FromTrigger, &sell.Committed)
 	if err != nil {
 		log.Println(err)
 	}
@@ -126,7 +127,7 @@ func upsertSellTrigger(ctx context.Context, req *pb.Command, user *User) (*Sell,
 
 func getSellTrigger(ctx context.Context, symbol, userId string) (*Sell, error) {
 	sell := &Sell{}
-	err := db.QueryRow("Select * from Sell where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", userId, symbol).Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount)
+	err := db.QueryRow("Select * from Sell where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", userId, symbol).Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount, &sell.FromTrigger, &sell.Committed)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func setSellTriggerPrice(ctx context.Context, user *User, req *pb.Command) (*Sel
 		return nil, err
 	}
 	sell.updatePrice(ctx, req.Amount, user, true)
-	sell.updateSell(ctx, false)
+	sell.updateSell(ctx)
 	return sell, nil
 }
 
@@ -149,19 +150,19 @@ func cancelSellTrigger(ctx context.Context, req *pb.Command, user *User) error {
 		return err
 	}
 	sell.cancel(ctx, user, true)
-	db.Exec("DELETE From sell where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", req.UserId, req.Symbol)
+	db.Exec("DELETE From Sell where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", req.UserId, req.Symbol)
 	return nil
 }
 
 func checkSellTriggers() {
-	rows, err := db.Query("SELECT * from Sell Committed=false and FromTrigger=true")
+	rows, err := db.Query("SELECT * from Sell where Committed=false and FromTrigger=true")
 	if err != nil {
 		log.Println(err)
 	}
 	sells := make([]*Sell, 0)
 	for rows.Next() {
 		sell := &Sell{}
-		err = rows.Scan(&sell.Id, &sell.StockSymbol, &sell.IntendedCashAmount, &sell.StockSoldAmount, &sell.Price, &sell.UserId)
+		err = rows.Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount, &sell.FromTrigger, &sell.Committed)
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}
@@ -172,8 +173,9 @@ func checkSellTriggers() {
 		stock, _ := quote(context.Background(), sell.UserId, sell.StockSymbol)
 		if sell.Price <= stock.Price {
 			user := getUser(sell.UserId)
+			sell.Committed = true
 			sell.updatePrice(context.Background(), stock.Price, user, true)
-			sell.updateSell(context.Background(), true)
+			sell.updateSell(context.Background())
 			user.updateUserBalance(context.Background(), sell.ActualCashAmount, true)
 		}
 	}

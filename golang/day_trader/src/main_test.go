@@ -17,6 +17,25 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+// func TestInvalidRequest(t *testing.T) {
+// 	req := genGrpcRequest("QUOTE")
+// 	req.Symbol = "ABCD"
+// 	_, err := s.Quote(context.Background(), req)
+// 	log.Println("WE ARE HERE")
+// 	log.Println(err.Error())
+// 	t.Error("SON")
+// 	if err.Error() != "Symbol must be 3 letters or less" {
+// 		t.Error("TestInvalidRequest expected error but none was returned", err)
+// 	}
+
+// 	req = genGrpcRequest("ADD")
+// 	req.Amount = -5
+// 	_, err = s.Add(context.Background(), req)
+// 	if err.Error() != "Amount must be a positive number" {
+// 		t.Error("TestInvalidRequest expected error but none was returned", err)
+// 	}
+// }
+
 func TestQuote(t *testing.T) {
 	resp, err := s.Quote(context.Background(), genGrpcRequest("QUOTE"))
 	if err != nil {
@@ -208,17 +227,16 @@ func TestSetBuyAmount(t *testing.T) {
 	if err != nil {
 		t.Error("SetBuyAmount got unexpected error: ", err)
 	}
-	var buyId int
 	var cashAmount float32
-	db.QueryRow("SELECT Id,IntendedCashAmount from Buy where StockSymbol=? and UserId=? and FromTrigger=? and Committed=?", symbol, testUserId, true, false).Scan(&buyId, &cashAmount)
+	db.QueryRow("SELECT IntendedCashAmount from Buy where StockSymbol=? and UserId=? and FromTrigger=? and Committed=?", symbol, testUserId, true, false).Scan(&cashAmount)
 	if cashAmount != amount {
 		t.Errorf("TestSetBuyAmount expected intendedCashAmount to be %f but was %f", amount, cashAmount)
 	}
 
 	var balance float32
 	db.QueryRow("SELECT Balance from User where Id=?", testUserId).Scan(&balance)
-	if balance != amount {
-		t.Errorf("TestSetBuyAmount expected balance of %v got %v", 0, amount)
+	if balance != 0 {
+		t.Errorf("TestSetBuyAmount expected balance of %v got %v", 0, balance)
 	}
 }
 
@@ -315,7 +333,7 @@ func TestCancelSetSell(t *testing.T) {
 	if err != nil {
 		t.Error("CancelSetSell got unexpected error: ", err)
 	}
-	_, err = db.Query("SELECT * from Sell where where StockSymbol=? and UserId=? and FromTrigger=?", symbol, testUserId, true)
+	_, err = db.Query("SELECT * from Sell where StockSymbol=? and UserId=? and FromTrigger=?", symbol, testUserId, true)
 	if err != nil {
 		t.Error("TestCancelSetSell Expected no sell trigger but one was returned")
 	}
@@ -342,9 +360,11 @@ func TestCheckSellTrigger(t *testing.T) {
 	if balance != amount {
 		t.Errorf("TestCheckSellTrigger expected balance of %v got %v", amount, balance)
 	}
-	_, err = db.Query("SELECT * from Buy_Trigger where UserId=?", testUserId)
-	if err != nil {
-		t.Error("TestCheckSellTrigger Expected no trigger but one was returned")
+
+	var committed = false
+	db.QueryRow("SELECT Committed from Sell where UserId=? and FromTrigger=true and StockSymbol=?", testUserId, symbol).Scan(&committed)
+	if !committed {
+		t.Error("TestCheckSellTrigger Expected committed to be true but was false")
 	}
 }
 
@@ -363,8 +383,10 @@ func TestCheckBuyTrigger(t *testing.T) {
 	if stockAmount != int(amount/quotePrice) {
 		t.Errorf("TestCheckBuyTrigger expected stock amount of %v got %v", int(amount/buyPrice), stockAmount)
 	}
-	_, err = db.Query("SELECT * from Buy_Trigger where UserId=?", testUserId)
-	if err != nil {
-		t.Error("TestCheckBuyTrigger Expected no trigger but one was returned")
+	time.Sleep(time.Millisecond * 100)
+	var committed = false
+	err = db.QueryRow("SELECT Committed from Buy where UserId=? and FromTrigger=true and StockSymbol=?", testUserId, symbol).Scan(&committed)
+	if !committed {
+		t.Error("TestCheckBuyTrigger Expected committed to be true but was false")
 	}
 }

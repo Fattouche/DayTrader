@@ -54,8 +54,9 @@ func (buy *Buy) updatePrice(stockPrice float32) {
 }
 
 func (buy *Buy) commit(ctx context.Context, user *User, update bool) *UserStock {
+	buy.Committed = true
 	if update {
-		go buy.updateBuy(ctx, true)
+		go buy.updateBuy(ctx)
 	} else {
 		//log here instead maybe?
 		go buy.insertBuy(ctx)
@@ -70,8 +71,8 @@ func (buy *Buy) cancel(ctx context.Context, user *User, writeThrough bool) {
 	user.updateUserBalance(ctx, buy.IntendedCashAmount, writeThrough)
 }
 
-func (buy *Buy) updateBuy(ctx context.Context, committed bool) error {
-	_, err := db.Exec("update Buy set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockBoughtAmount = ?, Committed=? where Id=?", buy.IntendedCashAmount, buy.Price, buy.ActualCashAmount, buy.StockBoughtAmount, committed, buy.Id)
+func (buy *Buy) updateBuy(ctx context.Context) error {
+	_, err := db.Exec("update Buy set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockBoughtAmount = ?, Committed=? where Id=?", buy.IntendedCashAmount, buy.Price, buy.ActualCashAmount, buy.StockBoughtAmount, buy.Committed, buy.Id)
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,7 @@ func (buy *Buy) insertBuy(ctx context.Context) (*Buy, error) {
 
 func getBuy(ctx context.Context, id int64) *Buy {
 	buy := &Buy{}
-	err := db.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount)
+	err := db.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount, &buy.FromTrigger, &buy.Committed)
 	if err != nil {
 		log.Println(err)
 	}
@@ -118,7 +119,7 @@ func upsertBuyTrigger(ctx context.Context, req *pb.Command, user *User) (*Buy, e
 
 func getBuyTrigger(ctx context.Context, symbol, userId string) (*Buy, error) {
 	buy := &Buy{}
-	err := db.QueryRow("Select * from Buy where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", userId, symbol).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount)
+	err := db.QueryRow("Select * from Buy where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", userId, symbol).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount, &buy.FromTrigger, &buy.Committed)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func setBuyTriggerPrice(ctx context.Context, req *pb.Command) (*Buy, error) {
 		return nil, err
 	}
 	buy.updatePrice(req.Amount)
-	buy.updateBuy(ctx, false)
+	buy.updateBuy(ctx)
 	return buy, nil
 }
 
@@ -153,7 +154,7 @@ func checkBuyTriggers() {
 	buys := make([]*Buy, 0)
 	for rows.Next() {
 		buy := &Buy{}
-		err = rows.Scan(&buy.Id, &buy.StockSymbol, &buy.IntendedCashAmount, &buy.StockBoughtAmount, &buy.Price, &buy.UserId)
+		err = rows.Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount, &buy.FromTrigger, &buy.Committed)
 		if err != nil {
 			log.Println("Error scanning trigger: ", err)
 		}

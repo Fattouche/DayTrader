@@ -27,7 +27,6 @@ func serverInterceptor(ctx context.Context, req interface{},
 				return nil, err
 			}
 			if err := checks(command); err != nil {
-				log.Println("Error creating user: ", err)
 				return nil, err
 			}
 		}
@@ -74,6 +73,15 @@ func checks(req *pb.Command) error {
 		if req.UserId == "" {
 			return errors.New("No user Id specified")
 		}
+		if len(req.Symbol) == 0 {
+			return errors.New("Must have a symbol")
+		}
+	}
+	if req.Amount < 0 {
+		return errors.New("Amount must be a positive number")
+	}
+	if len(req.Symbol) > 3 {
+		return errors.New("Symbol must be 3 letters or less")
 	}
 	return nil
 }

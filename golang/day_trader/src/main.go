@@ -45,6 +45,8 @@ type Buy struct {
 	StockBoughtAmount  int
 	UserId             string
 	Timestamp          time.Time
+	Committed          bool
+	FromTrigger        bool
 }
 
 //easyjson:json
@@ -57,6 +59,8 @@ type Sell struct {
 	StockSoldAmount    int
 	UserId             string
 	Timestamp          time.Time
+	Committed          bool
+	FromTrigger        bool
 }
 
 //easyjson:json

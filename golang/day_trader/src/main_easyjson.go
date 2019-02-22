@@ -570,6 +570,10 @@ func easyjson89aae3efDecodeDayTrader4(in *jlexer.Lexer, out *Sell) {
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Timestamp).UnmarshalJSON(data))
 			}
+		case "Committed":
+			out.Committed = bool(in.Bool())
+		case "FromTrigger":
+			out.FromTrigger = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -664,6 +668,26 @@ func easyjson89aae3efEncodeDayTrader4(out *jwriter.Writer, in Sell) {
 		}
 		out.Raw((in.Timestamp).MarshalJSON())
 	}
+	{
+		const prefix string = ",\"Committed\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.Committed))
+	}
+	{
+		const prefix string = ",\"FromTrigger\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.FromTrigger))
+	}
 	out.RawByte('}')
 }
 
@@ -727,6 +751,10 @@ func easyjson89aae3efDecodeDayTrader5(in *jlexer.Lexer, out *Buy) {
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Timestamp).UnmarshalJSON(data))
 			}
+		case "Committed":
+			out.Committed = bool(in.Bool())
+		case "FromTrigger":
+			out.FromTrigger = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -820,6 +848,26 @@ func easyjson89aae3efEncodeDayTrader5(out *jwriter.Writer, in Buy) {
 			out.RawString(prefix)
 		}
 		out.Raw((in.Timestamp).MarshalJSON())
+	}
+	{
+		const prefix string = ",\"Committed\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.Committed))
+	}
+	{
+		const prefix string = ",\"FromTrigger\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.FromTrigger))
 	}
 	out.RawByte('}')
 }
