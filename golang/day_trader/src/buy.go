@@ -7,6 +7,8 @@ import (
 	"log"
 	"math"
 	"time"
+
+	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 )
 
 func (buy *Buy) toString() string {
@@ -17,13 +19,13 @@ func (buy *Buy) toString() string {
 	return string(bytes)
 }
 
-func createBuy(ctx context.Context, intendedCashAmount float32, symbol string, user *User) (*Buy, error) {
+func createBuy(ctx context.Context, intendedCashAmount float32, symbol string, user *User, writeThrough bool) (*Buy, error) {
 	stock, err := quote(ctx, user.Id, symbol)
 	if err != nil {
 		return nil, err
 	}
 	buy := &Buy{Price: stock.Price, StockSymbol: symbol, UserId: user.Id}
-	err = buy.updateCashAmount(ctx, intendedCashAmount, user)
+	err = buy.updateCashAmount(ctx, intendedCashAmount, user, writeThrough)
 	if err != nil {
 		return nil, err
 	}
@@ -34,13 +36,13 @@ func createBuy(ctx context.Context, intendedCashAmount float32, symbol string, u
 	return buy, err
 }
 
-func (buy *Buy) updateCashAmount(ctx context.Context, amount float32, user *User) error {
+func (buy *Buy) updateCashAmount(ctx context.Context, amount float32, user *User, writeThrough bool) error {
 	if amount > user.Balance {
 		msg := fmt.Sprintf("Not enough balance, have %f need %f", user.Balance, amount)
 		return errors.New(msg)
 	}
 	updatedAmount := buy.IntendedCashAmount - amount
-	user.updateUserBalance(ctx, updatedAmount, false)
+	user.updateUserBalance(ctx, updatedAmount, writeThrough)
 	buy.IntendedCashAmount = float32(math.Abs(float64(updatedAmount)))
 	return nil
 }
@@ -51,30 +53,26 @@ func (buy *Buy) updatePrice(stockPrice float32) {
 	buy.ActualCashAmount = float32(buy.StockBoughtAmount) * buy.Price
 }
 
-func (buy *Buy) commit(ctx context.Context, user *User, update bool) (*UserStock, error) {
-	var err error
+func (buy *Buy) commit(ctx context.Context, user *User, update bool) *UserStock {
+	buy.Committed = true
 	if update {
-		err = buy.updateBuy(ctx)
+		go buy.updateBuy(ctx)
 	} else {
-		//log here instead
-		//_, err = buy.insertBuy(ctx)
+		//log here instead maybe?
+		go buy.insertBuy(ctx)
 	}
 	user.updateUserBalance(ctx, buy.IntendedCashAmount-buy.ActualCashAmount, true)
 	userStock := getOrCreateUserStock(ctx, buy.UserId, buy.StockSymbol, user)
-	userStock.updateStockAmount(ctx, buy.StockBoughtAmount, user)
-	err = user.updateStockBalance(ctx, buy.StockSymbol)
-	if err != nil {
-		return nil, err
-	}
-	return userStock, err
+	userStock.updateStockAmount(ctx, buy.StockBoughtAmount, user, true)
+	return userStock
 }
 
-func (buy *Buy) cancel(ctx context.Context, user *User) {
-	user.updateUserBalance(ctx, buy.IntendedCashAmount, false)
+func (buy *Buy) cancel(ctx context.Context, user *User, writeThrough bool) {
+	user.updateUserBalance(ctx, buy.IntendedCashAmount, writeThrough)
 }
 
 func (buy *Buy) updateBuy(ctx context.Context) error {
-	_, err := db.Exec("update Buy set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockBoughtAmount = ? where Id=?", buy.IntendedCashAmount, buy.Price, buy.ActualCashAmount, buy.StockBoughtAmount, buy.Id)
+	_, err := db.Exec("update Buy set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockBoughtAmount = ?, Committed=? where Id=?", buy.IntendedCashAmount, buy.Price, buy.ActualCashAmount, buy.StockBoughtAmount, buy.Committed, buy.Id)
 	if err != nil {
 		return err
 	}
@@ -82,7 +80,7 @@ func (buy *Buy) updateBuy(ctx context.Context) error {
 }
 
 func (buy *Buy) insertBuy(ctx context.Context) (*Buy, error) {
-	res, err := db.Exec("insert into Buy(Price,StockSymbol,UserId,IntendedCashAmount,ActualCashAmount,StockBoughtAmount) values(?,?,?,?,?,?)", buy.Price, buy.StockSymbol, buy.UserId, buy.IntendedCashAmount, buy.ActualCashAmount, buy.StockBoughtAmount)
+	res, err := db.Exec("insert into Buy(Price,StockSymbol,UserId,IntendedCashAmount,ActualCashAmount,StockBoughtAmount, Committed) values(?,?,?,?,?,?,true)", buy.Price, buy.StockSymbol, buy.UserId, buy.IntendedCashAmount, buy.ActualCashAmount, buy.StockBoughtAmount)
 	if err != nil {
 		return buy, err
 	}
@@ -92,7 +90,7 @@ func (buy *Buy) insertBuy(ctx context.Context) (*Buy, error) {
 
 func getBuy(ctx context.Context, id int64) *Buy {
 	buy := &Buy{}
-	err := db.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount)
+	err := db.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount, &buy.FromTrigger, &buy.Committed)
 	if err != nil {
 		log.Println(err)
 	}
@@ -105,4 +103,69 @@ func (buy *Buy) isExpired() bool {
 		return true
 	}
 	return false
+}
+
+func upsertBuyTrigger(ctx context.Context, req *pb.Command, user *User) (*Buy, error) {
+	buy, err := createBuy(ctx, req.Amount, req.Symbol, user, true)
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.Exec("insert into Buy(Price,StockSymbol,UserId,IntendedCashAmount,ActualCashAmount,StockBoughtAmount,FromTrigger,Committed) values(?,?,?,?,?,?,true,false) on duplicate key update IntendedCashAmount=?, ActualCashAmount=?,StockBoughtAmount=?", buy.Price, buy.StockSymbol, buy.UserId, buy.IntendedCashAmount, buy.ActualCashAmount, buy.StockBoughtAmount, buy.IntendedCashAmount, buy.ActualCashAmount, buy.StockBoughtAmount)
+	if err != nil {
+		return nil, err
+	}
+	return buy, nil
+}
+
+func getBuyTrigger(ctx context.Context, symbol, userId string) (*Buy, error) {
+	buy := &Buy{}
+	err := db.QueryRow("Select * from Buy where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", userId, symbol).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount, &buy.FromTrigger, &buy.Committed)
+	if err != nil {
+		return nil, err
+	}
+	return buy, nil
+}
+
+func setBuyTriggerPrice(ctx context.Context, req *pb.Command) (*Buy, error) {
+	buy, err := getBuyTrigger(ctx, req.Symbol, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	buy.updatePrice(req.Amount)
+	buy.updateBuy(ctx)
+	return buy, nil
+}
+
+func cancelBuyTrigger(ctx context.Context, req *pb.Command, user *User) error {
+	buy, err := getBuyTrigger(ctx, req.Symbol, req.UserId)
+	if err != nil {
+		return err
+	}
+	buy.cancel(ctx, user, true)
+	db.Exec("DELETE From Buy where UserId=? and StockSymbol=? and FromTrigger=true and Committed=false", req.UserId, req.Symbol)
+	return nil
+}
+
+func checkBuyTriggers() {
+	rows, err := db.Query("SELECT * from Buy where FromTrigger=true and Committed=false")
+	if err != nil {
+		log.Println(err)
+	}
+	buys := make([]*Buy, 0)
+	for rows.Next() {
+		buy := &Buy{}
+		err = rows.Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount, &buy.FromTrigger, &buy.Committed)
+		if err != nil {
+			log.Println("Error scanning trigger: ", err)
+		}
+		buys = append(buys, buy)
+	}
+	rows.Close()
+	for _, buy := range buys {
+		stock, _ := quote(context.Background(), buy.UserId, buy.StockSymbol)
+		if buy.Price >= stock.Price {
+			buy.updatePrice(stock.Price)
+			buy.commit(context.Background(), getUser(buy.UserId), true)
+		}
+	}
 }
