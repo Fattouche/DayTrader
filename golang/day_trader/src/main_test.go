@@ -17,25 +17,6 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// func TestInvalidRequest(t *testing.T) {
-// 	req := genGrpcRequest("QUOTE")
-// 	req.Symbol = "ABCD"
-// 	_, err := s.Quote(context.Background(), req)
-// 	log.Println("WE ARE HERE")
-// 	log.Println(err.Error())
-// 	t.Error("SON")
-// 	if err.Error() != "Symbol must be 3 letters or less" {
-// 		t.Error("TestInvalidRequest expected error but none was returned", err)
-// 	}
-
-// 	req = genGrpcRequest("ADD")
-// 	req.Amount = -5
-// 	_, err = s.Add(context.Background(), req)
-// 	if err.Error() != "Amount must be a positive number" {
-// 		t.Error("TestInvalidRequest expected error but none was returned", err)
-// 	}
-// }
-
 func TestQuote(t *testing.T) {
 	resp, err := s.Quote(context.Background(), genGrpcRequest("QUOTE"))
 	if err != nil {
@@ -227,16 +208,17 @@ func TestSetBuyAmount(t *testing.T) {
 	if err != nil {
 		t.Error("SetBuyAmount got unexpected error: ", err)
 	}
+	var buyId int
 	var cashAmount float32
-	db.QueryRow("SELECT IntendedCashAmount from Buy where StockSymbol=? and UserId=? and FromTrigger=? and Committed=?", symbol, testUserId, true, false).Scan(&cashAmount)
+	db.QueryRow("SELECT Id,IntendedCashAmount from Buy where Id=(Select max(Id) from Buy)").Scan(&buyId, &cashAmount)
 	if cashAmount != amount {
 		t.Errorf("TestSetBuyAmount expected intendedCashAmount to be %f but was %f", amount, cashAmount)
 	}
 
-	var balance float32
-	db.QueryRow("SELECT Balance from User where Id=?", testUserId).Scan(&balance)
-	if balance != 0 {
-		t.Errorf("TestSetBuyAmount expected balance of %v got %v", 0, balance)
+	var active bool
+	db.QueryRow("SELECT Active from Buy_Trigger where BuyId=? and UserId=?", buyId, testUserId).Scan(&active)
+	if active {
+		t.Errorf("TestSetBuyAmount expected trigger to be false but was true")
 	}
 }
 
@@ -245,6 +227,7 @@ func TestSetBuyTrigger(t *testing.T) {
 	var cashAmount float32
 	var price float32
 	var stockBoughtAmount int
+	var active bool
 	buyPrice := float32(3.0)
 
 	req := genGrpcRequest("SET_BUY_TRIGGER")
@@ -253,7 +236,7 @@ func TestSetBuyTrigger(t *testing.T) {
 	if err != nil {
 		t.Error("SetBuyTrigger got unexpected error: ", err)
 	}
-	db.QueryRow("SELECT Id,IntendedCashAmount,Price,StockBoughtAmount from Buy where StockSymbol=? and UserId=? and FromTrigger=? and Committed=?", symbol, testUserId, true, false).Scan(&buyId, &cashAmount, &price, &stockBoughtAmount)
+	db.QueryRow("SELECT Id,IntendedCashAmount,Price,StockBoughtAmount from Buy where Id=(Select max(Id) from Buy)").Scan(&buyId, &cashAmount, &price, &stockBoughtAmount)
 	if cashAmount != amount {
 		t.Errorf("TestSetBuyTrigger expected intendedCashAmount to be %f but was %f", amount, cashAmount)
 	}
@@ -263,6 +246,10 @@ func TestSetBuyTrigger(t *testing.T) {
 	if stockBoughtAmount != int(amount/buyPrice) {
 		t.Errorf("TestSetBuyTrigger expected stockBoughtAmount to be %d but was %d", int(amount/buyPrice), stockBoughtAmount)
 	}
+	db.QueryRow("SELECT Active from Buy_Trigger where BuyId=? and UserId=?", buyId, testUserId).Scan(&active)
+	if !active {
+		t.Errorf("TestSetBuyTrigger expected trigger to be true but was false")
+	}
 }
 
 func TestCancelSetBuy(t *testing.T) {
@@ -270,7 +257,7 @@ func TestCancelSetBuy(t *testing.T) {
 	if err != nil {
 		t.Error("CancelSetBuy got unexpected error: ", err)
 	}
-	_, err = db.Query("SELECT * from Buy where StockSymbol=? and UserId=? and FromTrigger=?", symbol, testUserId, true)
+	_, err = db.Query("SELECT * from Buy_Trigger where UserId=?", testUserId)
 	if err != nil {
 		t.Error("TestCancelSetBuy Expected no buy trigger but one was returned")
 	}
@@ -290,16 +277,21 @@ func TestSetSellAmount(t *testing.T) {
 	if err != nil {
 		t.Error("CommitBuy in TestSetSellAmount got unexpected error: ", err)
 	}
-
 	s.SetSellAmount(context.Background(), genGrpcRequest("SET_SELL_AMOUNT"))
 	if err != nil {
 		t.Error("SetSellAmount in TestSetSellAmount got unexpected error: ", err)
 	}
 	var sellId int
 	var cashAmount float32
-	db.QueryRow("SELECT Id,IntendedCashAmount from Sell where StockSymbol=? and UserId=? and FromTrigger=? and Committed=?", symbol, testUserId, true, false).Scan(&sellId, &cashAmount)
+	db.QueryRow("SELECT Id,IntendedCashAmount from Sell where Id=(Select max(Id) from Sell)").Scan(&sellId, &cashAmount)
 	if cashAmount != amount {
 		t.Errorf("TestSetSellAmount expected intendedCashAmount to be %f but was %f", amount, cashAmount)
+	}
+
+	var active bool
+	db.QueryRow("SELECT Active from Sell_Trigger where SellId=? and UserId=?", sellId, testUserId).Scan(&active)
+	if active {
+		t.Errorf("TestSetSellAmount expected trigger to be false but was true")
 	}
 }
 
@@ -308,6 +300,7 @@ func TestSetSellTrigger(t *testing.T) {
 	var cashAmount float32
 	var price float32
 	var stockSoldAmount int
+	var active bool
 	sellPrice := float32(6.0)
 
 	req := genGrpcRequest("SET_SELL_TRIGGER")
@@ -316,7 +309,7 @@ func TestSetSellTrigger(t *testing.T) {
 	if err != nil {
 		t.Error("SetSellTrigger got unexpected error: ", err)
 	}
-	db.QueryRow("SELECT Id,IntendedCashAmount,Price,StockSoldAmount from Sell where StockSymbol=? and UserId=? and FromTrigger=? and Committed=?", symbol, testUserId, true, false).Scan(&sellId, &cashAmount, &price, &stockSoldAmount)
+	db.QueryRow("SELECT Id,IntendedCashAmount,Price,StockSoldAmount from Sell where Id=(Select max(Id) from Sell)").Scan(&sellId, &cashAmount, &price, &stockSoldAmount)
 	if cashAmount != amount {
 		t.Errorf("TestSetSellTrigger expected intendedCashAmount to be %f but was %f", amount, cashAmount)
 	}
@@ -326,6 +319,10 @@ func TestSetSellTrigger(t *testing.T) {
 	if stockSoldAmount != int(amount/sellPrice) {
 		t.Errorf("TestSetSellTrigger expected stockSoldAmount to be %d but was %d", int(amount/sellPrice), stockSoldAmount)
 	}
+	db.QueryRow("SELECT Active from Sell_Trigger where SellId=? and UserId=?", sellId, testUserId).Scan(&active)
+	if !active {
+		t.Errorf("TestSetSellTrigger expected trigger to be true but was false")
+	}
 }
 
 func TestCancelSetSell(t *testing.T) {
@@ -333,7 +330,7 @@ func TestCancelSetSell(t *testing.T) {
 	if err != nil {
 		t.Error("CancelSetSell got unexpected error: ", err)
 	}
-	_, err = db.Query("SELECT * from Sell where StockSymbol=? and UserId=? and FromTrigger=?", symbol, testUserId, true)
+	_, err = db.Query("SELECT * from Sell_Trigger where UserId=?", testUserId)
 	if err != nil {
 		t.Error("TestCancelSetSell Expected no sell trigger but one was returned")
 	}
@@ -360,11 +357,9 @@ func TestCheckSellTrigger(t *testing.T) {
 	if balance != amount {
 		t.Errorf("TestCheckSellTrigger expected balance of %v got %v", amount, balance)
 	}
-
-	var committed = false
-	db.QueryRow("SELECT Committed from Sell where UserId=? and FromTrigger=true and StockSymbol=?", testUserId, symbol).Scan(&committed)
-	if !committed {
-		t.Error("TestCheckSellTrigger Expected committed to be true but was false")
+	_, err = db.Query("SELECT * from Buy_Trigger where UserId=?", testUserId)
+	if err != nil {
+		t.Error("TestCheckSellTrigger Expected no trigger but one was returned")
 	}
 }
 
@@ -383,10 +378,8 @@ func TestCheckBuyTrigger(t *testing.T) {
 	if stockAmount != int(amount/quotePrice) {
 		t.Errorf("TestCheckBuyTrigger expected stock amount of %v got %v", int(amount/buyPrice), stockAmount)
 	}
-	time.Sleep(time.Millisecond * 100)
-	var committed = false
-	err = db.QueryRow("SELECT Committed from Buy where UserId=? and FromTrigger=true and StockSymbol=?", testUserId, symbol).Scan(&committed)
-	if !committed {
-		t.Error("TestCheckBuyTrigger Expected committed to be true but was false")
+	_, err = db.Query("SELECT * from Buy_Trigger where UserId=?", testUserId)
+	if err != nil {
+		t.Error("TestCheckBuyTrigger Expected no trigger but one was returned")
 	}
 }
