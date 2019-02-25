@@ -296,7 +296,6 @@ func main() {
 	for i := 0; i < 500; i++ {
 		go startLoggerWorker()
 	}
-	go generateSocketConnections()
 	go watchTriggers()
 	startGRPCServer()
 }
