@@ -22,7 +22,7 @@ func (stock *Stock) toString() string {
 
 func quote(ctx context.Context, userID, symbol string) (*Stock, error) {
 	stock, err := getCacheStock(symbol)
-	if err != nil || (stock != nil && stock.isExpired()) {
+	if err != nil {
 		var quoteServerTimestamp int64
 		//TODO: Do something with this hash
 		stock = &Stock{Symbol: symbol}
@@ -50,14 +50,6 @@ func logQuoteServerEvent(ctx context.Context, price float32, userID string,
 	logEvent := &logObj{log: &pbLog, funcName: "LogQuoteServerEvent"}
 	logChan <- logEvent
 	return nil
-}
-
-func (stock *Stock) isExpired() bool {
-	duration := time.Since(stock.TimeStamp)
-	if duration > time.Second*60 {
-		return true
-	}
-	return false
 }
 
 func executeRequest(ctx context.Context, userID, symbol string) (float32, int64, string, error) {

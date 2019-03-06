@@ -22,8 +22,9 @@ func (user *User) setCache() error {
 func (stock *Stock) setCache() error {
 	bytes, _ := stock.MarshalJSON()
 	item := &memcache.Item{
-		Key:   stock.Symbol,
-		Value: bytes,
+		Key:        stock.Symbol,
+		Value:      bytes,
+		Expiration: 60,
 	}
 	return cache.Set(item)
 }
