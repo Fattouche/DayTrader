@@ -22,6 +22,8 @@ var createTableStatements = []string{
 		IntendedCashAmount float DEFAULT 0,
 		ActualCashAmount float DEFAULT 0,
 		StockSoldAmount int DEFAULT 0,
+		FromTrigger boolean DEFAULT false,
+		Committed boolean DEFAULT false,
 		PRIMARY KEY (Id),
 		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
 	)`,
@@ -33,24 +35,10 @@ var createTableStatements = []string{
 		IntendedCashAmount float DEFAULT 0,
 		ActualCashAmount float DEFAULT 0,
 		StockBoughtAmount int DEFAULT 0,
+		FromTrigger boolean DEFAULT false,
+		Committed boolean DEFAULT false,
 		PRIMARY KEY (Id),
 		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
-	)`,
-	`CREATE TABLE IF NOT EXISTS Sell_Trigger(
-		UserId varchar(32) NOT NULL,
-		SellId INT UNSIGNED NOT NULL,
-		Active BOOLEAN DEFAULT false,
-		UNIQUE(UserId, SellId),
-		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE,
-		FOREIGN KEY (SellId) REFERENCES Sell(Id) ON DELETE CASCADE
-	)`,
-	`CREATE TABLE IF NOT EXISTS Buy_Trigger(
-		UserId varchar(32) NOT NULL,
-		BuyId INT UNSIGNED NOT NULL,
-		Active BOOLEAN DEFAULT false,
-		UNIQUE(UserId, BuyId),
-		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE,
-		FOREIGN KEY (BuyId) REFERENCES Buy(Id) ON DELETE CASCADE
 	)`,
 	`CREATE TABLE IF NOT EXISTS User_Stock(
 		UserId varchar(32) NOT NULL,

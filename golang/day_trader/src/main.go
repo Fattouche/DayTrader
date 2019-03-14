@@ -45,6 +45,8 @@ type Buy struct {
 	StockBoughtAmount  int
 	UserId             string
 	Timestamp          time.Time
+	Committed          bool
+	FromTrigger        bool
 }
 
 //easyjson:json
@@ -57,20 +59,8 @@ type Sell struct {
 	StockSoldAmount    int
 	UserId             string
 	Timestamp          time.Time
-}
-
-//easyjson:json
-type BuyTrigger struct {
-	UserId string
-	BuyId  int64
-	Active bool
-}
-
-//easyjson:json
-type SellTrigger struct {
-	UserId string
-	SellId int64
-	Active bool
+	Committed          bool
+	FromTrigger        bool
 }
 
 //easyjson:json
@@ -105,7 +95,7 @@ func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.Response, error)
 
 func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	buy, err := createBuy(ctx, req.Amount, req.Symbol, user)
+	buy, err := createBuy(ctx, req.Amount, req.Symbol, user, false)
 	return &pb.Response{Message: buy.toString()}, err
 }
 
@@ -119,7 +109,7 @@ func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.Response, erro
 
 func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	sell, err := createSell(ctx, req.Amount, req.Symbol, user)
+	sell, err := createSell(ctx, req.Amount, req.Symbol, user, false)
 	if err != nil {
 		return nil, err
 	}
@@ -134,8 +124,8 @@ func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.Response, 
 	if buy == nil {
 		return nil, errors.New("No buy on the stack")
 	}
-	userStock, err := buy.commit(ctx, user, false)
-	return &pb.Response{Message: userStock.toString()}, err
+	userStock := buy.commit(ctx, user, false)
+	return &pb.Response{Message: userStock.toString()}, nil
 }
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
@@ -143,15 +133,15 @@ func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.Response,
 	if sell == nil {
 		return nil, errors.New("No sell on the stack")
 	}
-	err := sell.commit(ctx, false, user)
-	return &pb.Response{Message: user.toString()}, err
+	user = sell.commit(ctx, false, user)
+	return &pb.Response{Message: user.toString()}, nil
 }
 
 func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
 	buy := user.popFromBuyStack()
 	if buy != nil {
-		buy.cancel(ctx, user)
+		buy.cancel(ctx, user, false)
 	} else {
 		return nil, errors.New("No buy on stack")
 	}
@@ -162,7 +152,7 @@ func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.Response,
 	user := getUser(req.UserId)
 	sell := user.popFromSellStack()
 	if sell != nil {
-		sell.cancel(ctx, user)
+		sell.cancel(ctx, user, false)
 	} else {
 		return nil, errors.New("No sell on stack")
 	}
@@ -174,75 +164,51 @@ func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Respons
 	if user.Balance < req.Amount {
 		return nil, fmt.Errorf("Not enough balance, have %f need %f", user.Balance, req.Amount)
 	}
-	trigger, err := getBuyTrigger(ctx, user.Id, req.Symbol)
-	if err != nil {
-		buy, err := createBuy(ctx, req.Amount, req.Symbol, user)
-		if err != nil {
-			return nil, err
-		}
-		buy, err = buy.insertBuy(ctx)
-		if err != nil {
-			log.Println(err)
-		}
-		trigger := createBuyTrigger(ctx, user.Id, req.Symbol, buy.Id, req.Amount)
-		return &pb.Response{Message: trigger.toString()}, nil
-	}
-	return &pb.Response{Message: trigger.toString()}, trigger.updateCashAmount(ctx, req.Amount, user)
+	buy, err := upsertBuyTrigger(ctx, req, user)
+	return &pb.Response{Message: buy.toString()}, err
 }
 
 func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	trigger, err := getSellTrigger(ctx, req.UserId, req.Symbol)
+	sell, err := upsertSellTrigger(ctx, req, user)
 	if err != nil {
-		user := getUser(req.UserId)
-		sell := &Sell{StockSymbol: req.Symbol, UserId: req.UserId}
-		err = sell.updateCashAmount(ctx, req.Amount, user)
-		if err != nil {
-			return nil, err
-		}
-		sell.insertSell(ctx)
-		trigger := createSellTrigger(ctx, req.UserId, req.Symbol, sell.Id, req.Amount)
-		return &pb.Response{Message: trigger.toString()}, nil
+		return nil, err
 	}
-	return &pb.Response{Message: trigger.toString()}, trigger.updateCashAmount(ctx, req.Amount, user)
+	return &pb.Response{Message: sell.toString()}, nil
 }
 
 func (s *server) SetBuyTrigger(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	trigger, err := getBuyTrigger(ctx, req.UserId, req.Symbol)
+	buy, err := setBuyTriggerPrice(ctx, req)
 	if err != nil {
 		return nil, errors.New("Trigger requires a buy amount first, please make one")
 	}
-	trigger.updatePrice(ctx, req.Amount)
-	return &pb.Response{Message: trigger.toString()}, nil
+	return &pb.Response{Message: buy.toString()}, nil
 }
 
 func (s *server) SetSellTrigger(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	trigger, err := getSellTrigger(ctx, req.UserId, req.Symbol)
+	sell, err := setSellTriggerPrice(ctx, user, req)
 	if err != nil {
 		return nil, errors.New("Trigger requires a sell amount first, please make one")
 	}
-	trigger.updatePrice(ctx, req.Amount, user)
-	return &pb.Response{Message: trigger.toString()}, nil
+	return &pb.Response{Message: sell.toString()}, nil
 }
 
 func (s *server) CancelSetBuy(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	trigger, err := getBuyTrigger(ctx, req.UserId, req.Symbol)
+	err := cancelBuyTrigger(ctx, req, user)
 	if err != nil {
 		return nil, errors.New("Set buy not found")
 	}
-	trigger.cancel(ctx, user)
 	return &pb.Response{Message: "Disabling trigger"}, nil
 }
 
 func (s *server) CancelSetSell(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	user := getUser(req.UserId)
-	trigger, err := getSellTrigger(ctx, req.UserId, req.Symbol)
+	err := cancelSellTrigger(ctx, req, user)
 	if err != nil {
 		return nil, errors.New("Set sell not found")
 	}
-	trigger.cancel(ctx, user)
 	return &pb.Response{Message: "Disabling trigger"}, nil
 }
 
