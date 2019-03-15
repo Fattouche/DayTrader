@@ -5,8 +5,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -15,16 +13,17 @@ import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 import styles from './styles/SignInStyles';
 
-function SignIn(props) {
-  console.log(props)
+function SignUp(props) {
   const { classes, handler} = props;
-  
-  function signUp(){
-    handler(false /* sign in */, true  /* sign up */)
+
+  function signIn(){
+    handler(true /* sign in */, false  /* sign up */)
   }
 
-  function signIn(){}
-
+  function verifyInformation(){
+    
+  }
+  
   return (
     <main className={classes.main}>
       <CssBaseline />
@@ -33,7 +32,7 @@ function SignIn(props) {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in
+          Sign Up
         </Typography>
         <form className={classes.form}>
           <FormControl margin="normal" required fullWidth>
@@ -44,10 +43,10 @@ function SignIn(props) {
             <InputLabel htmlFor="password">Password</InputLabel>
             <Input name="password" type="password" id="password" autoComplete="current-password" />
           </FormControl>
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
+          <FormControl margin="normal" required fullWidth>
+            <InputLabel htmlFor="confirm-password">Confirm Password</InputLabel>
+            <Input name="confirm-password" type="password" id="confirm-password" autoComplete="current-password" />
+          </FormControl>
           <Button
             type="submit"
             fullWidth
@@ -64,7 +63,7 @@ function SignIn(props) {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={signUp}
+            onClick={verifyInformation()}
           >
             Sign up
           </Button>
@@ -74,8 +73,8 @@ function SignIn(props) {
   );
 }
 
-SignIn.propTypes = {
+SignUp.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SignIn);
+export default withStyles(styles)(SignUp);
