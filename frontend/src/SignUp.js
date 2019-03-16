@@ -21,7 +21,8 @@ function SignUp(props) {
   }
 
   function verifyInformation(){
-    
+    // TODO(isaac): if user successfully created...handler(true,false)
+    // else refresh page
   }
   
   return (
@@ -48,7 +49,7 @@ function SignUp(props) {
             <Input name="confirm-password" type="password" id="confirm-password" autoComplete="current-password" />
           </FormControl>
           <Button
-            type="submit"
+            type="button"
             fullWidth
             variant="contained"
             color="primary"
@@ -63,7 +64,7 @@ function SignUp(props) {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={verifyInformation()}
+            onClick={verifyInformation}
           >
             Sign up
           </Button>
