@@ -13,8 +13,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
-import styles from './styles/SignInStyles';
-import proto from './proto/credentials_grpc_web_pb';
+import styles from '../styles/SignInStyles';
 
 
 class SignIn extends Component {
@@ -26,7 +25,8 @@ class SignIn extends Component {
     };
 
     this.classes = props.classes
-    this.handler = props.handler
+    this.handler = props.handler[0]
+    this.landing = props.handler[1]
     this.signUp = this.signUp.bind(this)
     this.signIn = this.signIn.bind(this)
   }
@@ -39,6 +39,7 @@ class SignIn extends Component {
   // proto to be able to retrieve users.
   // TODO(isaac): fix weird form submission bug where async call doesn't finish
   signIn(){
+    this.landing()
     // if(this.state.email === "" || this.state.password === ""){
     //   console.log("stop fucking around")
     //   return
@@ -91,7 +92,7 @@ render(){
             label="Remember me"
           />
           <Button
-            type="submit"
+            type="button"
             fullWidth
             variant="contained"
             color="primary"

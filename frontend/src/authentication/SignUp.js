@@ -11,9 +11,9 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
-import styles from './styles/SignInStyles';
+import styles from '../styles/SignInStyles';
 
-function SignUp(props) {
+function SignUp(props) { // Stay consistent and change to class
   const { classes, handler} = props;
 
   function signIn(){
