@@ -4,7 +4,7 @@ import { MuiThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Hidden from '@material-ui/core/Hidden';
 import Navigator from './Navigator';
-import Content from './Content';
+import MyProfile from './MyProfile';
 import Header from './Header';
 import Sell from './Sell';
 import Buy from './Buy';
@@ -155,7 +155,7 @@ const styles = {
 class Landing extends Component {
     constructor(props){
         super(props)
-        this.contentMap = {'My Profile': <Content/>, 'Buy': <Buy/>, 'Sell': <Sell/>, 'Browse': <Browse/>}
+        this.contentMap = {'My Profile': <MyProfile/>, 'Buy': <Buy/>, 'Sell': <Sell/>, 'Browse': <Browse/>}
         this.state = {
             mobileOpen: false,
             content: 'My Profile'
