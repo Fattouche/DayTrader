@@ -1,18 +1,18 @@
 services:
-  logging_server:
-    build:
-      context: ./images/logging
-      dockerfile: Dockerfile-lab
-    command:  go run .
-    environment:
-      LOGGING_DB_IP: 192.168.1.244 
-      LOGGING_DB_PORT: 3308
-      MAX_WORKERS: 10
-      MAX_QUEUE_LENGTH: 1000
-    ports: 
-      - '40000:40000'
-    volumes:
-      - ./src:/go/src/logging
+  # logging_server:
+  #   build:
+  #     context: ./images/logging
+  #     dockerfile: Dockerfile-lab
+  #   command:  go run .
+  #   environment:
+  #     LOGGING_DB_IP: 192.168.1.244 
+  #     LOGGING_DB_PORT: 3308
+  #     MAX_WORKERS: 10
+  #     MAX_QUEUE_LENGTH: 1000
+  #   ports: 
+  #     - '40000:40000'
+  #   volumes:
+  #     - ./src:/go/src/logging
   # logging_db:
   #   image: mysql
   #   command: mysqld --max_allowed_packet=256M --max_connections=1024 --default-authentication-plugin=mysql_native_password
@@ -33,6 +33,9 @@ services:
     build:
       context: ./images/envoy
     command: /service/entrypoint.sh
+    environment:
+      LOGGING_SERVER_IP: 192.168.1.240
+      LOGGING_SERVER_PORT: 40000
     volumes:
       - ./images/envoy/envoy.yaml:/etc/envoy/envoy.yaml
     ports:

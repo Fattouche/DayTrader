@@ -44,5 +44,5 @@ static_resources:
     lb_policy: round_robin
     hosts: 
      - socket_address:
-        address: logging_server
-        port_value: 40000
+        address: ${LOGGING_SERVER_IP}
+        port_value: ${LOGGING_SERVER_PORT}
