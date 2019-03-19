@@ -7,6 +7,8 @@ services:
     environment:
       LOGGING_DB_IP: 192.168.1.244 
       LOGGING_DB_PORT: 3308
+      MAX_WORKERS: 10
+      MAX_QUEUE_LENGTH: 1000
     ports: 
       - '40000:40000'
     volumes:

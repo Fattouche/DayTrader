@@ -15,11 +15,59 @@ import (
 // This server implements the protobuff Node type
 type server struct{}
 
+// // Worker/Queue/Job code adapted from code by Marcio Castilho:
+// // http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
+// var {
+// 	MaxWorkers = os.Getenv("MAX_WORKERS")
+// 	MaxQueueLength = os.Getenv("MAX_QUEUE_LENGTH")
+// }
+
+// type Job struct {
+// 	Payload Payload
+// }
+
+// var JobQueue chan Job
+
+// type Worker Struct {
+// 	WorkerPool chan chan Job
+// 	JobChannel chan Job
+// 	quit chan bool
+// }
+
+// func NewWorker(workerPool chan chan Job) Worker {
+// 	return Worker {
+// 		WorkerPool: workerPool,
+// 		JobChannel: make(chan Job),
+// 		quit: make(chan bool)
+// 	}
+// }
+
+// func (w Worker) Start() {
+// 	go func() {
+// 		for {
+// 			w.WorkerPool <- w.JobChannel
+
+// 			select {
+// 			case job := <-w.JobChannel:
+
+// 			case <-w.quit:
+// 				return
+// 			}
+// 		}
+// 	}
+// }
+
 var (
 	grpcPort = ":40000"
 )
 
+var num_logs = 0
+
 func (s *server) LogUserCommand(ctx context.Context, req *pb.Log) (*pb.Response, error) {
+	num_logs++
+	if num_logs % 1000 == 0 {
+		log.Printf("Num logs attempted: %d\n", num_logs)
+	}
 	for {
 		_, err := db.Exec(
 			"INSERT INTO UserCommandLog(Server, TransactionNum, Command,"+
@@ -57,17 +105,18 @@ func (s *server) LogQuoteServerEvent(ctx context.Context, req *pb.Log) (*pb.Resp
 }
 
 func (s *server) LogAccountTransaction(ctx context.Context, req *pb.Log) (*pb.Response, error) {
-	return &pb.Response{Message: "Inserted"}, nil
-	_, err := db.Exec(
-		"INSERT INTO AccountTransactionLog(Server, TransactionNum, Action,"+
-			"Username, Funds) VALUES(?,?,?,?,?)",
-		req.ServerName, req.TransactionNum, req.AccountAction,
-		req.Username, req.Funds,
-	)
-	if err != nil {
-		log.Println(err)
-	}
-	return &pb.Response{Message: "Inserted"}, err
+	return &pb.Response{Message: "Skipped Account Transaction"}, nil
+	
+	// _, err := db.Exec(
+	// 	"INSERT INTO AccountTransactionLog(Server, TransactionNum, Action,"+
+	// 		"Username, Funds) VALUES(?,?,?,?,?)",
+	// 	req.ServerName, req.TransactionNum, req.AccountAction,
+	// 	req.Username, req.Funds,
+	// )
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// return &pb.Response{Message: "Inserted"}, err
 }
 
 func (s *server) LogSystemEvent(ctx context.Context, req *pb.Log) (*pb.Response, error) {
