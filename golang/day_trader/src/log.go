@@ -37,6 +37,8 @@ func makeLogFromContext(ctx context.Context) (pb.Log, error) {
 	}, nil
 }
 
+var num_logs = 0;
+
 func startLoggerWorker() {
 	conn, err := grpc.Dial(logUrl, grpc.WithInsecure())
 	if err != nil {
@@ -47,6 +49,10 @@ func startLoggerWorker() {
 		obj := <-logChan
 		switch obj.funcName {
 		case "LogUserCommand":
+			num_logs++
+			if num_logs % 1000 == 0 {
+				log.Printf("Num user command logs sent: %d\n", num_logs)
+			}
 			client.LogUserCommand(context.Background(), obj.log)
 		case "LogQuoteServerEvent":
 			client.LogQuoteServerEvent(context.Background(), obj.log)
