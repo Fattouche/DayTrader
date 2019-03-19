@@ -99,5 +99,5 @@ func createAndOpenDB() {
 	}
 	db.SetConnMaxLifetime(time.Second * 0)
 	db.SetMaxIdleConns(2000)
-	db.SetMaxOpenConns(1000)
+	db.SetMaxOpenConns(500)
 }

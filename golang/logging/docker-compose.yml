@@ -29,14 +29,14 @@ services:
   #     - ./images/nginx/nginx.conf:/etc/nginx/nginx.conf
   #   ports:
   #     - '81:80'
-  logging_lb:
-    build:
-      context: ./images/envoy
-    command: /service/entrypoint.sh
-    volumes:
-      - ./images/envoy/envoy.yaml:/etc/envoy/envoy.yaml
-    ports:
-      - '81:80'
+  # logging_lb:
+  #   build:
+  #     context: ./images/envoy
+  #   command: /service/entrypoint.sh
+  #   volumes:
+  #     - ./images/envoy/envoy.yaml:/etc/envoy/envoy.yaml
+  #   ports:
+  #     - '81:80'
 
 networks:
   default:
