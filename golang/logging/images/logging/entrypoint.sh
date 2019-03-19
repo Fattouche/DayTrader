@@ -1,5 +1,5 @@
 #!/bin/bash
 
-bash /startup/wait-for-it.sh logging_db:3306 --timeout=300
+bash /startup/wait-for-it.sh ${LOGGING_DB_IP}:${LOGGING_DB_PORT} --timeout=300
 
 exec "$@"

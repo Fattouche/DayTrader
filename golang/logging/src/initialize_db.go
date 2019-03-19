@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"time"
+	"os"
 )
 
 var (
@@ -77,7 +78,7 @@ var createTableStatements = []string{
 
 func createAndOpenDB() {
 	var err error
-	db, err = sql.Open("mysql", "root:@tcp(logging_db:3306)/")
+	db, err = sql.Open("mysql", "root:@tcp("+os.Getenv("LOGGING_DB_IP")+":"+os.Getenv("LOGGING_DB_PORT")+")/")
 	if err != nil {
 		panic(err)
 	}
@@ -91,7 +92,7 @@ func createAndOpenDB() {
 		}
 	}
 	db, err = sql.Open(
-		"mysql", "root@tcp(logging_db:3306)/logging?parseTime=true",
+		"mysql", "root@tcp("+os.Getenv("LOGGING_DB_IP")+":"+os.Getenv("LOGGING_DB_PORT")+")/logging?parseTime=true",
 	)
 	if err != nil {
 		panic(err)

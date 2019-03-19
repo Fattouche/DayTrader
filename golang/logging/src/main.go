@@ -20,33 +20,44 @@ var (
 )
 
 func (s *server) LogUserCommand(ctx context.Context, req *pb.Log) (*pb.Response, error) {
-	_, err := db.Exec(
-		"INSERT INTO UserCommandLog(Server, TransactionNum, Command,"+
-			"Username, StockSymbol, Filename, Funds) VALUES(?,?,?,?,?,?,?)",
-		req.ServerName, req.TransactionNum, req.Command, req.Username,
-		req.StockSymbol, req.Filename, req.Funds,
-	)
-	if err != nil {
-		log.Println(err)
+	for {
+		_, err := db.Exec(
+			"INSERT INTO UserCommandLog(Server, TransactionNum, Command,"+
+				"Username, StockSymbol, Filename, Funds) VALUES(?,?,?,?,?,?,?)",
+			req.ServerName, req.TransactionNum, req.Command, req.Username,
+			req.StockSymbol, req.Filename, req.Funds,
+		)
+		if err != nil {
+			log.Println(err)
+			log.Println("Retrying query...")
+		} else {
+			break
+		}
 	}
-	return &pb.Response{Message: "Inserted"}, err
+	return &pb.Response{Message: "Inserted"}, nil
 }
 
 func (s *server) LogQuoteServerEvent(ctx context.Context, req *pb.Log) (*pb.Response, error) {
-	_, err := db.Exec(
-		"INSERT INTO QuoteServerLog(Server, TransactionNum, Price,"+
-			"StockSymbol, Username, QuoteServerTime, CryptoKey)"+
-			"VALUES(?,?,?,?,?,?,?)",
-		req.ServerName, req.TransactionNum, req.Price, req.StockSymbol,
-		req.Username, req.QuoteServerTime, req.CryptoKey,
-	)
-	if err != nil {
-		log.Println(err)
+	for {
+		_, err := db.Exec(
+			"INSERT INTO QuoteServerLog(Server, TransactionNum, Price,"+
+				"StockSymbol, Username, QuoteServerTime, CryptoKey)"+
+				"VALUES(?,?,?,?,?,?,?)",
+			req.ServerName, req.TransactionNum, req.Price, req.StockSymbol,
+			req.Username, req.QuoteServerTime, req.CryptoKey,
+		)
+		if err != nil {
+			log.Println(err)
+			log.Println("Retrying query...")
+		} else {
+			break
+		}
 	}
-	return &pb.Response{Message: "Inserted"}, err
+	return &pb.Response{Message: "Inserted"}, nil
 }
 
 func (s *server) LogAccountTransaction(ctx context.Context, req *pb.Log) (*pb.Response, error) {
+	return &pb.Response{Message: "Inserted"}, nil
 	_, err := db.Exec(
 		"INSERT INTO AccountTransactionLog(Server, TransactionNum, Action,"+
 			"Username, Funds) VALUES(?,?,?,?,?)",

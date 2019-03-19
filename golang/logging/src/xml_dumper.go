@@ -285,4 +285,6 @@ func dumpLogsToXML(userID string, filename string) {
 	rows.Close()
 
 	f.WriteString("</log>\n")
+
+	log.Println("Finished dumping logs")
 }
