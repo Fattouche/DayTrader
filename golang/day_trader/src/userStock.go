@@ -17,7 +17,7 @@ func getOrCreateUserStock(ctx context.Context, userID, symbol string, user *User
 		return &UserStock{UserId: userID, StockSymbol: symbol, Amount: amount}
 	}
 	amount := 0
-	db.QueryRow("Select Amount from User_Stock where UserId=?", user.Id).Scan(&amount)
+	userDb.QueryRow("Select Amount from User_Stock where UserId=?", user.Id).Scan(&amount)
 	userStock := &UserStock{UserId: userID, StockSymbol: symbol, Amount: amount}
 	user.setCache()
 	return userStock

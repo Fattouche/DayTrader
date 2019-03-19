@@ -46,7 +46,7 @@ func (user *User) popFromSellStack() *Sell {
 func getUser(userID string) *User {
 	user, err := getCacheUser(userID)
 	if err != nil {
-		db.QueryRow("SELECT Balance from User where Id=?", user.Id).Scan(&user.Balance)
+		userDb.QueryRow("SELECT Balance from User where Id=?", user.Id).Scan(&user.Balance)
 		user.SellStack = make([]*Sell, 0)
 		user.BuyStack = make([]*Buy, 0)
 		user.StockMap = make(map[string]int)
@@ -61,7 +61,7 @@ func createUser(userID string) error {
 	user.BuyStack = make([]*Buy, 0)
 	user.StockMap = make(map[string]int)
 	user.setCache()
-	_, err := db.Exec("insert into User(Id) values(?)", userID)
+	_, err := userDb.Exec("insert into User(Id) values(?)", userID)
 	return err
 }
 
@@ -74,7 +74,7 @@ func (user *User) updateUserBalance(ctx context.Context, amount float32, writeTh
 	}
 	user.Balance += amount
 	if writeThrough {
-		_, err := db.Exec("update User set Balance=? where Id=?", user.Balance, user.Id)
+		_, err := userDb.Exec("update User set Balance=? where Id=?", user.Balance, user.Id)
 		if err != nil {
 			return user, err
 		}
@@ -94,7 +94,7 @@ func (user *User) updateUserBalance(ctx context.Context, amount float32, writeTh
 
 func (user *User) updateStockBalance(ctx context.Context, symbol string) error {
 	amount := user.StockMap[symbol]
-	_, err := db.Exec("insert into User_Stock(UserId,StockSymbol,Amount) Values(?,?,?) on duplicate key update Amount=?", user.Id, symbol, amount, amount)
+	_, err := userDb.Exec("insert into User_Stock(UserId,StockSymbol,Amount) Values(?,?,?) on duplicate key update Amount=?", user.Id, symbol, amount, amount)
 	if err != nil {
 		return err
 	}

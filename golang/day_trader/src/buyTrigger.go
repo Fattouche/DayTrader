@@ -16,7 +16,7 @@ func (trigger *BuyTrigger) toString() string {
 
 func getBuyTrigger(ctx context.Context, userID, symbol string) (*BuyTrigger, error) {
 	buyTrigger := &BuyTrigger{UserId: userID, BuyId: -1}
-	db.QueryRow("SELECT Buy.Id,Buy_Trigger.Active from Buy_Trigger inner join Buy on Buy_Trigger.BuyId=Buy.Id where Buy_Trigger.UserId=? and Buy.StockSymbol=?", buyTrigger.UserId, symbol).Scan(&buyTrigger.BuyId, &buyTrigger.Active)
+	buyDb.QueryRow("SELECT Buy.Id,Buy_Trigger.Active from Buy_Trigger inner join Buy on Buy_Trigger.BuyId=Buy.Id where Buy_Trigger.UserId=? and Buy.StockSymbol=?", buyTrigger.UserId, symbol).Scan(&buyTrigger.BuyId, &buyTrigger.Active)
 	if buyTrigger.BuyId == -1 {
 		return nil, errors.New("No Buy trigger found")
 	}
@@ -38,18 +38,18 @@ func (trigger *BuyTrigger) updatePrice(ctx context.Context, price float32) {
 	buy.updatePrice(price)
 	buy.updateBuy(ctx)
 	trigger.Active = true
-	db.Exec("UPDATE Buy_Trigger set Active=true where UserId=? and BuyId=?", trigger.UserId, trigger.BuyId)
+	buyDb.Exec("UPDATE Buy_Trigger set Active=true where UserId=? and BuyId=?", trigger.UserId, trigger.BuyId)
 }
 
 func (trigger *BuyTrigger) cancel(ctx context.Context, user *User) {
 	buy := getBuy(ctx, trigger.BuyId)
 	buy.cancel(ctx, user)
-	db.Exec("DELETE From Buy_Trigger UserId=? and BuyId=?", trigger.UserId, trigger.BuyId)
-	db.Exec("DELETE From Buy where Id=?", trigger.BuyId)
+	buyDb.Exec("DELETE From Buy_Trigger UserId=? and BuyId=?", trigger.UserId, trigger.BuyId)
+	buyDb.Exec("DELETE From Buy where Id=?", trigger.BuyId)
 }
 
 func createBuyTrigger(ctx context.Context, userID, symbol string, buyID int64, amount float32) *BuyTrigger {
-	_, err := db.Exec("insert into Buy_Trigger(UserId,BuyId) values(?,?)", userID, buyID)
+	_, err := buyDb.Exec("insert into Buy_Trigger(UserId,BuyId) values(?,?)", userID, buyID)
 	if err != nil {
 		log.Println(err)
 	}
@@ -58,7 +58,7 @@ func createBuyTrigger(ctx context.Context, userID, symbol string, buyID int64, a
 }
 
 func checkBuyTriggers() {
-	rows, err := db.Query("SELECT Buy.Id, Buy.StockSymbol, Buy.IntendedCashAmount,Buy.StockBoughtAmount, Buy.Price, Buy.UserId from Buy inner join Buy_Trigger on Buy_Trigger.BuyId=Buy.Id where Buy_Trigger.Active=true")
+	rows, err := buyDb.Query("SELECT Buy.Id, Buy.StockSymbol, Buy.IntendedCashAmount,Buy.StockBoughtAmount, Buy.Price, Buy.UserId from Buy inner join Buy_Trigger on Buy_Trigger.BuyId=Buy.Id where Buy_Trigger.Active=true")
 	if err != nil {
 		log.Println(err)
 	}
@@ -77,7 +77,7 @@ func checkBuyTriggers() {
 		if buy.Price >= stock.Price {
 			buy.updatePrice(stock.Price)
 			buy.commit(context.Background(), getUser(buy.UserId), true)
-			db.Exec("Delete From Buy_Trigger where BuyId=? and UserId=?", buy.Id, buy.UserId)
+			buyDb.Exec("Delete From Buy_Trigger where BuyId=? and UserId=?", buy.Id, buy.UserId)
 		}
 	}
 }

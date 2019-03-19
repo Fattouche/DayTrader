@@ -74,7 +74,7 @@ func (buy *Buy) cancel(ctx context.Context, user *User) {
 }
 
 func (buy *Buy) updateBuy(ctx context.Context) error {
-	_, err := db.Exec("update Buy set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockBoughtAmount = ? where Id=?", buy.IntendedCashAmount, buy.Price, buy.ActualCashAmount, buy.StockBoughtAmount, buy.Id)
+	_, err := buyDb.Exec("update Buy set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockBoughtAmount = ? where Id=?", buy.IntendedCashAmount, buy.Price, buy.ActualCashAmount, buy.StockBoughtAmount, buy.Id)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (buy *Buy) updateBuy(ctx context.Context) error {
 }
 
 func (buy *Buy) insertBuy(ctx context.Context) (*Buy, error) {
-	res, err := db.Exec("insert into Buy(Price,StockSymbol,UserId,IntendedCashAmount,ActualCashAmount,StockBoughtAmount) values(?,?,?,?,?,?)", buy.Price, buy.StockSymbol, buy.UserId, buy.IntendedCashAmount, buy.ActualCashAmount, buy.StockBoughtAmount)
+	res, err := buyDb.Exec("insert into Buy(Price,StockSymbol,UserId,IntendedCashAmount,ActualCashAmount,StockBoughtAmount) values(?,?,?,?,?,?)", buy.Price, buy.StockSymbol, buy.UserId, buy.IntendedCashAmount, buy.ActualCashAmount, buy.StockBoughtAmount)
 	if err != nil {
 		return buy, err
 	}
@@ -92,7 +92,7 @@ func (buy *Buy) insertBuy(ctx context.Context) (*Buy, error) {
 
 func getBuy(ctx context.Context, id int64) *Buy {
 	buy := &Buy{}
-	err := db.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount)
+	err := buyDb.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount)
 	if err != nil {
 		log.Println(err)
 	}

@@ -30,7 +30,7 @@ func (trigger *SellTrigger) updatePrice(ctx context.Context, price float32, user
 	if err == nil {
 		trigger.Active = true
 		sell.updateSell(ctx)
-		db.Exec("UPDATE Sell_Trigger set Active=true where UserId=? and SellId=?", trigger.UserId, trigger.SellId)
+		sellDb.Exec("UPDATE Sell_Trigger set Active=true where UserId=? and SellId=?", trigger.UserId, trigger.SellId)
 	}
 	return err
 }
@@ -38,13 +38,13 @@ func (trigger *SellTrigger) updatePrice(ctx context.Context, price float32, user
 func (trigger *SellTrigger) cancel(ctx context.Context, user *User) {
 	sell := getSell(ctx, trigger.SellId)
 	sell.cancel(ctx, user)
-	db.Exec("DELETE from Sell_Trigger UserId=? and SellId=?", trigger.UserId, trigger.SellId)
-	db.Exec("DELETE From Sell where Id=?", trigger.SellId)
+	sellDb.Exec("DELETE from Sell_Trigger UserId=? and SellId=?", trigger.UserId, trigger.SellId)
+	sellDb.Exec("DELETE From Sell where Id=?", trigger.SellId)
 }
 
 func getSellTrigger(ctx context.Context, userID, symbol string) (*SellTrigger, error) {
 	sellTrigger := &SellTrigger{UserId: userID, SellId: -1}
-	db.QueryRow("SELECT Sell.Id, Sell_Trigger.Active from Sell inner join Sell_Trigger on Sell_Trigger.SellId=Sell.Id where Sell_Trigger.UserId=? and Sell.StockSymbol=?", sellTrigger.UserId, symbol).Scan(&sellTrigger.SellId, &sellTrigger.Active)
+	sellDb.QueryRow("SELECT Sell.Id, Sell_Trigger.Active from Sell inner join Sell_Trigger on Sell_Trigger.SellId=Sell.Id where Sell_Trigger.UserId=? and Sell.StockSymbol=?", sellTrigger.UserId, symbol).Scan(&sellTrigger.SellId, &sellTrigger.Active)
 	if sellTrigger.SellId == -1 {
 		return nil, errors.New("No sell trigger found")
 	}
@@ -52,7 +52,7 @@ func getSellTrigger(ctx context.Context, userID, symbol string) (*SellTrigger, e
 }
 
 func createSellTrigger(ctx context.Context, userID, symbol string, sellID int64, amount float32) *SellTrigger {
-	_, err := db.Exec("insert into Sell_Trigger(UserId,SellId) values(?,?)", userID, sellID)
+	_, err := sellDb.Exec("insert into Sell_Trigger(UserId,SellId) values(?,?)", userID, sellID)
 	if err != nil {
 		log.Println(err)
 	}
@@ -61,7 +61,7 @@ func createSellTrigger(ctx context.Context, userID, symbol string, sellID int64,
 }
 
 func checkSellTriggers() {
-	rows, err := db.Query("SELECT Sell.Id, Sell.StockSymbol, Sell.IntendedCashAmount,Sell.StockSoldAmount, Sell.Price,Sell.UserId from Sell inner join Sell_Trigger on Sell_Trigger.SellId=Sell.Id where Sell_Trigger.Active=true")
+	rows, err := sellDb.Query("SELECT Sell.Id, Sell.StockSymbol, Sell.IntendedCashAmount,Sell.StockSoldAmount, Sell.Price,Sell.UserId from Sell inner join Sell_Trigger on Sell_Trigger.SellId=Sell.Id where Sell_Trigger.Active=true")
 	if err != nil {
 		log.Println(err)
 	}
@@ -81,7 +81,7 @@ func checkSellTriggers() {
 			user := getUser(sell.UserId)
 			sell.updatePrice(context.Background(), stock.Price, user)
 			sell.commit(context.Background(), true, user)
-			db.Exec("Delete From Sell_Trigger where SellId=? and UserId=?", sell.Id, sell.UserId)
+			sellDb.Exec("Delete From Sell_Trigger where SellId=? and UserId=?", sell.Id, sell.UserId)
 		}
 	}
 }

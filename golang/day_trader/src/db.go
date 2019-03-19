@@ -6,7 +6,28 @@ import (
 	"os"
 )
 
-var createTableStatements = []string{
+var createSellTableStatements = []string{
+	`CREATE DATABASE IF NOT EXISTS ` + DB_NAME,
+	`USE ` + DB_NAME,
+	`CREATE TABLE IF NOT EXISTS Sell(
+		Id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+		Price float DEFAULT 0,
+		StockSymbol varchar(3) NULL,
+		UserId varchar(32) NULL,
+		IntendedCashAmount float DEFAULT 0,
+		ActualCashAmount float DEFAULT 0,
+		StockSoldAmount int DEFAULT 0,
+		PRIMARY KEY (Id)
+	)`,
+	`CREATE TABLE IF NOT EXISTS Sell_Trigger(
+		UserId varchar(32),
+		SellId INT UNSIGNED,
+		Active BOOLEAN DEFAULT false,
+		UNIQUE(UserId, SellId)
+	)`,
+}
+
+var createUserTableStatements = []string{
 	`CREATE DATABASE IF NOT EXISTS ` + DB_NAME,
 	`USE ` + DB_NAME,
 	`CREATE TABLE IF NOT EXISTS User(
@@ -15,73 +36,109 @@ var createTableStatements = []string{
 		Name varchar(32) NULL,
 		PRIMARY KEY (id)
 	)`,
-	`CREATE TABLE IF NOT EXISTS Sell(
-		Id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-		Price float DEFAULT 0,
+	`CREATE TABLE IF NOT EXISTS User_Stock(
+		UserId varchar(32),
 		StockSymbol varchar(3) NULL,
-		UserId varchar(32) NOT NULL,
-		IntendedCashAmount float DEFAULT 0,
-		ActualCashAmount float DEFAULT 0,
-		StockSoldAmount int DEFAULT 0,
-		PRIMARY KEY (Id),
-		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
+		Amount INT UNSIGNED DEFAULT 0,
+		UNIQUE(UserId, StockSymbol)
 	)`,
+}
+
+var createBuyTableStatements = []string{
+	`CREATE DATABASE IF NOT EXISTS ` + DB_NAME,
+	`USE ` + DB_NAME,
 	`CREATE TABLE IF NOT EXISTS Buy(
 		Id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 		Price float DEFAULT 0,
 		StockSymbol varchar(3) NULL,
-		UserId varchar(32) NOT NULL,
+		UserId varchar(32) NULL,
 		IntendedCashAmount float DEFAULT 0,
 		ActualCashAmount float DEFAULT 0,
 		StockBoughtAmount int DEFAULT 0,
-		PRIMARY KEY (Id),
-		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
-	)`,
-	`CREATE TABLE IF NOT EXISTS Sell_Trigger(
-		UserId varchar(32) NOT NULL,
-		SellId INT UNSIGNED NOT NULL,
-		Active BOOLEAN DEFAULT false,
-		UNIQUE(UserId, SellId),
-		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE,
-		FOREIGN KEY (SellId) REFERENCES Sell(Id) ON DELETE CASCADE
+		PRIMARY KEY (Id)
 	)`,
 	`CREATE TABLE IF NOT EXISTS Buy_Trigger(
-		UserId varchar(32) NOT NULL,
-		BuyId INT UNSIGNED NOT NULL,
+		UserId varchar(32),
+		BuyId INT UNSIGNED,
 		Active BOOLEAN DEFAULT false,
-		UNIQUE(UserId, BuyId),
-		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE,
-		FOREIGN KEY (BuyId) REFERENCES Buy(Id) ON DELETE CASCADE
-	)`,
-	`CREATE TABLE IF NOT EXISTS User_Stock(
-		UserId varchar(32) NOT NULL,
-		StockSymbol varchar(3) NULL,
-		Amount INT UNSIGNED DEFAULT 0,
-		UNIQUE(UserId, StockSymbol),
-		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
+		UNIQUE(UserId, BuyId)
 	)`,
 }
-var db *sql.DB
+var sellDb *sql.DB
+var buyDb *sql.DB
+var userDb *sql.DB
 
-func createAndOpenDB() {
+func createAndOpenSellDB(){
 	var err error
-	db, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_DB_IP")+":3306)/")
+	sellDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_SELL_DB_IP")+":3306)/")
 	if err != nil {
 		panic(err)
 	}
 
-	for _, stmt := range createTableStatements {
-		_, err := db.Exec(stmt)
+	for _, stmt := range createSellTableStatements {
+		_, err := sellDb.Exec(stmt)
 		if err != nil {
 			if err != nil {
 				panic(err)
 			}
 		}
 	}
-	db, err = sql.Open("mysql", "root@tcp("+os.Getenv("DAYTRADER_DB_IP")+":3306)/daytrader")
+	sellDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_SELL_DB_IP")+":3306)/")
 	if err != nil {
 		panic(err)
 	}
-	db.SetConnMaxLifetime(time.Second * 0)
-	db.SetMaxIdleConns(10000)
+	sellDb.SetConnMaxLifetime(time.Second * 0)
+	sellDb.SetMaxIdleConns(10000)
+}
+
+func createAndOpenBuyDB(){
+	var err error
+	buyDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_BUY_DB_IP")+":3306)/")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, stmt := range createBuyTableStatements {
+		_, err := buyDb.Exec(stmt)
+		if err != nil {
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+	buyDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_BUY_DB_IP")+":3306)/")
+	if err != nil {
+		panic(err)
+	}
+	buyDb.SetConnMaxLifetime(time.Second * 0)
+	buyDb.SetMaxIdleConns(10000)
+}
+
+func createAndOpenUserDB(){
+	var err error
+	userDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_USER_DB_IP")+":3306)/")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, stmt := range createUserTableStatements {
+		_, err := userDb.Exec(stmt)
+		if err != nil {
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+	userDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_USER_DB_IP")+":3306)/")
+	if err != nil {
+		panic(err)
+	}
+	userDb.SetConnMaxLifetime(time.Second * 0)
+	userDb.SetMaxIdleConns(10000)
+}
+
+func createAndOpenDB() {
+	createAndOpenBuyDB()
+	createAndOpenSellDB()
+	createAndOpenUserDB()
 }
