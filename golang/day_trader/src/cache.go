@@ -1,13 +1,14 @@
 package main
 
 import (
+	"os"
 	"github.com/rainycape/memcache"
 )
 
 var cache *memcache.Client
 
 func initCache() {
-	cache, _ = memcache.New("daytrader_cache:11211")
+	cache, _ = memcache.New(os.Getenv("DAYTRADER_CACHE_IP")+":"+os.Getenv("DAYTRADER_CACHE_PORT"))
 }
 
 func (user *User) setCache() error {

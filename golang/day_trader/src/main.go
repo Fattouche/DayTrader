@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"time"
+	"os"
 
 	_ "net/http/pprof"
 
@@ -86,7 +87,7 @@ type server struct{}
 var (
 	GRPC_PORT  = ":41000"
 	DB_NAME    = "daytrader"
-	QUOTE_HOST = "quote_server"
+	QUOTE_HOST = os.Getenv("QUOTE_SERVER_HOST")
 	QUOTE_PORT = ":4442"
 	CACHE_HOST = "cache"
 	CACHE_PORT = ":11211"
@@ -296,6 +297,6 @@ func main() {
 	for i := 0; i < 500; i++ {
 		go startLoggerWorker()
 	}
-	go watchTriggers()
+	//go watchTriggers()
 	startGRPCServer()
 }

@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"log"
+	"os"
 
 	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 	"google.golang.org/grpc"
 )
 
-var logUrl = "logging_lb:80"
+var logUrl = os.Getenv("LOGGING_LB_IP")+":"+os.Getenv("LOGGING_LB_PORT")
 var logChan = make(chan *logObj, 10000)
 
 type logObj struct {
