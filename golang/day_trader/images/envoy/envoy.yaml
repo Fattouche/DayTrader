@@ -44,11 +44,11 @@ static_resources:
     lb_policy: round_robin
     hosts: 
      - socket_address:
-        address: day_trader_daytrader_web_1
+        address: 192.168.1.194
         port_value: 41000
      - socket_address:
-        address: day_trader_daytrader_web_2
+        address: 192.168.1.157
         port_value: 41000
      - socket_address:
-        address: day_trader_daytrader_web_3
+        address: 192.168.1.191
         port_value: 41000
