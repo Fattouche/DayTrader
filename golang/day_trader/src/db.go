@@ -83,7 +83,7 @@ func createAndOpenSellDB(){
 			}
 		}
 	}
-	sellDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_SELL_DB_IP")+":3306)/")
+	sellDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_SELL_DB_IP")+":3306)/daytrader")
 	if err != nil {
 		panic(err)
 	}
@@ -106,7 +106,7 @@ func createAndOpenBuyDB(){
 			}
 		}
 	}
-	buyDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_BUY_DB_IP")+":3306)/")
+	buyDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_BUY_DB_IP")+":3306)/daytrader")
 	if err != nil {
 		panic(err)
 	}
@@ -129,7 +129,7 @@ func createAndOpenUserDB(){
 			}
 		}
 	}
-	userDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_USER_DB_IP")+":3306)/")
+	userDb, err = sql.Open("mysql", "root:@tcp("+os.Getenv("DAYTRADER_USER_DB_IP")+":3306)/daytrader")
 	if err != nil {
 		panic(err)
 	}
