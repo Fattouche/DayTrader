@@ -36,26 +36,67 @@ service Logger{
     rpc DumpLogs(command) returns (Response){} 
 }
 
+message UserResponse {
+    string user_id = 1;
+    float balance = 2;
+    map<string,int32> stocks = 3; 
+}
+
+message BalanceResponse {
+    string user_id = 1;
+    float balance = 2;
+}
+
+message StockUpdateResponse{
+    string user_id = 1;
+    map<string,int32> stocks = 2;
+}
+
+message PriceResponse {
+    string user_id = 1;
+    float price = 2;
+}
+
+message Trigger {
+    float price = 1;
+    float amount = 2;
+}
+
+message Transaction {
+    string command_name = 1;
+    string amount = 2;
+    string stock_symbol = 3;
+}
+
+message SummaryResponse {
+    UserResponse user_info = 1;
+    repeated Transaction transactions = 2;
+    repeated Trigger buy_triggers = 3;
+    repeated Trigger sell_triggers = 4;
+}
+
 message Response{
-    string message = 1;
+    string user_id = 1;
+    string message = 2;
 }
 
 service DayTrader{
-    rpc CreateUser(command) returns(Response){}
-    rpc Add(command) returns(Response) {}
-    rpc Quote(command) returns(Response) {}
-    rpc Buy(command) returns(Response) {}
-    rpc Sell(command) returns(Response) {}
-    rpc CommitBuy(command) returns(Response) {}
-    rpc CommitSell(command) returns(Response) {}
-    rpc CancelBuy(command) returns(Response) {}
-    rpc CancelSell(command) returns(Response) {}
-    rpc SetBuyAmount(command) returns(Response) {}
+    rpc GetUser(command) returns(UserResponse) {}
+    rpc CreateUser(command) returns(UserResponse) {}
+    rpc Add(command) returns(BalanceResponse) {}
+    rpc Quote(command) returns(PriceResponse) {}
+    rpc Buy(command) returns(BalanceResponse) {}
+    rpc Sell(command) returns(StockUpdateResponse) {}
+    rpc CommitBuy(command) returns(StockUpdateResponse) {}
+    rpc CommitSell(command) returns(UserResponse) {}
+    rpc CancelBuy(command) returns(BalanceResponse) {}
+    rpc CancelSell(command) returns(StockUpdateResponse) {}
+    rpc SetBuyAmount(command) returns(BalanceResponse) {}
     rpc SetSellAmount(command) returns(Response) {}
     rpc SetBuyTrigger(command) returns(Response) {}
-    rpc SetSellTrigger(command) returns(Response) {}
-    rpc CancelSetSell(command) returns(Response) {}
-    rpc CancelSetBuy(command) returns(Response) {}
+    rpc SetSellTrigger(command) returns(StockUpdateResponse) {}
+    rpc CancelSetBuy(command) returns(BalanceResponse) {}
+    rpc CancelSetSell(command) returns(StockUpdateResponse) {}
     rpc DumpLog(command) returns(Response) {}
-    rpc DisplaySummary(command) returns(Response) {}
+    rpc DisplaySummary(command) returns(SummaryResponse) {}
 }
