@@ -73,6 +73,14 @@ func (user *User) updateUserBalance(ctx context.Context, amount float32, writeTh
 		accountAction = "Add"
 	}
 	user.Balance += amount
+	//deal with max balances and overflow
+	if user.Balance > MAX_BALANCE {
+		user.Balance = MAX_BALANCE
+	}
+	//Shouldn't happen
+	if user.Balance < 0 {
+		user.Balance = 0
+	}
 	if writeThrough {
 		_, err := db.Exec("update User set Balance=? where Id=?", user.Balance, user.Id)
 		if err != nil {

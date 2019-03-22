@@ -27,7 +27,7 @@ func serverInterceptor(ctx context.Context, req interface{},
 				return nil, err
 			}
 			if err := checks(command); err != nil {
-				log.Println("Error creating user: ", err)
+				err := logErrorEvent(ctx, err)
 				return nil, err
 			}
 		}
@@ -37,43 +37,18 @@ func serverInterceptor(ctx context.Context, req interface{},
 	return h, err
 }
 
-// Populates the context with logging info, so that it can be extracted whenever
-// a log event occurs
-func populateContextWithLogInfo(ctx context.Context, command *pb.Command) context.Context {
-	var key logKey
-
-	// TODO: get the server name from an environment variable
-	rawLog := pb.Log{
-		TransactionNum: command.TransactionId,
-		Username:       command.UserId,
-		ServerName:     "Beaver_1",
-		Command:        command.Name,
-	}
-	key = "log"
-	ctx = context.WithValue(ctx, key, rawLog)
-	return ctx
-}
-
-func logUserCommand(ctx context.Context, command *pb.Command) error {
-	logObject, err := makeLogFromContext(ctx)
-	if err != nil {
-		log.Println("Error making log from context: ", err)
-		return err
-	}
-	logObject.StockSymbol = command.Symbol
-	logObject.Filename = command.Filename
-	logObject.Funds = command.Amount
-	logEvent := &logObj{log: &logObject, funcName: "LogUserCommand"}
-	logChan <- logEvent
-	return nil
-}
-
 // make sure user exists
 func checks(req *pb.Command) error {
 	if req.Name != "DUMPLOG" && req.Name != "DISPLAY_SUMMARY" {
 		if req.UserId == "" {
 			return errors.New("No user Id specified")
 		}
+	}
+	if req.Amount <= 0 {
+		return errors.New("Balance must be greater than 0")
+	}
+	if len(req.Symbol) > 3 {
+		return errors.New("Symbol must be 3 characters or less")
 	}
 	return nil
 }
