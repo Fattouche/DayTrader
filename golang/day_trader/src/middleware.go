@@ -44,8 +44,8 @@ func checks(req *pb.Command) error {
 			return errors.New("No user Id specified")
 		}
 	}
-	if req.Amount <= 0 {
-		return errors.New("Balance must be greater than 0")
+	if req.Amount < 0 {
+		return errors.New("Amount must be greater than 0")
 	}
 	if len(req.Symbol) > 3 {
 		return errors.New("Symbol must be 3 characters or less")

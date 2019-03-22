@@ -104,12 +104,186 @@ func getRows(tableName, userID string) (*sql.Rows, error) {
 	return rows, err
 }
 
-func dumpLogsToXML(userID string, filename string) {
-	// For final dumplog, do a wait to make sure all logs are in the DB
+func dumpLogsToXML(userID, filename string) {
 	if userID == "" {
+		dumpErrorLogs(userID, filename+"_Error")
+		dumpAccountLogs(userID, filename+"_Account")
+		dumpDebugLogs(userID, filename+"_Debug")
+		dumpSystemEventLogs(userID, filename+"_System")
+		// For final dumplog, do a wait to make sure all logs are in the DB
 		time.Sleep(time.Second * 20)
 	}
+	dumpUserLogs(userID, filename+"_User")
+}
 
+func dumpErrorLogs(userID, filename string) {
+	dumplogsDir := "/go/src/logging/dumplogs"
+	sanitizedFilename := filepath.Join(dumplogsDir, filepath.Clean(filename))
+	f, err := os.Create(sanitizedFilename)
+	if err != nil {
+		log.Println("Error scanning trigger: ", err)
+	}
+	defer f.Close()
+
+	f.WriteString("<?xml version=\"1.0\"?>\n")
+	f.WriteString("<log>\n")
+	var rows *sql.Rows
+
+	// ErrorEvent
+	rows, err = getRows("ErrorEventLog", userID)
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		xmlLog := &errorEventLog{}
+		var timestamp time.Time
+		err = rows.Scan(
+			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
+			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
+			&xmlLog.Filename, &xmlLog.Funds, &xmlLog.ErrorMessage,
+		)
+		if err != nil {
+			log.Println("Error scanning trigger: ", err)
+		}
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
+		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
+		if err != nil {
+			log.Println("Error marshalling to XML: ", err)
+		}
+		f.Write(output)
+		f.WriteString("\n")
+	}
+	rows.Close()
+	f.WriteString("</log>\n")
+}
+
+func dumpAccountLogs(userID, filename string) {
+	dumplogsDir := "/go/src/logging/dumplogs"
+	sanitizedFilename := filepath.Join(dumplogsDir, filepath.Clean(filename))
+	f, err := os.Create(sanitizedFilename)
+	if err != nil {
+		log.Println("Error scanning trigger: ", err)
+	}
+	defer f.Close()
+
+	f.WriteString("<?xml version=\"1.0\"?>\n")
+	f.WriteString("<log>\n")
+	var rows *sql.Rows
+
+	// AccountTransaction
+	rows, err = getRows("AccountTransactionLog", userID)
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		xmlLog := &accountTransactionLog{}
+		var timestamp time.Time
+		err = rows.Scan(
+			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
+			&xmlLog.Action, &xmlLog.Username, &xmlLog.Funds,
+		)
+		if err != nil {
+			log.Println("Error scanning trigger: ", err)
+		}
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
+		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
+		if err != nil {
+			log.Println("Error marshalling to XML: ", err)
+		}
+		f.Write(output)
+		f.WriteString("\n")
+	}
+	rows.Close()
+	f.WriteString("</log>\n")
+}
+
+func dumpSystemEventLogs(userID, filename string) {
+	dumplogsDir := "/go/src/logging/dumplogs"
+	sanitizedFilename := filepath.Join(dumplogsDir, filepath.Clean(filename))
+	f, err := os.Create(sanitizedFilename)
+	if err != nil {
+		log.Println("Error scanning trigger: ", err)
+	}
+	defer f.Close()
+
+	f.WriteString("<?xml version=\"1.0\"?>\n")
+	f.WriteString("<log>\n")
+	var rows *sql.Rows
+
+	// SystemEvent
+	rows, err = getRows("SystemEventLog", userID)
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		xmlLog := &systemEventLog{}
+		var timestamp time.Time
+		err = rows.Scan(
+			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
+			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
+			&xmlLog.Filename, &xmlLog.Funds,
+		)
+		if err != nil {
+			log.Println("Error scanning trigger: ", err)
+		}
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
+		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
+		if err != nil {
+			log.Println("Error marshalling to XML: ", err)
+		}
+		f.Write(output)
+		f.WriteString("\n")
+	}
+	rows.Close()
+	f.WriteString("</log>\n")
+}
+
+func dumpDebugLogs(userID, filename string) {
+	dumplogsDir := "/go/src/logging/dumplogs"
+	sanitizedFilename := filepath.Join(dumplogsDir, filepath.Clean(filename))
+	f, err := os.Create(sanitizedFilename)
+	if err != nil {
+		log.Println("Error scanning trigger: ", err)
+	}
+	defer f.Close()
+
+	f.WriteString("<?xml version=\"1.0\"?>\n")
+	f.WriteString("<log>\n")
+	var rows *sql.Rows
+
+	// DebugEvent
+	rows, err = getRows("DebugEventLog", userID)
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		xmlLog := &debugEventLog{}
+		var timestamp time.Time
+		err = rows.Scan(
+			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
+			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
+			&xmlLog.Filename, &xmlLog.Funds, &xmlLog.DebugMessage,
+		)
+		if err != nil {
+			log.Println("Error scanning trigger: ", err)
+		}
+		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
+		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
+		if err != nil {
+			log.Println("Error marshalling to XML: ", err)
+		}
+		f.Write(output)
+		f.WriteString("\n")
+	}
+	rows.Close()
+	f.WriteString("</log>\n")
+}
+
+func dumpUserLogs(userID, filename string) {
 	dumplogsDir := "/go/src/logging/dumplogs"
 	sanitizedFilename := filepath.Join(dumplogsDir, filepath.Clean(filename))
 	f, err := os.Create(sanitizedFilename)
@@ -176,113 +350,5 @@ func dumpLogsToXML(userID string, filename string) {
 		f.WriteString("\n")
 	}
 	rows.Close()
-
-	// AccountTransaction
-	rows, err = getRows("AccountTransactionLog", userID)
-	if err != nil {
-		return
-	}
-
-	for rows.Next() {
-		xmlLog := &accountTransactionLog{}
-		var timestamp time.Time
-		err = rows.Scan(
-			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
-			&xmlLog.Action, &xmlLog.Username, &xmlLog.Funds,
-		)
-		if err != nil {
-			log.Println("Error scanning trigger: ", err)
-		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
-		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
-		if err != nil {
-			log.Println("Error marshalling to XML: ", err)
-		}
-		f.Write(output)
-		f.WriteString("\n")
-	}
-	rows.Close()
-
-	// SystemEvent
-	rows, err = getRows("SystemEventLog", userID)
-	if err != nil {
-		return
-	}
-
-	for rows.Next() {
-		xmlLog := &systemEventLog{}
-		var timestamp time.Time
-		err = rows.Scan(
-			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
-			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
-			&xmlLog.Filename, &xmlLog.Funds,
-		)
-		if err != nil {
-			log.Println("Error scanning trigger: ", err)
-		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
-		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
-		if err != nil {
-			log.Println("Error marshalling to XML: ", err)
-		}
-		f.Write(output)
-		f.WriteString("\n")
-	}
-	rows.Close()
-
-	// ErrorEvent
-	rows, err = getRows("ErrorEventLog", userID)
-	if err != nil {
-		return
-	}
-
-	for rows.Next() {
-		xmlLog := &errorEventLog{}
-		var timestamp time.Time
-		err = rows.Scan(
-			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
-			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
-			&xmlLog.Filename, &xmlLog.Funds, &xmlLog.ErrorMessage,
-		)
-		if err != nil {
-			log.Println("Error scanning trigger: ", err)
-		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
-		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
-		if err != nil {
-			log.Println("Error marshalling to XML: ", err)
-		}
-		f.Write(output)
-		f.WriteString("\n")
-	}
-	rows.Close()
-
-	// DebugEvent
-	rows, err = getRows("DebugEventLog", userID)
-	if err != nil {
-		return
-	}
-
-	for rows.Next() {
-		xmlLog := &debugEventLog{}
-		var timestamp time.Time
-		err = rows.Scan(
-			&timestamp, &xmlLog.Server, &xmlLog.TransactionNum,
-			&xmlLog.Command, &xmlLog.Username, &xmlLog.StockSymbol,
-			&xmlLog.Filename, &xmlLog.Funds, &xmlLog.DebugMessage,
-		)
-		if err != nil {
-			log.Println("Error scanning trigger: ", err)
-		}
-		xmlLog.Timestamp = timestamp.UnixNano() / 1000000
-		output, err := xml.MarshalIndent(xmlLog, "\t", "\t")
-		if err != nil {
-			log.Println("Error marshalling to XML: ", err)
-		}
-		f.Write(output)
-		f.WriteString("\n")
-	}
-	rows.Close()
-
 	f.WriteString("</log>\n")
 }
