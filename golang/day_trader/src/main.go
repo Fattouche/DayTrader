@@ -303,6 +303,20 @@ func (s *server) DumpLog(ctx context.Context, req *pb.Command) (*pb.Response, er
 }
 
 func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.Response, error) {
+	conn, err := grpc.Dial(logUrl, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to dial to %s with %v", logUrl, err)
+	}
+	client := pb.NewLoggerClient(conn)
+	response, err := client.DisplaySummary(ctx, req)
+	if err != nil {
+		log.Println("DisplaySummary call to log server failed: ", err)
+	}
+
+	// response should contain all transactions, once that's implemented
+	// TODO: grab info on current triggers, and then put it all together into
+	// a SummaryResponse proto and return
+
 	return &pb.Response{Message: "yee"}, nil
 }
 

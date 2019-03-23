@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"net"
+	"strconv"
+	"time"
 
 	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 
@@ -104,6 +106,37 @@ func (s *server) DumpLogs(ctx context.Context, req *pb.Command) (*pb.Response, e
 	go dumpLogsToXML(req.UserId, req.Filename)
 
 	return &pb.Response{Message: "Writing to XML"}, nil
+}
+
+func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.Response, error) {
+	rows, err := getRows("UserCommandLog", req.UserId)
+	if err != nil {
+		return &pb.Response{Message: "Failed to get rows from DB"}, err
+	}
+
+	var entries []pb.Transaction
+
+	for rows.Next() {
+		entry := pb.Transaction{}
+		var timestamp time.Time
+		err = rows.Scan(
+			&timestamp, nil, nil,
+			&entry.CommandName, nil, &entry.StockSymbol,
+			nil, &entry.Amount,
+		)
+		if err != nil {
+			log.Println("Error scanning rows: ", err)
+		}
+		entry.Timestamp = strconv.FormatInt(timestamp.UnixNano()/1000000, 10)
+
+		entries = append(entries, entry)
+	}
+	rows.Close()
+
+	log.Println(entries)
+
+	// TODO: aggregate all transactions and return
+	return &pb.Response{Message: "yeee"}, nil
 }
 
 func startGRPCServer() {
