@@ -83,7 +83,7 @@ message Response{
 
 service DayTrader{
     rpc GetUser(command) returns(UserResponse) {}
-    rpc CreateUser(command) returns(UserResponse) {}
+    rpc CreateUser(command) returns(Response) {}
     rpc Add(command) returns(BalanceResponse) {}
     rpc Quote(command) returns(PriceResponse) {}
     rpc Buy(command) returns(BalanceResponse) {}
