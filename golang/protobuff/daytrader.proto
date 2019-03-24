@@ -35,6 +35,7 @@ service Logger{
     rpc LogErrorEvent(log) returns (Response){} 
     rpc LogDebugEvent(log) returns (Response){}
     rpc DumpLogs(command) returns (Response){} 
+    rpc DisplaySummary(command) returns (SummaryResponse){}
 }
 
 message UserResponse {
