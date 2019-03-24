@@ -3,11 +3,12 @@ package daytrader;
 
 message command{
     string user_id=1;
-    float amount=2;
-    string symbol=3;
-    string filename=4;
-    int32 transaction_id=5;
-    string name = 6;
+    string password = 2;
+    float amount=3;
+    string symbol=4;
+    string filename=5;
+    int32 transaction_id=6;
+    string name = 7;
 }
 
 message log{
