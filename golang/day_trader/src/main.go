@@ -294,7 +294,7 @@ func main() {
 	// }()
 	createAndOpenDB()
 	initCache()
-	for i := 0; i < 500; i++ {
+	for i := 0; i < 50; i++ {
 		go startLoggerWorker()
 	}
 	//go watchTriggers()
