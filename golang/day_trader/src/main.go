@@ -113,9 +113,6 @@ func (s *server) CreateUser(ctx context.Context, req *pb.Command) (*pb.Response,
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
 	user := getUser(req.UserId)
 	user, err := user.updateUserBalance(ctx, req.Amount, true)
-	if err == nil {
-		err = errors.New(fmt.Sprintf("Amount: %f Balance: %f", req.Amount, user.Balance))
-	}
 	return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, err
 }
 
