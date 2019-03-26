@@ -8,6 +8,8 @@ import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -24,11 +26,12 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type Command struct {
 	UserId               string   `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Amount               float32  `protobuf:"fixed32,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	Symbol               string   `protobuf:"bytes,3,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	Filename             string   `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
-	TransactionId        int32    `protobuf:"varint,5,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
-	Name                 string   `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
+	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Amount               float32  `protobuf:"fixed32,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	Symbol               string   `protobuf:"bytes,4,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Filename             string   `protobuf:"bytes,5,opt,name=filename,proto3" json:"filename,omitempty"`
+	TransactionId        int32    `protobuf:"varint,6,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Name                 string   `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -62,6 +65,13 @@ var xxx_messageInfo_Command proto.InternalMessageInfo
 func (m *Command) GetUserId() string {
 	if m != nil {
 		return m.UserId
+	}
+	return ""
+}
+
+func (m *Command) GetPassword() string {
+	if m != nil {
+		return m.Password
 	}
 	return ""
 }
@@ -236,8 +246,378 @@ func (m *Log) GetDebugMessage() string {
 	return ""
 }
 
+type UserResponse struct {
+	UserId               string           `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Balance              float32          `protobuf:"fixed32,2,opt,name=balance,proto3" json:"balance,omitempty"`
+	Stocks               map[string]int32 `protobuf:"bytes,3,rep,name=stocks,proto3" json:"stocks,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *UserResponse) Reset()         { *m = UserResponse{} }
+func (m *UserResponse) String() string { return proto.CompactTextString(m) }
+func (*UserResponse) ProtoMessage()    {}
+func (*UserResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59c1366fd5914009, []int{2}
+}
+
+func (m *UserResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserResponse.Unmarshal(m, b)
+}
+func (m *UserResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserResponse.Marshal(b, m, deterministic)
+}
+func (m *UserResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserResponse.Merge(m, src)
+}
+func (m *UserResponse) XXX_Size() int {
+	return xxx_messageInfo_UserResponse.Size(m)
+}
+func (m *UserResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserResponse proto.InternalMessageInfo
+
+func (m *UserResponse) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *UserResponse) GetBalance() float32 {
+	if m != nil {
+		return m.Balance
+	}
+	return 0
+}
+
+func (m *UserResponse) GetStocks() map[string]int32 {
+	if m != nil {
+		return m.Stocks
+	}
+	return nil
+}
+
+type BalanceResponse struct {
+	UserId               string   `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Balance              float32  `protobuf:"fixed32,2,opt,name=balance,proto3" json:"balance,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BalanceResponse) Reset()         { *m = BalanceResponse{} }
+func (m *BalanceResponse) String() string { return proto.CompactTextString(m) }
+func (*BalanceResponse) ProtoMessage()    {}
+func (*BalanceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59c1366fd5914009, []int{3}
+}
+
+func (m *BalanceResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BalanceResponse.Unmarshal(m, b)
+}
+func (m *BalanceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BalanceResponse.Marshal(b, m, deterministic)
+}
+func (m *BalanceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BalanceResponse.Merge(m, src)
+}
+func (m *BalanceResponse) XXX_Size() int {
+	return xxx_messageInfo_BalanceResponse.Size(m)
+}
+func (m *BalanceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_BalanceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BalanceResponse proto.InternalMessageInfo
+
+func (m *BalanceResponse) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *BalanceResponse) GetBalance() float32 {
+	if m != nil {
+		return m.Balance
+	}
+	return 0
+}
+
+type StockUpdateResponse struct {
+	UserId               string           `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Stocks               map[string]int32 `protobuf:"bytes,2,rep,name=stocks,proto3" json:"stocks,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *StockUpdateResponse) Reset()         { *m = StockUpdateResponse{} }
+func (m *StockUpdateResponse) String() string { return proto.CompactTextString(m) }
+func (*StockUpdateResponse) ProtoMessage()    {}
+func (*StockUpdateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59c1366fd5914009, []int{4}
+}
+
+func (m *StockUpdateResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StockUpdateResponse.Unmarshal(m, b)
+}
+func (m *StockUpdateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StockUpdateResponse.Marshal(b, m, deterministic)
+}
+func (m *StockUpdateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StockUpdateResponse.Merge(m, src)
+}
+func (m *StockUpdateResponse) XXX_Size() int {
+	return xxx_messageInfo_StockUpdateResponse.Size(m)
+}
+func (m *StockUpdateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_StockUpdateResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StockUpdateResponse proto.InternalMessageInfo
+
+func (m *StockUpdateResponse) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *StockUpdateResponse) GetStocks() map[string]int32 {
+	if m != nil {
+		return m.Stocks
+	}
+	return nil
+}
+
+type PriceResponse struct {
+	UserId               string   `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Price                float32  `protobuf:"fixed32,2,opt,name=price,proto3" json:"price,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PriceResponse) Reset()         { *m = PriceResponse{} }
+func (m *PriceResponse) String() string { return proto.CompactTextString(m) }
+func (*PriceResponse) ProtoMessage()    {}
+func (*PriceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59c1366fd5914009, []int{5}
+}
+
+func (m *PriceResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PriceResponse.Unmarshal(m, b)
+}
+func (m *PriceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PriceResponse.Marshal(b, m, deterministic)
+}
+func (m *PriceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PriceResponse.Merge(m, src)
+}
+func (m *PriceResponse) XXX_Size() int {
+	return xxx_messageInfo_PriceResponse.Size(m)
+}
+func (m *PriceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_PriceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PriceResponse proto.InternalMessageInfo
+
+func (m *PriceResponse) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *PriceResponse) GetPrice() float32 {
+	if m != nil {
+		return m.Price
+	}
+	return 0
+}
+
+type Trigger struct {
+	Price                float32  `protobuf:"fixed32,1,opt,name=price,proto3" json:"price,omitempty"`
+	Amount               float32  `protobuf:"fixed32,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Trigger) Reset()         { *m = Trigger{} }
+func (m *Trigger) String() string { return proto.CompactTextString(m) }
+func (*Trigger) ProtoMessage()    {}
+func (*Trigger) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59c1366fd5914009, []int{6}
+}
+
+func (m *Trigger) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Trigger.Unmarshal(m, b)
+}
+func (m *Trigger) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Trigger.Marshal(b, m, deterministic)
+}
+func (m *Trigger) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Trigger.Merge(m, src)
+}
+func (m *Trigger) XXX_Size() int {
+	return xxx_messageInfo_Trigger.Size(m)
+}
+func (m *Trigger) XXX_DiscardUnknown() {
+	xxx_messageInfo_Trigger.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Trigger proto.InternalMessageInfo
+
+func (m *Trigger) GetPrice() float32 {
+	if m != nil {
+		return m.Price
+	}
+	return 0
+}
+
+func (m *Trigger) GetAmount() float32 {
+	if m != nil {
+		return m.Amount
+	}
+	return 0
+}
+
+type Transaction struct {
+	CommandName          string   `protobuf:"bytes,1,opt,name=command_name,json=commandName,proto3" json:"command_name,omitempty"`
+	Amount               string   `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	StockSymbol          string   `protobuf:"bytes,3,opt,name=stock_symbol,json=stockSymbol,proto3" json:"stock_symbol,omitempty"`
+	Timestamp            string   `protobuf:"bytes,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Transaction) Reset()         { *m = Transaction{} }
+func (m *Transaction) String() string { return proto.CompactTextString(m) }
+func (*Transaction) ProtoMessage()    {}
+func (*Transaction) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59c1366fd5914009, []int{7}
+}
+
+func (m *Transaction) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Transaction.Unmarshal(m, b)
+}
+func (m *Transaction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Transaction.Marshal(b, m, deterministic)
+}
+func (m *Transaction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Transaction.Merge(m, src)
+}
+func (m *Transaction) XXX_Size() int {
+	return xxx_messageInfo_Transaction.Size(m)
+}
+func (m *Transaction) XXX_DiscardUnknown() {
+	xxx_messageInfo_Transaction.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Transaction proto.InternalMessageInfo
+
+func (m *Transaction) GetCommandName() string {
+	if m != nil {
+		return m.CommandName
+	}
+	return ""
+}
+
+func (m *Transaction) GetAmount() string {
+	if m != nil {
+		return m.Amount
+	}
+	return ""
+}
+
+func (m *Transaction) GetStockSymbol() string {
+	if m != nil {
+		return m.StockSymbol
+	}
+	return ""
+}
+
+func (m *Transaction) GetTimestamp() string {
+	if m != nil {
+		return m.Timestamp
+	}
+	return ""
+}
+
+type SummaryResponse struct {
+	UserInfo             *UserResponse  `protobuf:"bytes,1,opt,name=user_info,json=userInfo,proto3" json:"user_info,omitempty"`
+	Transactions         []*Transaction `protobuf:"bytes,2,rep,name=transactions,proto3" json:"transactions,omitempty"`
+	BuyTriggers          []*Trigger     `protobuf:"bytes,3,rep,name=buy_triggers,json=buyTriggers,proto3" json:"buy_triggers,omitempty"`
+	SellTriggers         []*Trigger     `protobuf:"bytes,4,rep,name=sell_triggers,json=sellTriggers,proto3" json:"sell_triggers,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
+}
+
+func (m *SummaryResponse) Reset()         { *m = SummaryResponse{} }
+func (m *SummaryResponse) String() string { return proto.CompactTextString(m) }
+func (*SummaryResponse) ProtoMessage()    {}
+func (*SummaryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59c1366fd5914009, []int{8}
+}
+
+func (m *SummaryResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SummaryResponse.Unmarshal(m, b)
+}
+func (m *SummaryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SummaryResponse.Marshal(b, m, deterministic)
+}
+func (m *SummaryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SummaryResponse.Merge(m, src)
+}
+func (m *SummaryResponse) XXX_Size() int {
+	return xxx_messageInfo_SummaryResponse.Size(m)
+}
+func (m *SummaryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_SummaryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SummaryResponse proto.InternalMessageInfo
+
+func (m *SummaryResponse) GetUserInfo() *UserResponse {
+	if m != nil {
+		return m.UserInfo
+	}
+	return nil
+}
+
+func (m *SummaryResponse) GetTransactions() []*Transaction {
+	if m != nil {
+		return m.Transactions
+	}
+	return nil
+}
+
+func (m *SummaryResponse) GetBuyTriggers() []*Trigger {
+	if m != nil {
+		return m.BuyTriggers
+	}
+	return nil
+}
+
+func (m *SummaryResponse) GetSellTriggers() []*Trigger {
+	if m != nil {
+		return m.SellTriggers
+	}
+	return nil
+}
+
 type Response struct {
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	UserId               string   `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Message              string   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -247,7 +627,7 @@ func (m *Response) Reset()         { *m = Response{} }
 func (m *Response) String() string { return proto.CompactTextString(m) }
 func (*Response) ProtoMessage()    {}
 func (*Response) Descriptor() ([]byte, []int) {
-	return fileDescriptor_59c1366fd5914009, []int{2}
+	return fileDescriptor_59c1366fd5914009, []int{9}
 }
 
 func (m *Response) XXX_Unmarshal(b []byte) error {
@@ -268,6 +648,13 @@ func (m *Response) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Response proto.InternalMessageInfo
 
+func (m *Response) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
 func (m *Response) GetMessage() string {
 	if m != nil {
 		return m.Message
@@ -278,53 +665,85 @@ func (m *Response) GetMessage() string {
 func init() {
 	proto.RegisterType((*Command)(nil), "daytrader.command")
 	proto.RegisterType((*Log)(nil), "daytrader.log")
+	proto.RegisterType((*UserResponse)(nil), "daytrader.UserResponse")
+	proto.RegisterMapType((map[string]int32)(nil), "daytrader.UserResponse.StocksEntry")
+	proto.RegisterType((*BalanceResponse)(nil), "daytrader.BalanceResponse")
+	proto.RegisterType((*StockUpdateResponse)(nil), "daytrader.StockUpdateResponse")
+	proto.RegisterMapType((map[string]int32)(nil), "daytrader.StockUpdateResponse.StocksEntry")
+	proto.RegisterType((*PriceResponse)(nil), "daytrader.PriceResponse")
+	proto.RegisterType((*Trigger)(nil), "daytrader.Trigger")
+	proto.RegisterType((*Transaction)(nil), "daytrader.Transaction")
+	proto.RegisterType((*SummaryResponse)(nil), "daytrader.SummaryResponse")
 	proto.RegisterType((*Response)(nil), "daytrader.Response")
 }
 
 func init() { proto.RegisterFile("daytrader.proto", fileDescriptor_59c1366fd5914009) }
 
 var fileDescriptor_59c1366fd5914009 = []byte{
-	// 638 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x9c, 0x56, 0xdd, 0x6e, 0xd3, 0x4c,
-	0x10, 0xfd, 0x9a, 0x34, 0x7f, 0xd3, 0x24, 0xd5, 0xb7, 0xe5, 0xc7, 0xaa, 0x84, 0x80, 0x00, 0x02,
-	0x71, 0x51, 0x41, 0x81, 0x22, 0x7e, 0x84, 0x14, 0x9a, 0x5e, 0x20, 0xa0, 0x12, 0x4e, 0xb8, 0x8e,
-	0xb6, 0xf6, 0x36, 0xb2, 0x6a, 0x7b, 0xc3, 0xee, 0xba, 0x92, 0x9f, 0x86, 0x6b, 0x24, 0xde, 0x84,
-	0x97, 0x62, 0x77, 0x76, 0x93, 0x18, 0x24, 0xa4, 0xae, 0xef, 0x3c, 0x67, 0xe6, 0xec, 0x99, 0x33,
-	0xb3, 0xb6, 0x0c, 0xbb, 0x31, 0x2d, 0x95, 0xa0, 0x31, 0x13, 0x07, 0x4b, 0xc1, 0x15, 0x27, 0xbd,
-	0x35, 0x30, 0xfa, 0xb1, 0x05, 0x9d, 0x88, 0x67, 0x19, 0xcd, 0x63, 0x72, 0x13, 0x3a, 0x85, 0x64,
-	0x62, 0x9e, 0xc4, 0xc1, 0xd6, 0x9d, 0xad, 0x47, 0xbd, 0xb0, 0x6d, 0xc2, 0x0f, 0x31, 0xb9, 0x01,
-	0x6d, 0x9a, 0xf1, 0x22, 0x57, 0x41, 0x43, 0xe3, 0x8d, 0xd0, 0x45, 0x06, 0x97, 0x65, 0x76, 0xc6,
-	0xd3, 0xa0, 0x69, 0xeb, 0x6d, 0x44, 0xf6, 0xa1, 0x7b, 0x9e, 0xa4, 0x2c, 0xa7, 0x19, 0x0b, 0xb6,
-	0x31, 0xb3, 0x8e, 0xc9, 0x03, 0x18, 0x6a, 0xe9, 0x5c, 0xd2, 0x48, 0x25, 0x3c, 0x37, 0x5a, 0x2d,
-	0x5d, 0xd1, 0x0a, 0x07, 0x15, 0x54, 0x4b, 0x12, 0xd8, 0x46, 0x7a, 0x1b, 0xe9, 0xf8, 0x3c, 0xfa,
-	0xd9, 0x84, 0x66, 0xca, 0x17, 0x24, 0x58, 0xb7, 0xec, 0xfa, 0x5c, 0x3b, 0xb8, 0x0d, 0x3b, 0xba,
-	0xe3, 0x4b, 0xed, 0x01, 0xc9, 0x0d, 0xcc, 0x82, 0x85, 0x4e, 0x8d, 0xfa, 0x43, 0xd8, 0xad, 0xaa,
-	0xe7, 0x45, 0x86, 0xad, 0xb7, 0xc2, 0x6a, 0x53, 0xa7, 0x45, 0x66, 0x2c, 0x18, 0xf3, 0x55, 0x0b,
-	0xab, 0x98, 0xdc, 0x85, 0xbe, 0x54, 0x3c, 0xba, 0x98, 0x3b, 0xf3, 0x2d, 0xcc, 0xef, 0x20, 0x36,
-	0xb5, 0x13, 0xb8, 0x06, 0xad, 0xa5, 0x48, 0x22, 0xdb, 0x7f, 0x23, 0xb4, 0x81, 0x41, 0xcf, 0x8b,
-	0x3c, 0x96, 0x41, 0xc7, 0xa2, 0x18, 0xfc, 0x31, 0xad, 0xee, 0x5f, 0xd3, 0xba, 0x05, 0x10, 0x89,
-	0x72, 0xa9, 0xf8, 0xfc, 0x82, 0x95, 0x41, 0x0f, 0xb3, 0x3d, 0x8b, 0x7c, 0x64, 0x25, 0x79, 0x0c,
-	0xff, 0x7f, 0x2b, 0xb8, 0x62, 0x73, 0xe7, 0x5a, 0x25, 0xfa, 0x0c, 0xd0, 0x55, 0xcd, 0x70, 0x17,
-	0x13, 0x53, 0xc4, 0x67, 0x89, 0x1d, 0x3c, 0x8d, 0x22, 0xb3, 0xb7, 0xb9, 0xb5, 0x19, 0xec, 0xe0,
-	0x71, 0x03, 0x87, 0x8e, 0x11, 0x24, 0xf7, 0x60, 0xc0, 0x84, 0xe0, 0x62, 0x9e, 0x31, 0x29, 0xe9,
-	0x82, 0x05, 0x7d, 0xac, 0xea, 0x23, 0xf8, 0xd9, 0x62, 0xa6, 0x28, 0x66, 0x67, 0xc5, 0x62, 0x5d,
-	0x34, 0xb0, 0x45, 0x08, 0xba, 0xa2, 0xd1, 0x7d, 0xe8, 0x86, 0x4c, 0x2e, 0x79, 0x2e, 0x99, 0x59,
-	0xd9, 0xaa, 0xd4, 0xad, 0xcc, 0x85, 0x87, 0xdf, 0x9b, 0xd0, 0xfe, 0xc4, 0x17, 0x0b, 0x26, 0xc8,
-	0x4b, 0x18, 0xea, 0xa7, 0xaf, 0xda, 0xcb, 0xb1, 0xdb, 0xe7, 0xf0, 0x60, 0x73, 0x75, 0xf5, 0xe6,
-	0xf7, 0xf7, 0x2a, 0xf1, 0xea, 0xec, 0xd1, 0x7f, 0xe4, 0x2d, 0xec, 0x69, 0xe2, 0x97, 0x8d, 0xe1,
-	0x93, 0x4b, 0xa6, 0xaf, 0xe7, 0x15, 0xd9, 0xef, 0xe0, 0xba, 0x66, 0x8f, 0xed, 0x14, 0x66, 0x9b,
-	0x6b, 0x70, 0x55, 0xbe, 0x6d, 0x7b, 0x5a, 0x4a, 0xc5, 0x32, 0x2f, 0xe1, 0x23, 0x18, 0x68, 0xe2,
-	0x89, 0x19, 0x6c, 0x0d, 0xde, 0xc4, 0xcc, 0xda, 0x8b, 0xf7, 0x02, 0xba, 0x93, 0x22, 0x5b, 0x6a,
-	0xae, 0x24, 0xa4, 0x52, 0xe2, 0xde, 0x9e, 0x7f, 0xd0, 0x0e, 0x7f, 0x75, 0xa0, 0x37, 0xa1, 0xe5,
-	0x0c, 0x13, 0xda, 0x2d, 0x1c, 0x0b, 0x46, 0x15, 0x33, 0x7b, 0xf2, 0x38, 0x86, 0x3c, 0x81, 0xe6,
-	0x38, 0x8e, 0x7d, 0x18, 0x87, 0xd0, 0xc2, 0x9d, 0x7a, 0xaa, 0xbc, 0x2f, 0x4a, 0x1f, 0xc6, 0x53,
-	0xd8, 0x9e, 0xb2, 0x34, 0xf5, 0xa1, 0x1c, 0x41, 0xcf, 0xdc, 0xd0, 0x44, 0x79, 0x4a, 0x99, 0xd9,
-	0x21, 0xaf, 0x8e, 0x20, 0xcd, 0x23, 0x96, 0xd6, 0x10, 0x44, 0x9e, 0xaf, 0xe0, 0x2b, 0xe8, 0x4f,
-	0x99, 0xb1, 0x37, 0xb6, 0x5f, 0x7a, 0x0f, 0xea, 0x6b, 0x18, 0x68, 0xaa, 0x11, 0xac, 0xcb, 0xd5,
-	0xb2, 0x33, 0x91, 0xe0, 0x27, 0xc1, 0x83, 0xfb, 0x06, 0x86, 0x4e, 0xb7, 0x06, 0x59, 0x0b, 0xaf,
-	0x06, 0xa5, 0x6a, 0xcc, 0x6a, 0xcd, 0xf5, 0xdc, 0xcf, 0x73, 0xe8, 0xb8, 0x37, 0xd2, 0xd3, 0xe9,
-	0x24, 0x91, 0xcb, 0x94, 0x96, 0xd3, 0x42, 0x17, 0x0a, 0x1f, 0xc9, 0xb3, 0x36, 0xfe, 0x02, 0x3c,
-	0xfb, 0x1d, 0x00, 0x00, 0xff, 0xff, 0xa5, 0x3c, 0xe4, 0xd5, 0x15, 0x08, 0x00, 0x00,
+	// 998 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0xdd, 0x6e, 0xe3, 0x44,
+	0x14, 0xae, 0xe3, 0xe6, 0xc7, 0x27, 0x7f, 0x30, 0x85, 0x5d, 0xab, 0xe2, 0x27, 0x78, 0x85, 0x88,
+	0xf6, 0xa2, 0x17, 0x65, 0x97, 0x2e, 0xdd, 0x1f, 0x91, 0x34, 0x05, 0x55, 0x84, 0x15, 0x38, 0xdd,
+	0xeb, 0x68, 0x12, 0x4f, 0xad, 0x68, 0x6d, 0x4f, 0x98, 0x19, 0x17, 0xf9, 0x11, 0x78, 0x17, 0x78,
+	0x00, 0x1e, 0x80, 0x27, 0xe1, 0x01, 0xb8, 0xe0, 0x05, 0xd0, 0xcc, 0xd8, 0x8e, 0x53, 0xe2, 0x36,
+	0x6d, 0xd1, 0xde, 0xe5, 0x1c, 0xcf, 0x77, 0xce, 0xf9, 0xce, 0xcf, 0x27, 0x05, 0xba, 0x1e, 0x4e,
+	0x04, 0xc3, 0x1e, 0x61, 0x07, 0x4b, 0x46, 0x05, 0x45, 0x56, 0xee, 0x70, 0xfe, 0x34, 0xa0, 0x3e,
+	0xa7, 0x61, 0x88, 0x23, 0x0f, 0x3d, 0x84, 0x7a, 0xcc, 0x09, 0x9b, 0x2e, 0x3c, 0xdb, 0xe8, 0x19,
+	0x7d, 0xcb, 0xad, 0x49, 0xf3, 0xcc, 0x43, 0xfb, 0xd0, 0x58, 0x62, 0xce, 0x7f, 0xa1, 0xcc, 0xb3,
+	0x2b, 0xea, 0x4b, 0x6e, 0xa3, 0x07, 0x50, 0xc3, 0x21, 0x8d, 0x23, 0x61, 0x9b, 0x3d, 0xa3, 0x5f,
+	0x71, 0x53, 0x4b, 0xfa, 0x79, 0x12, 0xce, 0x68, 0x60, 0xef, 0xea, 0x58, 0xda, 0x92, 0xb1, 0x2e,
+	0x16, 0x01, 0x89, 0x70, 0x48, 0xec, 0xaa, 0x8e, 0x95, 0xd9, 0xe8, 0x73, 0xe8, 0x08, 0x86, 0x23,
+	0x8e, 0xe7, 0x62, 0x41, 0x23, 0x59, 0x47, 0xad, 0x67, 0xf4, 0xab, 0x6e, 0xbb, 0xe0, 0x3d, 0xf3,
+	0x10, 0x82, 0x5d, 0x05, 0xaf, 0x2b, 0xb8, 0xfa, 0xed, 0xfc, 0x66, 0x82, 0x19, 0x50, 0x1f, 0xd9,
+	0x39, 0x9d, 0x94, 0x43, 0xce, 0xee, 0x53, 0x68, 0x72, 0xc2, 0x2e, 0x09, 0x9b, 0x2a, 0xb0, 0xe6,
+	0x01, 0xda, 0xf5, 0x5a, 0x66, 0xff, 0x02, 0xba, 0xc5, 0xec, 0x51, 0x1c, 0x2a, 0x4a, 0x55, 0xb7,
+	0x58, 0xd4, 0xeb, 0x38, 0x94, 0x14, 0x64, 0x63, 0x54, 0x18, 0x4d, 0x2e, 0xb7, 0xd1, 0x67, 0xd0,
+	0xe2, 0x82, 0xce, 0xdf, 0x4e, 0x53, 0xf2, 0x9a, 0x62, 0x53, 0xf9, 0x26, 0xba, 0x03, 0x1f, 0x40,
+	0x75, 0xc9, 0x16, 0x73, 0xa2, 0xc8, 0x55, 0x5c, 0x6d, 0x48, 0xef, 0x45, 0x1c, 0x79, 0x5c, 0xb1,
+	0xaa, 0xb8, 0xda, 0x58, 0xeb, 0x56, 0xe3, 0x4a, 0xb7, 0x3e, 0x06, 0x98, 0xb3, 0x64, 0x29, 0xe8,
+	0xf4, 0x2d, 0x49, 0x6c, 0x4b, 0x7d, 0xb5, 0xb4, 0xe7, 0x7b, 0x92, 0xa0, 0xc7, 0xf0, 0xfe, 0xcf,
+	0x31, 0x15, 0x64, 0x9a, 0xb2, 0x16, 0x8b, 0x90, 0xd8, 0xd0, 0x33, 0xfa, 0xa6, 0xdb, 0x55, 0x1f,
+	0x26, 0xca, 0x7f, 0xbe, 0xd0, 0x8d, 0xc7, 0xf3, 0xb9, 0x9c, 0xdb, 0x54, 0xd3, 0xb4, 0x9b, 0x2a,
+	0x5c, 0x3b, 0xf5, 0x0e, 0x94, 0x13, 0x3d, 0x82, 0x36, 0x61, 0x8c, 0xb2, 0x69, 0x48, 0x38, 0xc7,
+	0x3e, 0xb1, 0x5b, 0xea, 0x55, 0x4b, 0x39, 0x7f, 0xd0, 0x3e, 0xf9, 0xc8, 0x23, 0xb3, 0xd8, 0xcf,
+	0x1f, 0xb5, 0xf5, 0x23, 0xe5, 0x4c, 0x1f, 0x39, 0x7f, 0x18, 0xd0, 0x7a, 0xc3, 0x09, 0x73, 0x09,
+	0x5f, 0xd2, 0x88, 0x93, 0xf2, 0xdd, 0xb3, 0xa1, 0x3e, 0xc3, 0x01, 0x8e, 0xe6, 0x7a, 0x64, 0x15,
+	0x37, 0x33, 0xd1, 0x73, 0xa8, 0xa9, 0xb6, 0x72, 0xdb, 0xec, 0x99, 0xfd, 0xe6, 0xe1, 0xa3, 0x83,
+	0xd5, 0x9e, 0x17, 0x63, 0x1f, 0x4c, 0xd4, 0xab, 0xd3, 0x48, 0xb0, 0xc4, 0x4d, 0x21, 0xfb, 0x5f,
+	0x43, 0xb3, 0xe0, 0x46, 0xef, 0x81, 0x29, 0x9b, 0xa8, 0x53, 0xcb, 0x9f, 0x72, 0x1e, 0x97, 0x38,
+	0x88, 0x75, 0xd6, 0xaa, 0xab, 0x8d, 0xe3, 0xca, 0x33, 0xc3, 0x19, 0x41, 0x77, 0xa8, 0x4b, 0xb8,
+	0x47, 0xf5, 0xce, 0xef, 0x06, 0xec, 0xa9, 0x0a, 0xde, 0x2c, 0x3d, 0x2c, 0xb6, 0x08, 0x35, 0xcc,
+	0xe9, 0x56, 0x14, 0xdd, 0xc7, 0x05, 0xba, 0x1b, 0x02, 0xfd, 0xdf, 0xac, 0x5f, 0x41, 0xfb, 0x47,
+	0xb9, 0xa8, 0x37, 0x17, 0x9a, 0xef, 0x77, 0xa5, 0xb0, 0xdf, 0xce, 0x11, 0xd4, 0xcf, 0xd9, 0xc2,
+	0xf7, 0x09, 0x5b, 0x3d, 0x30, 0x8a, 0x07, 0xb0, 0x12, 0x92, 0x4a, 0x51, 0x48, 0x9c, 0x5f, 0x0d,
+	0x68, 0x9e, 0xaf, 0x0e, 0x50, 0x5e, 0x58, 0x7a, 0xd2, 0xfa, 0x90, 0x75, 0xf2, 0x66, 0xea, 0x53,
+	0x97, 0xbc, 0x1e, 0xca, 0xca, 0x35, 0xe9, 0xea, 0x71, 0x9a, 0xff, 0x3d, 0xce, 0x8f, 0xc0, 0x92,
+	0x87, 0xc2, 0x05, 0x0e, 0x97, 0xe9, 0x71, 0xaf, 0x1c, 0xce, 0x3f, 0x06, 0x74, 0x27, 0x71, 0x18,
+	0x62, 0x96, 0xe4, 0x7d, 0x78, 0x02, 0x96, 0xee, 0x43, 0x74, 0x41, 0x55, 0x31, 0xcd, 0xc3, 0x87,
+	0x25, 0x9b, 0xa8, 0x75, 0xe2, 0x2c, 0xba, 0xa0, 0xe8, 0x18, 0x5a, 0x05, 0x55, 0xc9, 0x66, 0xfa,
+	0xa0, 0x00, 0x2c, 0x70, 0x76, 0xd7, 0xde, 0xa2, 0xa7, 0xd0, 0x9a, 0xc5, 0xc9, 0x54, 0xe8, 0x76,
+	0x66, 0xeb, 0x8f, 0xd6, 0xb0, 0xea, 0x93, 0xdb, 0x9c, 0xc5, 0x49, 0xfa, 0x9b, 0xa3, 0x23, 0x68,
+	0x73, 0x12, 0x04, 0x2b, 0xdc, 0x6e, 0x29, 0xae, 0x25, 0x1f, 0x66, 0x40, 0xe7, 0x25, 0x34, 0xb6,
+	0xda, 0xf4, 0xec, 0xe0, 0x75, 0xd3, 0x33, 0xf3, 0xf0, 0x2f, 0x13, 0x6a, 0x63, 0xaa, 0x26, 0x7f,
+	0x04, 0x9d, 0x31, 0xf5, 0x65, 0x4b, 0x4e, 0x52, 0x55, 0xee, 0x14, 0xb2, 0x07, 0xd4, 0xdf, 0xdf,
+	0x2b, 0xd8, 0x59, 0x52, 0x67, 0x07, 0xbd, 0x80, 0xbd, 0x31, 0xf5, 0x7f, 0x5a, 0xc9, 0xd6, 0xe9,
+	0x25, 0x89, 0xc4, 0xb6, 0xe8, 0x57, 0xf0, 0xe1, 0x98, 0xfa, 0x03, 0xad, 0x65, 0xc5, 0x5d, 0xda,
+	0x12, 0xaf, 0xcb, 0x9e, 0x24, 0x5c, 0x90, 0xf0, 0x56, 0x89, 0xbf, 0x82, 0xf6, 0x98, 0xfa, 0xa7,
+	0x52, 0x1e, 0xef, 0x80, 0x1b, 0x49, 0xc5, 0xbc, 0x15, 0xee, 0x29, 0x34, 0x46, 0x71, 0xb8, 0x1c,
+	0x53, 0x9f, 0xa3, 0xe2, 0x5c, 0xd3, 0xe3, 0x28, 0x83, 0x0d, 0xa1, 0x33, 0x5a, 0xf0, 0x65, 0x80,
+	0x93, 0x74, 0xb9, 0x37, 0x82, 0xf7, 0x8b, 0x82, 0xb3, 0x7e, 0x04, 0xce, 0xce, 0xe1, 0xdf, 0x0d,
+	0xb0, 0x46, 0x38, 0x39, 0x57, 0xdf, 0xd1, 0x33, 0xa8, 0x7f, 0x47, 0x84, 0x1c, 0xf4, 0xc6, 0x50,
+	0x65, 0x07, 0xa2, 0x7a, 0x0d, 0x27, 0x8c, 0x60, 0x41, 0x4a, 0xc1, 0xa5, 0x43, 0x32, 0x07, 0x9e,
+	0x77, 0x63, 0xe5, 0x57, 0xa4, 0x5b, 0x01, 0xab, 0x6a, 0xb1, 0x36, 0x42, 0xed, 0x82, 0x6f, 0x4d,
+	0xff, 0x74, 0xc6, 0x61, 0x9c, 0xdc, 0x21, 0xe3, 0x0b, 0xd8, 0x9d, 0x90, 0x20, 0xd8, 0x88, 0xfc,
+	0xe4, 0x7a, 0x59, 0x77, 0x76, 0xd0, 0x00, 0x2c, 0x79, 0x3d, 0x0b, 0x51, 0x96, 0xfc, 0xe6, 0x10,
+	0xcf, 0x01, 0x74, 0x88, 0xd2, 0x32, 0xae, 0x99, 0xd0, 0x4b, 0xb0, 0x4e, 0x24, 0xa1, 0xe0, 0x6e,
+	0xe4, 0x87, 0x00, 0x1a, 0x7e, 0x8f, 0x16, 0x7c, 0x03, 0xad, 0x09, 0x91, 0xfc, 0x07, 0x5a, 0xd8,
+	0x6f, 0x5f, 0xc5, 0x31, 0xb4, 0x27, 0x44, 0xd1, 0xbf, 0x26, 0x44, 0xc9, 0xa6, 0x69, 0xec, 0x30,
+	0x97, 0xd6, 0xdb, 0x60, 0xbf, 0x85, 0x4e, 0x9a, 0xf7, 0x3a, 0xf0, 0x56, 0x1d, 0xc8, 0xba, 0x28,
+	0xee, 0x36, 0x87, 0x53, 0x68, 0xe7, 0x11, 0xee, 0x31, 0x8a, 0x27, 0x50, 0x4f, 0x25, 0xe7, 0x1d,
+	0x2b, 0xce, 0xac, 0xa6, 0xfe, 0xcc, 0x7c, 0xf9, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x3d, 0x38,
+	0x65, 0x1f, 0xdf, 0x0c, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -346,6 +765,7 @@ type LoggerClient interface {
 	LogErrorEvent(ctx context.Context, in *Log, opts ...grpc.CallOption) (*Response, error)
 	LogDebugEvent(ctx context.Context, in *Log, opts ...grpc.CallOption) (*Response, error)
 	DumpLogs(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
+	DisplaySummary(ctx context.Context, in *Command, opts ...grpc.CallOption) (*SummaryResponse, error)
 }
 
 type loggerClient struct {
@@ -419,6 +839,15 @@ func (c *loggerClient) DumpLogs(ctx context.Context, in *Command, opts ...grpc.C
 	return out, nil
 }
 
+func (c *loggerClient) DisplaySummary(ctx context.Context, in *Command, opts ...grpc.CallOption) (*SummaryResponse, error) {
+	out := new(SummaryResponse)
+	err := c.cc.Invoke(ctx, "/daytrader.Logger/DisplaySummary", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoggerServer is the server API for Logger service.
 type LoggerServer interface {
 	LogUserCommand(context.Context, *Log) (*Response, error)
@@ -428,6 +857,36 @@ type LoggerServer interface {
 	LogErrorEvent(context.Context, *Log) (*Response, error)
 	LogDebugEvent(context.Context, *Log) (*Response, error)
 	DumpLogs(context.Context, *Command) (*Response, error)
+	DisplaySummary(context.Context, *Command) (*SummaryResponse, error)
+}
+
+// UnimplementedLoggerServer can be embedded to have forward compatible implementations.
+type UnimplementedLoggerServer struct {
+}
+
+func (*UnimplementedLoggerServer) LogUserCommand(ctx context.Context, req *Log) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogUserCommand not implemented")
+}
+func (*UnimplementedLoggerServer) LogQuoteServerEvent(ctx context.Context, req *Log) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogQuoteServerEvent not implemented")
+}
+func (*UnimplementedLoggerServer) LogAccountTransaction(ctx context.Context, req *Log) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogAccountTransaction not implemented")
+}
+func (*UnimplementedLoggerServer) LogSystemEvent(ctx context.Context, req *Log) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogSystemEvent not implemented")
+}
+func (*UnimplementedLoggerServer) LogErrorEvent(ctx context.Context, req *Log) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogErrorEvent not implemented")
+}
+func (*UnimplementedLoggerServer) LogDebugEvent(ctx context.Context, req *Log) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogDebugEvent not implemented")
+}
+func (*UnimplementedLoggerServer) DumpLogs(ctx context.Context, req *Command) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DumpLogs not implemented")
+}
+func (*UnimplementedLoggerServer) DisplaySummary(ctx context.Context, req *Command) (*SummaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisplaySummary not implemented")
 }
 
 func RegisterLoggerServer(s *grpc.Server, srv LoggerServer) {
@@ -560,6 +1019,24 @@ func _Logger_DumpLogs_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Logger_DisplaySummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoggerServer).DisplaySummary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daytrader.Logger/DisplaySummary",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoggerServer).DisplaySummary(ctx, req.(*Command))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Logger_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "daytrader.Logger",
 	HandlerType: (*LoggerServer)(nil),
@@ -592,6 +1069,10 @@ var _Logger_serviceDesc = grpc.ServiceDesc{
 			MethodName: "DumpLogs",
 			Handler:    _Logger_DumpLogs_Handler,
 		},
+		{
+			MethodName: "DisplaySummary",
+			Handler:    _Logger_DisplaySummary_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "daytrader.proto",
@@ -601,23 +1082,24 @@ var _Logger_serviceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type DayTraderClient interface {
+	GetUser(ctx context.Context, in *Command, opts ...grpc.CallOption) (*UserResponse, error)
 	CreateUser(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	Add(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	Quote(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	Buy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	Sell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	CommitBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	CommitSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	CancelBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	CancelSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	SetBuyAmount(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
+	Add(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error)
+	Quote(ctx context.Context, in *Command, opts ...grpc.CallOption) (*PriceResponse, error)
+	Buy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error)
+	Sell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error)
+	CommitBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error)
+	CommitSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*UserResponse, error)
+	CancelBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error)
+	CancelSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error)
+	SetBuyAmount(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error)
 	SetSellAmount(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
 	SetBuyTrigger(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	SetSellTrigger(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	CancelSetSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	CancelSetBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
+	SetSellTrigger(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error)
+	CancelSetBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error)
+	CancelSetSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error)
 	DumpLog(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
-	DisplaySummary(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error)
+	DisplaySummary(ctx context.Context, in *Command, opts ...grpc.CallOption) (*SummaryResponse, error)
 }
 
 type dayTraderClient struct {
@@ -626,6 +1108,15 @@ type dayTraderClient struct {
 
 func NewDayTraderClient(cc *grpc.ClientConn) DayTraderClient {
 	return &dayTraderClient{cc}
+}
+
+func (c *dayTraderClient) GetUser(ctx context.Context, in *Command, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/GetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *dayTraderClient) CreateUser(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
@@ -637,8 +1128,8 @@ func (c *dayTraderClient) CreateUser(ctx context.Context, in *Command, opts ...g
 	return out, nil
 }
 
-func (c *dayTraderClient) Add(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) Add(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error) {
+	out := new(BalanceResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/Add", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -646,8 +1137,8 @@ func (c *dayTraderClient) Add(ctx context.Context, in *Command, opts ...grpc.Cal
 	return out, nil
 }
 
-func (c *dayTraderClient) Quote(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) Quote(ctx context.Context, in *Command, opts ...grpc.CallOption) (*PriceResponse, error) {
+	out := new(PriceResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/Quote", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -655,8 +1146,8 @@ func (c *dayTraderClient) Quote(ctx context.Context, in *Command, opts ...grpc.C
 	return out, nil
 }
 
-func (c *dayTraderClient) Buy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) Buy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error) {
+	out := new(BalanceResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/Buy", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -664,8 +1155,8 @@ func (c *dayTraderClient) Buy(ctx context.Context, in *Command, opts ...grpc.Cal
 	return out, nil
 }
 
-func (c *dayTraderClient) Sell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) Sell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error) {
+	out := new(StockUpdateResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/Sell", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -673,8 +1164,8 @@ func (c *dayTraderClient) Sell(ctx context.Context, in *Command, opts ...grpc.Ca
 	return out, nil
 }
 
-func (c *dayTraderClient) CommitBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) CommitBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error) {
+	out := new(StockUpdateResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CommitBuy", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -682,8 +1173,8 @@ func (c *dayTraderClient) CommitBuy(ctx context.Context, in *Command, opts ...gr
 	return out, nil
 }
 
-func (c *dayTraderClient) CommitSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) CommitSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CommitSell", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -691,8 +1182,8 @@ func (c *dayTraderClient) CommitSell(ctx context.Context, in *Command, opts ...g
 	return out, nil
 }
 
-func (c *dayTraderClient) CancelBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) CancelBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error) {
+	out := new(BalanceResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CancelBuy", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -700,8 +1191,8 @@ func (c *dayTraderClient) CancelBuy(ctx context.Context, in *Command, opts ...gr
 	return out, nil
 }
 
-func (c *dayTraderClient) CancelSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) CancelSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error) {
+	out := new(StockUpdateResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CancelSell", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -709,8 +1200,8 @@ func (c *dayTraderClient) CancelSell(ctx context.Context, in *Command, opts ...g
 	return out, nil
 }
 
-func (c *dayTraderClient) SetBuyAmount(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) SetBuyAmount(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error) {
+	out := new(BalanceResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/SetBuyAmount", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -736,8 +1227,8 @@ func (c *dayTraderClient) SetBuyTrigger(ctx context.Context, in *Command, opts .
 	return out, nil
 }
 
-func (c *dayTraderClient) SetSellTrigger(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) SetSellTrigger(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error) {
+	out := new(StockUpdateResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/SetSellTrigger", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -745,18 +1236,18 @@ func (c *dayTraderClient) SetSellTrigger(ctx context.Context, in *Command, opts 
 	return out, nil
 }
 
-func (c *dayTraderClient) CancelSetSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CancelSetSell", in, out, opts...)
+func (c *dayTraderClient) CancelSetBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*BalanceResponse, error) {
+	out := new(BalanceResponse)
+	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CancelSetBuy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dayTraderClient) CancelSetBuy(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CancelSetBuy", in, out, opts...)
+func (c *dayTraderClient) CancelSetSell(ctx context.Context, in *Command, opts ...grpc.CallOption) (*StockUpdateResponse, error) {
+	out := new(StockUpdateResponse)
+	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/CancelSetSell", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -772,8 +1263,8 @@ func (c *dayTraderClient) DumpLog(ctx context.Context, in *Command, opts ...grpc
 	return out, nil
 }
 
-func (c *dayTraderClient) DisplaySummary(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *dayTraderClient) DisplaySummary(ctx context.Context, in *Command, opts ...grpc.CallOption) (*SummaryResponse, error) {
+	out := new(SummaryResponse)
 	err := c.cc.Invoke(ctx, "/daytrader.DayTrader/DisplaySummary", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -783,27 +1274,105 @@ func (c *dayTraderClient) DisplaySummary(ctx context.Context, in *Command, opts 
 
 // DayTraderServer is the server API for DayTrader service.
 type DayTraderServer interface {
+	GetUser(context.Context, *Command) (*UserResponse, error)
 	CreateUser(context.Context, *Command) (*Response, error)
-	Add(context.Context, *Command) (*Response, error)
-	Quote(context.Context, *Command) (*Response, error)
-	Buy(context.Context, *Command) (*Response, error)
-	Sell(context.Context, *Command) (*Response, error)
-	CommitBuy(context.Context, *Command) (*Response, error)
-	CommitSell(context.Context, *Command) (*Response, error)
-	CancelBuy(context.Context, *Command) (*Response, error)
-	CancelSell(context.Context, *Command) (*Response, error)
-	SetBuyAmount(context.Context, *Command) (*Response, error)
+	Add(context.Context, *Command) (*BalanceResponse, error)
+	Quote(context.Context, *Command) (*PriceResponse, error)
+	Buy(context.Context, *Command) (*BalanceResponse, error)
+	Sell(context.Context, *Command) (*StockUpdateResponse, error)
+	CommitBuy(context.Context, *Command) (*StockUpdateResponse, error)
+	CommitSell(context.Context, *Command) (*UserResponse, error)
+	CancelBuy(context.Context, *Command) (*BalanceResponse, error)
+	CancelSell(context.Context, *Command) (*StockUpdateResponse, error)
+	SetBuyAmount(context.Context, *Command) (*BalanceResponse, error)
 	SetSellAmount(context.Context, *Command) (*Response, error)
 	SetBuyTrigger(context.Context, *Command) (*Response, error)
-	SetSellTrigger(context.Context, *Command) (*Response, error)
-	CancelSetSell(context.Context, *Command) (*Response, error)
-	CancelSetBuy(context.Context, *Command) (*Response, error)
+	SetSellTrigger(context.Context, *Command) (*StockUpdateResponse, error)
+	CancelSetBuy(context.Context, *Command) (*BalanceResponse, error)
+	CancelSetSell(context.Context, *Command) (*StockUpdateResponse, error)
 	DumpLog(context.Context, *Command) (*Response, error)
-	DisplaySummary(context.Context, *Command) (*Response, error)
+	DisplaySummary(context.Context, *Command) (*SummaryResponse, error)
+}
+
+// UnimplementedDayTraderServer can be embedded to have forward compatible implementations.
+type UnimplementedDayTraderServer struct {
+}
+
+func (*UnimplementedDayTraderServer) GetUser(ctx context.Context, req *Command) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (*UnimplementedDayTraderServer) CreateUser(ctx context.Context, req *Command) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (*UnimplementedDayTraderServer) Add(ctx context.Context, req *Command) (*BalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
+}
+func (*UnimplementedDayTraderServer) Quote(ctx context.Context, req *Command) (*PriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Quote not implemented")
+}
+func (*UnimplementedDayTraderServer) Buy(ctx context.Context, req *Command) (*BalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Buy not implemented")
+}
+func (*UnimplementedDayTraderServer) Sell(ctx context.Context, req *Command) (*StockUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Sell not implemented")
+}
+func (*UnimplementedDayTraderServer) CommitBuy(ctx context.Context, req *Command) (*StockUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommitBuy not implemented")
+}
+func (*UnimplementedDayTraderServer) CommitSell(ctx context.Context, req *Command) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommitSell not implemented")
+}
+func (*UnimplementedDayTraderServer) CancelBuy(ctx context.Context, req *Command) (*BalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelBuy not implemented")
+}
+func (*UnimplementedDayTraderServer) CancelSell(ctx context.Context, req *Command) (*StockUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelSell not implemented")
+}
+func (*UnimplementedDayTraderServer) SetBuyAmount(ctx context.Context, req *Command) (*BalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetBuyAmount not implemented")
+}
+func (*UnimplementedDayTraderServer) SetSellAmount(ctx context.Context, req *Command) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetSellAmount not implemented")
+}
+func (*UnimplementedDayTraderServer) SetBuyTrigger(ctx context.Context, req *Command) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetBuyTrigger not implemented")
+}
+func (*UnimplementedDayTraderServer) SetSellTrigger(ctx context.Context, req *Command) (*StockUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetSellTrigger not implemented")
+}
+func (*UnimplementedDayTraderServer) CancelSetBuy(ctx context.Context, req *Command) (*BalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelSetBuy not implemented")
+}
+func (*UnimplementedDayTraderServer) CancelSetSell(ctx context.Context, req *Command) (*StockUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelSetSell not implemented")
+}
+func (*UnimplementedDayTraderServer) DumpLog(ctx context.Context, req *Command) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DumpLog not implemented")
+}
+func (*UnimplementedDayTraderServer) DisplaySummary(ctx context.Context, req *Command) (*SummaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisplaySummary not implemented")
 }
 
 func RegisterDayTraderServer(s *grpc.Server, srv DayTraderServer) {
 	s.RegisterService(&_DayTrader_serviceDesc, srv)
+}
+
+func _DayTrader_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DayTraderServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daytrader.DayTrader/GetUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DayTraderServer).GetUser(ctx, req.(*Command))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _DayTrader_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1040,24 +1609,6 @@ func _DayTrader_SetSellTrigger_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DayTrader_CancelSetSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Command)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DayTraderServer).CancelSetSell(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/daytrader.DayTrader/CancelSetSell",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DayTraderServer).CancelSetSell(ctx, req.(*Command))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _DayTrader_CancelSetBuy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Command)
 	if err := dec(in); err != nil {
@@ -1072,6 +1623,24 @@ func _DayTrader_CancelSetBuy_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DayTraderServer).CancelSetBuy(ctx, req.(*Command))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DayTrader_CancelSetSell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DayTraderServer).CancelSetSell(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daytrader.DayTrader/CancelSetSell",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DayTraderServer).CancelSetSell(ctx, req.(*Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1116,6 +1685,10 @@ var _DayTrader_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "daytrader.DayTrader",
 	HandlerType: (*DayTraderServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetUser",
+			Handler:    _DayTrader_GetUser_Handler,
+		},
 		{
 			MethodName: "CreateUser",
 			Handler:    _DayTrader_CreateUser_Handler,
@@ -1169,12 +1742,12 @@ var _DayTrader_serviceDesc = grpc.ServiceDesc{
 			Handler:    _DayTrader_SetSellTrigger_Handler,
 		},
 		{
-			MethodName: "CancelSetSell",
-			Handler:    _DayTrader_CancelSetSell_Handler,
-		},
-		{
 			MethodName: "CancelSetBuy",
 			Handler:    _DayTrader_CancelSetBuy_Handler,
+		},
+		{
+			MethodName: "CancelSetSell",
+			Handler:    _DayTrader_CancelSetSell_Handler,
 		},
 		{
 			MethodName: "DumpLog",
