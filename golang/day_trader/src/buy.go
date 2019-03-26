@@ -75,9 +75,6 @@ func (buy *Buy) cancel(ctx context.Context, user *User) {
 
 func (buy *Buy) updateBuy(ctx context.Context) error {
 	_, err := db.Exec("update Buy set IntendedCashAmount=?, Price=?, ActualCashAmount=?, StockBoughtAmount = ? where Id=?", buy.IntendedCashAmount, buy.Price, buy.ActualCashAmount, buy.StockBoughtAmount, buy.Id)
-	if err != nil {
-		return err
-	}
 	return err
 }
 

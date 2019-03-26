@@ -26,7 +26,7 @@ func (trigger *SellTrigger) updateCashAmount(ctx context.Context, amount float32
 
 func (trigger *SellTrigger) updatePrice(ctx context.Context, price float32, user *User) error {
 	sell := getSell(ctx, trigger.SellId)
-	err := sell.updatePrice(ctx, price, user)
+	_, err := sell.updatePrice(ctx, price, user)
 	if err == nil {
 		trigger.Active = true
 		sell.updateSell(ctx)

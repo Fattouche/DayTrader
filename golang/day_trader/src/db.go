@@ -10,8 +10,8 @@ var createTableStatements = []string{
 	`USE ` + DB_NAME,
 	`CREATE TABLE IF NOT EXISTS User(
 		Id varchar(32) NOT NULL,
+		Password varchar(32) NOT NULL,
 		Balance float DEFAULT 0, 
-		Name varchar(32) NULL,
 		PRIMARY KEY (id)
 	)`,
 	`CREATE TABLE IF NOT EXISTS Sell(

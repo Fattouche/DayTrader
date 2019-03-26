@@ -47,7 +47,7 @@ func getCacheUser(key string) (*User, error) {
 	}
 	err = user.UnmarshalJSON(item.Value)
 	if user.StockMap == nil {
-		user.StockMap = make(map[string]int)
+		user.StockMap = make(map[string]int32)
 	}
 	return user, err
 }

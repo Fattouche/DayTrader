@@ -28,11 +28,11 @@ type Stock struct {
 //easyjson:json
 type User struct {
 	Balance   float32
-	Name      string
+	Password  string
 	Id        string
 	BuyStack  []*Buy
 	SellStack []*Sell
-	StockMap  map[string]int
+	StockMap  map[string]int32
 }
 
 //easyjson:json
@@ -94,19 +94,29 @@ var (
 )
 
 func (s *server) GetUser(ctx context.Context, req *pb.Command) (*pb.UserResponse, error) {
-	createUser(req.UserId)
-	return &pb.UserResponse{UserId: req.UserId}, nil
+	balance, stocks, err := userExists(req.UserId, req.Password)
+	var userResp *pb.UserResponse
+	if err == nil {
+		userResp = &pb.UserResponse{
+			UserId:  req.UserId,
+			Balance: balance,
+			Stocks:  stocks,
+		}
+	}
+	return userResp, err
 }
 
 func (s *server) CreateUser(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	createUser(req.UserId)
-	return &pb.Response{Message: "Created user with id" + req.UserId}, nil
+	return &pb.Response{UserId: req.UserId, Message: "Successfully created user"}, createUser(req.UserId, req.Password)
 }
 
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
 	user := getUser(req.UserId)
-	user.updateUserBalance(ctx, req.Amount, true)
-	return &pb.BalanceResponse{UserId: req.UserId}, nil
+	user, err := user.updateUserBalance(ctx, req.Amount, true)
+	if err == nil {
+		err = errors.New(fmt.Sprintf("Amount: %f Balance: %f", req.Amount, user.Balance))
+	}
+	return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, err
 }
 
 func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
@@ -115,16 +125,17 @@ func (s *server) Buy(ctx context.Context, req *pb.Command) (*pb.BalanceResponse,
 	if err != nil {
 		logErrorEvent(ctx, err)
 	}
-	return &pb.BalanceResponse{UserId: req.UserId}, err
+	return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, err
 }
 
 func (s *server) Quote(ctx context.Context, req *pb.Command) (*pb.PriceResponse, error) {
-	_, err := quote(ctx, req.UserId, req.Symbol)
+	stock, err := quote(ctx, req.UserId, req.Symbol)
 	if err != nil {
 		logErrorEvent(ctx, err)
 		return nil, err
 	}
-	return &pb.PriceResponse{UserId: req.UserId}, nil
+
+	return &pb.PriceResponse{UserId: req.UserId, Price: stock.Price}, nil
 }
 
 func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.StockUpdateResponse, error) {
@@ -136,7 +147,7 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.StockUpdateResp
 	}
 	user.SellStack = append(user.SellStack, sell)
 	user.setCache()
-	return &pb.StockUpdateResponse{UserId: req.UserId}, nil
+	return &pb.StockUpdateResponse{UserId: user.Id, Stocks: map[string]int32{req.Symbol: user.StockMap[req.Symbol]}}, nil
 }
 
 func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.StockUpdateResponse, error) {
@@ -148,12 +159,14 @@ func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.StockUpdat
 		logErrorEvent(ctx, err)
 		return nil, err
 	}
-	_, err = buy.commit(ctx, user, false)
+	userStock, err := buy.commit(ctx, user, false)
 	if err != nil {
 		logErrorEvent(ctx, err)
+		return nil, err
 	}
-	return &pb.StockUpdateResponse{UserId: req.UserId}, err
+	return &pb.StockUpdateResponse{UserId: user.Id, Stocks: map[string]int32{userStock.StockSymbol: int32(userStock.Amount)}}, err
 }
+
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.UserResponse, error) {
 	var err error
 	user := getUser(req.UserId)
@@ -167,7 +180,7 @@ func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.UserRespo
 	if err != nil {
 		logErrorEvent(ctx, err)
 	}
-	return &pb.UserResponse{UserId: req.UserId}, err
+	return &pb.UserResponse{UserId: user.Id, Balance: user.Balance, Stocks: map[string]int32{sell.StockSymbol: user.StockMap[sell.StockSymbol]}}, err
 }
 
 func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
@@ -180,7 +193,7 @@ func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.BalanceRes
 		logErrorEvent(ctx, err)
 		return nil, err
 	}
-	return &pb.BalanceResponse{UserId: req.UserId}, nil
+	return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, nil
 }
 
 func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.StockUpdateResponse, error) {
@@ -193,7 +206,7 @@ func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.StockUpda
 		logErrorEvent(ctx, err)
 		return nil, err
 	}
-	return &pb.StockUpdateResponse{UserId: req.UserId}, nil
+	return &pb.StockUpdateResponse{UserId: user.Id, Stocks: map[string]int32{sell.StockSymbol: user.StockMap[sell.StockSymbol]}}, nil
 }
 
 func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
@@ -216,13 +229,13 @@ func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Balance
 			log.Println(err)
 		}
 		createBuyTrigger(ctx, user.Id, req.Symbol, buy.Id, req.Amount)
-		return &pb.BalanceResponse{UserId: req.UserId}, nil
+		return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, nil
 	}
 	err = trigger.updateCashAmount(ctx, req.Amount, user)
 	if err != nil {
 		logErrorEvent(ctx, err)
 	}
-	return &pb.BalanceResponse{UserId: req.UserId}, err
+	return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, err
 }
 
 func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -237,14 +250,15 @@ func (s *server) SetSellAmount(ctx context.Context, req *pb.Command) (*pb.Respon
 			return nil, err
 		}
 		sell.insertSell(ctx)
-		trigger := createSellTrigger(ctx, req.UserId, req.Symbol, sell.Id, req.Amount)
-		return &pb.Response{Message: trigger.toString()}, nil
+		createSellTrigger(ctx, req.UserId, req.Symbol, sell.Id, req.Amount)
+		return &pb.Response{UserId: user.Id, Message: "Successfully set sell amount"}, nil
 	}
 	err = trigger.updateCashAmount(ctx, req.Amount, user)
 	if err != nil {
 		logErrorEvent(ctx, err)
 	}
-	return &pb.Response{Message: trigger.toString()}, err
+	return &pb.Response{UserId: user.Id, Message: "Successfully set sell amount"}, err
+
 }
 
 func (s *server) SetBuyTrigger(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -255,7 +269,7 @@ func (s *server) SetBuyTrigger(ctx context.Context, req *pb.Command) (*pb.Respon
 		return nil, err
 	}
 	trigger.updatePrice(ctx, req.Amount)
-	return &pb.Response{Message: trigger.toString()}, nil
+	return &pb.Response{UserId: req.UserId, Message: "Successfully set buy trigger"}, nil
 }
 
 func (s *server) SetSellTrigger(ctx context.Context, req *pb.Command) (*pb.StockUpdateResponse, error) {
@@ -267,7 +281,7 @@ func (s *server) SetSellTrigger(ctx context.Context, req *pb.Command) (*pb.Stock
 		return nil, err
 	}
 	trigger.updatePrice(ctx, req.Amount, user)
-	return &pb.StockUpdateResponse{UserId: req.UserId}, nil
+	return &pb.StockUpdateResponse{UserId: user.Id, Stocks: map[string]int32{req.Symbol: user.StockMap[req.Symbol]}}, nil
 }
 
 func (s *server) CancelSetBuy(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
@@ -279,7 +293,7 @@ func (s *server) CancelSetBuy(ctx context.Context, req *pb.Command) (*pb.Balance
 		return nil, err
 	}
 	trigger.cancel(ctx, user)
-	return &pb.BalanceResponse{UserId: req.UserId}, nil
+	return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, nil
 }
 
 func (s *server) CancelSetSell(ctx context.Context, req *pb.Command) (*pb.StockUpdateResponse, error) {
@@ -291,7 +305,7 @@ func (s *server) CancelSetSell(ctx context.Context, req *pb.Command) (*pb.StockU
 		return nil, err
 	}
 	trigger.cancel(ctx, user)
-	return &pb.StockUpdateResponse{UserId: req.UserId}, nil
+	return &pb.StockUpdateResponse{UserId: user.Id, Stocks: map[string]int32{req.Symbol: user.StockMap[req.Symbol]}}, nil
 }
 
 func (s *server) DumpLog(ctx context.Context, req *pb.Command) (*pb.Response, error) {
@@ -308,15 +322,15 @@ func (s *server) DumpLog(ctx context.Context, req *pb.Command) (*pb.Response, er
 }
 
 func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.SummaryResponse, error) {
-	conn, err := grpc.Dial(logUrl, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("Failed to dial to %s with %v", logUrl, err)
-	}
-	client := pb.NewLoggerClient(conn)
-	_, err = client.DisplaySummary(ctx, req)
-	if err != nil {
-		log.Println("DisplaySummary call to log server failed: ", err)
-	}
+	// conn, err := grpc.Dial(logUrl, grpc.WithInsecure())
+	// if err != nil {
+	// 	log.Printf("Failed to dial to %s with %v", logUrl, err)
+	// }
+	// client := pb.NewLoggerClient(conn)
+	// _, err = client.DisplaySummary(ctx, req)
+	// if err != nil {
+	// 	log.Println("DisplaySummary call to log server failed: ", err)
+	// }
 
 	// _ (rename to response when ready to implement) should contain all transactions, once that's implemented
 	// TODO: grab info on current triggers, and then put it all together into
