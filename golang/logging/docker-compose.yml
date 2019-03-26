@@ -33,9 +33,6 @@ services:
     build:
       context: ./images/envoy
     command: /service/entrypoint.sh
-    environment:
-      LOGGING_SERVER_IP: 192.168.1.240
-      LOGGING_SERVER_PORT: 40000
     volumes:
       - ./images/envoy/envoy.yaml:/etc/envoy/envoy.yaml
     ports:
