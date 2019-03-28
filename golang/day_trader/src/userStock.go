@@ -13,13 +13,15 @@ func (userStock *UserStock) toString() string {
 }
 
 func getAllUserStock(userID string, stocks *map[string]int32) {
-	rows, _ := db.Query("SELECT StockSymbol, Amount from UserStock where UserId=?", userID)
-	defer rows.Close()
-	for rows.Next() {
-		var stockSymbol string
-		var amount int32
-		if rows.Scan(&stockSymbol, &amount) == nil {
-			(*stocks)[stockSymbol] = amount
+	rows, err := db.Query("SELECT StockSymbol, Amount from UserStock where UserId=?", userID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var stockSymbol string
+			var amount int32
+			if rows.Scan(&stockSymbol, &amount) == nil {
+				(*stocks)[stockSymbol] = amount
+			}
 		}
 	}
 }

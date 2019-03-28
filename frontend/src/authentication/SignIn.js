@@ -5,8 +5,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -14,7 +12,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 import styles from '../styles/SignInStyles';
-import {check_credentials} from '../backend_services/Service';
+import {checkCredentials} from '../backend_services/Service';
 
 
 class SignIn extends Component {
@@ -43,11 +41,12 @@ class SignIn extends Component {
       return
     }
 
-    check_credentials(this.state.email, this.state.password, (err, response) => {this.signInCallback(err, response)});
+    checkCredentials(this.state.email, this.state.password, (err, response) => {this.signInCallback(err, response)});
   }
 
   signInCallback(err, response){
       if (err) {
+        alert(err.message)
         console.log(err.code);
         console.log(err.message);
       } else {
@@ -70,16 +69,12 @@ render(){
         <form className={this.classes.form}>
           <FormControl margin="normal" required fullWidth>
             <InputLabel htmlFor="email">Email Address</InputLabel>
-            <Input id="email" name="email" autoComplete="email" autoFocus onChange={(e) => {this.setState({email: e.target.value})}}/>
+            <Input id="email" name="email" onChange={(e) => {this.setState({email: e.target.value})}}/>
           </FormControl>
           <FormControl margin="normal" required fullWidth>
             <InputLabel htmlFor="password">Password</InputLabel>
-            <Input name="password" type="password" id="password" autoComplete="current-password" onChange={(e) => {this.setState({password: e.target.value})}}/>
+            <Input name="password" type="password" id="password" onChange={(e) => {this.setState({password: e.target.value})}}/>
           </FormControl>
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
           <Button
             type="button"
             fullWidth
