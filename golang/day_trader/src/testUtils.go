@@ -7,6 +7,7 @@ import (
 var s server
 var symbol = "ABC"
 var testUserId = "tester"
+var testPassword = "IsaacIsDope"
 var filename = "dumplog"
 var amount = float32(521)
 var transactionId = int32(1)
