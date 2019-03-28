@@ -57,7 +57,7 @@ func checks(req *pb.Command) error {
 	return nil
 }
 
-func IsLetter(s string) bool {
+func isLetter(s string) bool {
 	for _, r := range s {
 		if !unicode.IsLetter(r) {
 			return false
