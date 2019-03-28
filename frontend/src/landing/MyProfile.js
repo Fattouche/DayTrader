@@ -5,15 +5,11 @@ import { withStyles } from '@material-ui/core/styles';
 import { displaySummary } from '../backend_services/Service';
 import { ListItem, List, TextField } from '@material-ui/core';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import FolderIcon from '@material-ui/icons/Folder';
-import DeleteIcon from '@material-ui/icons/Delete';
 
 
 const styles = theme => ({

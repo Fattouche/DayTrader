@@ -47,7 +47,7 @@ class Buy extends Component {
       this.handleConfirmClose = this.handleConfirmClose.bind(this)
       this.keyPress = this.keyPress.bind(this)
       this.handleStockChange = this.handleStockChange.bind(this)
-      this.handlePriceChange = this.handlePriceChange.bind(this)
+      this.handleAmountChange = this.handleAmountChange.bind(this)
       this.buttonPress = this.buttonPress.bind(this)
       this.buyCallback = this.buyCallback.bind(this)
       this.commitBuyCallback = this.commitBuyCallback.bind(this)
@@ -75,7 +75,7 @@ class Buy extends Component {
     }
 
     keyPress(e){
-      if(e.key == 'Enter' && this.state.amount !== ''){
+      if(e.key === 'Enter' && this.state.amount !== ''){
         console.log(this.state.amount)
       }
     }
@@ -88,7 +88,7 @@ class Buy extends Component {
       }
     }
 
-    handlePriceChange(e){
+    handleAmountChange(e){
       if(e.target.value === '' || validatePrice(e.target.value)){  
         this.setState({
           amount: e.target.value
@@ -97,7 +97,11 @@ class Buy extends Component {
     }
 
     buttonPress(){
-      buy(this.state.userId, this.state.stock, this.state.amount,(err, response) => {this.buyCallback(err,response)})
+      if(this.state.amount > 0){
+        buy(this.state.userId, this.state.stock, this.state.amount,(err, response) => {this.buyCallback(err,response)})
+      }else {
+        alert("Figure it out you nerd")
+      }
     }
     
     buyCallback(err, response){
@@ -143,7 +147,7 @@ class Buy extends Component {
               id="outlined-name"
               label="Purchase Amount"
               className={this.classes.textField}
-              onChange={this.handlePriceChange}
+              onChange={this.handleAmountChange}
               onKeyDown = {this.keyPress}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -155,7 +159,9 @@ class Buy extends Component {
             <Button variant="outlined" color="primary" onClick={this.buttonPress}>
               Buy
             </Button>
-            <Dialog open={this.state.isModalOpen} onClose={this.handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+            <Dialog open={this.state.isModalOpen} onClose={this.handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"
+            disableBackdropClick
+            disableEscapeKeyDown>
               <DialogTitle id="alert-dialog-title">{"Are you sure you want to make this purchase?"}</DialogTitle>
               <DialogContent>
                 <DialogContentText id="alert-dialog-description">

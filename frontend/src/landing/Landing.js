@@ -159,7 +159,7 @@ class Landing extends Component {
         this.contentMap = {
           'My Profile': <MyProfile userInfo={props.userInfo}/>, 
           'Buy': <Buy userId={props.userInfo.getUserId()}/>, 
-          'Sell': <Sell/>, 
+          'Sell': <Sell userId={props.userInfo.getUserId()}/>, 
           'Browse': <Browse userId={props.userInfo.getUserId()}/>,
           'Triggers': <Triggers/>
         }

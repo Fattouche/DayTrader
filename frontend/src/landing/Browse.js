@@ -74,6 +74,7 @@ class Browse extends Component {
               value={this.state.stock}
               margin="normal"
               variant="outlined"
+              autoComplete='off'
             />
             <TextField
               id="outlined-name"
