@@ -166,7 +166,7 @@ class Landing extends Component {
         this.handler = props.handler
         this.classes = props.classes
         this.showContentAndHeader = this.showContentAndHeader.bind(this)
-        this.displaySummaryCallback = this.displaySummaryCallback.bind(this)
+        // this.displaySummaryCallback = this.displaySummaryCallback.bind(this)
         this.logout = this.logout.bind(this)
     }
  
