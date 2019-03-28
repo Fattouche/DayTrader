@@ -1,0 +1,17 @@
+version: '3.6'
+services:
+  web:
+    command: npm start
+    container_name: web
+    build: .
+    ports:
+      - "3000:3000"
+      - "49153:49153"
+    volumes:
+    - ./:/front_end/
+    networks:
+      - day_trader_default
+  
+networks:
+  day_trader_default:
+    external: true
