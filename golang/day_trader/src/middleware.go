@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"unicode"
 
 	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 	"google.golang.org/grpc"
@@ -50,5 +51,17 @@ func checks(req *pb.Command) error {
 	if len(req.Symbol) > 3 {
 		return errors.New("Symbol must be 3 characters or less")
 	}
+	if !isLetter(req.Symbol) {
+		return errors.New("Symbol must consist of only letters")
+	}
 	return nil
+}
+
+func IsLetter(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
 }
