@@ -26,7 +26,7 @@ func createSell(ctx context.Context, intendedCashAmount float32, symbol string, 
 	if err != nil {
 		return nil, err
 	}
-	err = sell.updatePrice(ctx, stock.Price, user)
+	_, err = sell.updatePrice(ctx, stock.Price, user)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (sell *Sell) updateCashAmount(ctx context.Context, amount float32, user *Us
 	return nil
 }
 
-func (sell *Sell) updatePrice(ctx context.Context, stockPrice float32, user *User) error {
+func (sell *Sell) updatePrice(ctx context.Context, stockPrice float32, user *User) (int, error) {
 	userStock := getOrCreateUserStock(ctx, sell.UserId, sell.StockSymbol, user)
 	updateSoldAmount := int(math.Min(math.Floor(float64(sell.IntendedCashAmount/stockPrice)), float64(userStock.Amount+sell.StockSoldAmount)))
 	updated := updateSoldAmount - sell.StockSoldAmount
@@ -53,7 +53,7 @@ func (sell *Sell) updatePrice(ctx context.Context, stockPrice float32, user *Use
 	sell.Timestamp = time.Now()
 	sell.Price = stockPrice
 	userStock.updateStockAmount(ctx, updated*-1, user)
-	return nil
+	return userStock.Amount, nil
 }
 
 func (sell *Sell) commit(ctx context.Context, update bool, user *User) (err error) {

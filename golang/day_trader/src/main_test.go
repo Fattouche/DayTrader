@@ -11,7 +11,7 @@ import (
 func TestMain(m *testing.M) {
 	createAndOpenDB()
 	initCache()
-	createUser(testUserId)
+	createUser(testUserId, testPassword)
 	stock := &Stock{Symbol: symbol, Price: quotePrice, Hash: hash, TimeStamp: time.Now()}
 	stock.setCache()
 	os.Exit(m.Run())
@@ -22,28 +22,34 @@ func TestQuote(t *testing.T) {
 	if err != nil {
 		t.Error("TestQuote got unexpected error: ", err)
 	}
-	stock := &Stock{}
-	stock.UnmarshalJSON([]byte(resp.Message))
-	if stock.Hash != hash {
-		t.Errorf("TestQuote Expected Hash to be %v but was %v", hash, stock.Hash)
+
+	if resp.UserId != testUserId {
+		t.Errorf("TestQuote Expected user id to be %v but was %v", testUserId, resp.UserId)
 	}
-	if stock.Price != quotePrice {
-		t.Errorf("TestQuote Expected Price to be %v but was %v", quotePrice, stock.Price)
-	}
-	if stock.Symbol != symbol {
-		t.Errorf("TestQuote Expected Symbol to be %v but was %v", symbol, stock.Symbol)
+
+	if resp.Price != quotePrice {
+		t.Errorf("TestQuote Expected Price to be %v but was %v", quotePrice, resp.Price)
 	}
 }
 
 func TestAdd(t *testing.T) {
-	_, err := s.Add(context.Background(), genGrpcRequest("ADD"))
+	resp, err := s.Add(context.Background(), genGrpcRequest("ADD"))
 	if err != nil {
 		t.Error("TestAdd got unexpected error: ", err)
 	}
+
+	if resp.UserId != testUserId {
+		t.Errorf("TestQuote Expected user id to be %v but was %v", testUserId, resp.UserId)
+	}
+
+	if resp.Balance != amount {
+		t.Errorf("TestQuote Expected response amount to be %v but was %v", amount, resp.Balance)
+	}
+
 	var balance float32
-	db.QueryRow("SELECT Balance from User where Id=?", testUserId).Scan(&balance)
+	db.QueryRow("SELECT Balance from User where Id=? AND Password=?", testUserId, testPassword).Scan(&balance)
 	if balance != amount {
-		t.Errorf("TestAdd expected balance of %v got %v", amount, balance)
+		t.Errorf("TestAdd expected database balance of %v got %v", amount, balance)
 	}
 }
 
@@ -196,8 +202,8 @@ func TestCancelSell(t *testing.T) {
 		t.Errorf("TestCancelSell expected Sell stack to have length of %d but had %d", 0, len(user.SellStack))
 	}
 	db.QueryRow("SELECT Amount from User_Stock where UserId=? and StockSymbol=?", testUserId, symbol).Scan(&stockAmount)
-	if stockAmount != int(amount/quotePrice) {
-		t.Errorf("TestCancelSell expected stock amount of %v got %v", int(amount/quotePrice), stockAmount)
+	if stockAmount != int32(amount/quotePrice) {
+		t.Errorf("TestCancelSell expected stock amount of %v got %v", int32(amount/quotePrice), stockAmount)
 	}
 	s.Sell(context.Background(), genGrpcRequest("SELL"))
 	s.CommitSell(context.Background(), genGrpcRequest("COMMIT_SELL"))

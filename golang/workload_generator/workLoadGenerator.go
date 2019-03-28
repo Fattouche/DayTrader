@@ -46,45 +46,68 @@ var transactionNum = int32(1)
 func completeCall(command *pb.Command, client pb.DayTraderClient) {
 	ctx := context.Background()
 	var err error
-	var resp *pb.Response
+	var resp string
+	var userResp *pb.UserResponse
+	var balanceResp *pb.BalanceResponse
+	var priceResp *pb.PriceResponse
+	var stockResp *pb.StockUpdateResponse
+	var response *pb.Response
+	var summaryResponse *pb.SummaryResponse
+
 	switch command.Name {
 	case "ADD":
-		resp, err = client.Add(ctx, command)
+		balanceResp, err = client.Add(ctx, command)
+		resp = balanceResp.String()
 	case "QUOTE":
-		resp, err = client.Quote(ctx, command)
+		priceResp, err = client.Quote(ctx, command)
+		resp = priceResp.String()
 	case "BUY":
-		resp, err = client.Buy(ctx, command)
+		balanceResp, err = client.Buy(ctx, command)
+		resp = balanceResp.String()
 	case "SELL":
-		resp, err = client.Sell(ctx, command)
+		stockResp, err = client.Sell(ctx, command)
+		resp = stockResp.String()
 	case "COMMIT_BUY":
-		resp, err = client.CommitBuy(ctx, command)
+		stockResp, err = client.CommitBuy(ctx, command)
+		resp = stockResp.String()
 	case "COMMIT_SELL":
-		resp, err = client.CommitSell(ctx, command)
+		userResp, err = client.CommitSell(ctx, command)
+		resp = userResp.String()
 	case "CANCEL_BUY":
-		resp, err = client.CancelBuy(ctx, command)
+		balanceResp, err = client.CancelBuy(ctx, command)
+		resp = balanceResp.String()
 	case "CANCEL_SELL":
-		resp, err = client.CancelSell(ctx, command)
+		stockResp, err = client.CancelSell(ctx, command)
+		resp = stockResp.String()
 	case "SET_BUY_AMOUNT":
-		resp, err = client.SetBuyAmount(ctx, command)
+		balanceResp, err = client.SetBuyAmount(ctx, command)
+		resp = balanceResp.String()
 	case "SET_SELL_AMOUNT":
-		resp, err = client.SetSellAmount(ctx, command)
+		response, err = client.SetSellAmount(ctx, command)
+		resp = response.String()
 	case "SET_BUY_TRIGGER":
-		resp, err = client.SetBuyTrigger(ctx, command)
+		response, err = client.SetBuyTrigger(ctx, command)
+		resp = response.String()
 	case "SET_SELL_TRIGGER":
-		resp, err = client.SetSellTrigger(ctx, command)
+		stockResp, err = client.SetSellTrigger(ctx, command)
+		resp = stockResp.String()
 	case "CANCEL_SET_BUY":
-		resp, err = client.CancelSetBuy(ctx, command)
+		balanceResp, err = client.CancelSetBuy(ctx, command)
+		resp = balanceResp.String()
 	case "CANCEL_SET_SELL":
-		resp, err = client.CancelSetSell(ctx, command)
+		stockResp, err = client.CancelSetSell(ctx, command)
+		resp = stockResp.String()
 	case "DUMPLOG":
-		resp, err = client.DumpLog(ctx, command)
+		response, err = client.DumpLog(ctx, command)
+		resp = response.String()
 	case "DISPLAY_SUMMARY":
-		resp, err = client.DisplaySummary(ctx, command)
+		summaryResponse, err = client.DisplaySummary(ctx, command)
+		resp = summaryResponse.String()
 	}
 	_, _ = resp, err
 	// UNCOMMENT FOR RESPONSES
 	// fmt.Print(command.Name + " ")
-	// log.Print("RESP: " + resp.String())
+	// log.Print("RESP: " + resp)
 	// if err != nil {
 	// 	fmt.Println(" ERROR: " + err.Error())
 	// }

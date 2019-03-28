@@ -34,37 +34,10 @@ class SignIn extends Component {
   signUp(){
     this.handler(false /* sign in */, true  /* sign up */)
   }
-
-  // TODO(isaac): grpc-web works, but need to change backend service
-  // proto to be able to retrieve users.
-  // TODO(isaac): fix weird form submission bug where async call doesn't finish
+  
   signIn(){
-    this.landing()
-    // if(this.state.email === "" || this.state.password === ""){
-    //   console.log("stop fucking around")
-    //   return
-    // }
-    
-    // var client = new proto.DayTraderClient('http://localhost:80')
-    // var command = new proto.command()
-    // command.setUserId(this.state.email)
-    // command.setPassword(password)
-    // var metadata = {'custom-header-1': 'value1'};
-    // var call = client.createUser(command, metadata, function(err, response) {
-    // if (err) {
-    //   console.log(err.code);
-    //   console.log(err.message);
-    // } else {
-    //   console.log(response.getMessage());
-    //   // TODO(isaac): show landing page on successful
-    // }
-    // });
 
-    // call.on('status', function(status) {
-    // console.log(status.code);
-    // console.log(status.details);
-    // console.log(status.metadata);
-    // })
+    this.landing()
   }
   
 render(){

@@ -192,8 +192,8 @@ func easyjson89aae3efDecodeDayTrader2(in *jlexer.Lexer, out *User) {
 		switch key {
 		case "Balance":
 			out.Balance = float32(in.Float32())
-		case "Name":
-			out.Name = string(in.String())
+		case "Password":
+			out.Password = string(in.String())
 		case "Id":
 			out.Id = string(in.String())
 		case "BuyStack":
@@ -264,15 +264,15 @@ func easyjson89aae3efDecodeDayTrader2(in *jlexer.Lexer, out *User) {
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.StockMap = make(map[string]int)
+					out.StockMap = make(map[string]int32)
 				} else {
 					out.StockMap = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v3 int
-					v3 = int(in.Int())
+					var v3 int32
+					v3 = int32(in.Int32())
 					(out.StockMap)[key] = v3
 					in.WantComma()
 				}
@@ -303,14 +303,14 @@ func easyjson89aae3efEncodeDayTrader2(out *jwriter.Writer, in User) {
 		out.Float32(float32(in.Balance))
 	}
 	{
-		const prefix string = ",\"Name\":"
+		const prefix string = ",\"Password\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
 		} else {
 			out.RawString(prefix)
 		}
-		out.String(string(in.Name))
+		out.String(string(in.Password))
 	}
 	{
 		const prefix string = ",\"Id\":"
@@ -393,7 +393,7 @@ func easyjson89aae3efEncodeDayTrader2(out *jwriter.Writer, in User) {
 				}
 				out.String(string(v8Name))
 				out.RawByte(':')
-				out.Int(int(v8Value))
+				out.Int32(int32(v8Value))
 			}
 			out.RawByte('}')
 		}

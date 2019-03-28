@@ -43,25 +43,35 @@ func (user *User) popFromSellStack() *Sell {
 	return sell
 }
 
+func userExists(userID string, password string) (float32, map[string]int32, error) {
+	stocks := make(map[string]int32)
+	var balance float32
+	err := db.QueryRow("SELECT Balance from User where Id=? and Password=?", userID, password).Scan(&balance)
+	if err == nil {
+		getAllUserStock(userID, &stocks)
+	}
+	return balance, stocks, err
+}
+
 func getUser(userID string) *User {
 	user, err := getCacheUser(userID)
 	if err != nil {
 		db.QueryRow("SELECT Balance from User where Id=?", user.Id).Scan(&user.Balance)
 		user.SellStack = make([]*Sell, 0)
 		user.BuyStack = make([]*Buy, 0)
-		user.StockMap = make(map[string]int)
+		user.StockMap = make(map[string]int32)
 		user.setCache()
 	}
 	return user
 }
 
-func createUser(userID string) error {
-	user := &User{Id: userID, Balance: 0, Name: ""}
+func createUser(userID string, password string) error {
+	user := &User{Id: userID, Balance: 0, Password: password}
 	user.SellStack = make([]*Sell, 0)
 	user.BuyStack = make([]*Buy, 0)
-	user.StockMap = make(map[string]int)
+	user.StockMap = make(map[string]int32)
 	user.setCache()
-	_, err := db.Exec("insert into User(Id) values(?)", userID)
+	_, err := db.Exec("insert into User(Id,Password) values(?,?)", userID, password)
 	return err
 }
 
