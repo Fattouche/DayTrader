@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import { List, ListItem, TextField } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { getQuote } from '../backend_services/Service';
+import { validateStockSymbol } from '../shared/InputUtils';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
 const styles = theme => ({
@@ -36,11 +37,11 @@ class Browse extends Component {
       this.handleChange = this.handleChange.bind(this)
       this.keyPress = this.keyPress.bind(this)
       this.getQuoteCallback = this.getQuoteCallback.bind(this)
-      this.validateStockSymbol = this.validateStockSymbol.bind(this)
+      // this.validateStockSymbol = this.validateStockSymbol.bind(this)
     }
 
     handleChange(e){
-      if(e.target.value === '' || this.validateStockSymbol(e.target.value)){
+      if(e.target.value === '' || validateStockSymbol(e.target.value)){
         this.setState({
           stock: e.target.value
         });
@@ -55,13 +56,8 @@ class Browse extends Component {
       }
     }
 
-    validateStockSymbol(symbol){
-      var re = /^[a-zA-Z]{1,3}$/;
-      return re.test(symbol)
-    }
-
     keyPress(e){
-      if(e.key == 'Enter'){
+      if(e.key == 'Enter' && this.state.stock !== ''){
         getQuote(this.state.userId, this.state.stock,(err, response) => {this.getQuoteCallback(err,response)})
       }
    };

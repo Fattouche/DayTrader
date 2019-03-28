@@ -156,7 +156,7 @@ const styles = {
 class Landing extends Component {
     constructor(props){
         super(props)
-        this.contentMap = {'My Profile': <MyProfile/>, 'Buy': <Buy/>, 'Sell': <Sell/>, 'Browse': <Browse userId={props.userInfo.getUserId()}/>}
+        this.contentMap = {'My Profile': <MyProfile/>, 'Buy': <Buy userId={props.userInfo.getUserId()}/>, 'Sell': <Sell/>, 'Browse': <Browse userId={props.userInfo.getUserId()}/>}
         this.state = {
             mobileOpen: false,
             content: 'My Profile',

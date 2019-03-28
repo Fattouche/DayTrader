@@ -32,8 +32,27 @@ export function getQuote(username, symbol, callback){
     var command = new proto.Command()
     command.setUserId(username)
     command.setSymbol(symbol)
-    console.log("SYMBOL IS ")
-    console.log(symbol)
-
     client.quote(command, {}, callback)
+}
+
+export function buy(username, symbol, amount, callback){
+    var client = new proto.DayTraderClient(BACKEND_ADDRESS)
+    var command = new proto.Command()
+    command.setUserId(username)
+    command.setSymbol(symbol)
+    command.setAmount(amount)
+    client.buy(command, {}, callback)
+}
+
+export function commitBuy(username, callback){
+    var client = new proto.DayTraderClient(BACKEND_ADDRESS)
+    var command = new proto.Command()
+    command.setUserId(username)
+    client.commitBuy(command, {}, callback)
+}
+export function cancelBuy(username, callback){
+    var client = new proto.DayTraderClient(BACKEND_ADDRESS)
+    var command = new proto.Command()
+    command.setUserId(username)
+    client.cancelBuy(command, {}, callback)
 }
