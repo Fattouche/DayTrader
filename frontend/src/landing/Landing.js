@@ -9,6 +9,7 @@ import Header from './Header';
 import Sell from './Sell';
 import Buy from './Buy';
 import Browse from './Browse';
+import Triggers from './Triggers';
 
 
 let theme = createMuiTheme({
@@ -155,7 +156,13 @@ const styles = {
 class Landing extends Component {
     constructor(props){
         super(props)
-        this.contentMap = {'My Profile': <MyProfile userInfo={props.userInfo}/>, 'Buy': <Buy userId={props.userInfo.getUserId()}/>, 'Sell': <Sell/>, 'Browse': <Browse userId={props.userInfo.getUserId()}/>}
+        this.contentMap = {
+          'My Profile': <MyProfile userInfo={props.userInfo}/>, 
+          'Buy': <Buy userId={props.userInfo.getUserId()}/>, 
+          'Sell': <Sell/>, 
+          'Browse': <Browse userId={props.userInfo.getUserId()}/>,
+          'Triggers': <Triggers/>
+        }
 
         this.state = {
             mobileOpen: false,

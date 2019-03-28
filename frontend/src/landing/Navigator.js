@@ -14,6 +14,8 @@ import PublicIcon from '@material-ui/icons/Public';
 import SettingsPower from '@material-ui/icons/SettingsPower';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import MoneyOff from '@material-ui/icons/MoneyOff';
+import SettingsRemote from '@material-ui/icons/SettingsRemote';
+
 
 const categories = [
   {
@@ -23,6 +25,7 @@ const categories = [
       { id: 'Buy', icon: <AttachMoney /> },
       { id: 'Sell', icon: <MoneyOff /> },
       { id: 'Browse', icon: <PublicIcon /> },
+      { id: 'Triggers', icon: <SettingsRemote /> },
     ],
   },
   {
