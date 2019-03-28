@@ -51,7 +51,7 @@ class SignIn extends Component {
         console.log(err.message);
       } else {
         console.log(response)
-        this.landing()
+        this.landing(response)
       }
   }
   

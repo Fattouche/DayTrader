@@ -19,3 +19,24 @@ export function createUser(username, password, callback) {
 
     client.createUser(command, {}, callback)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export function displaySummary(username, callback) {
+    var client = new proto.DayTraderClient(BACKEND_ADDRESS)
+    var command = new proto.Command()
+    command.setUserId(username)
+    client.displaySummary(command, {}, callback)
+}

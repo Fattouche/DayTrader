@@ -31,9 +31,9 @@ class App extends Component {
     this.setState({
       signIn: false,
       signUp: false,
-      landing:true
+      landing:true,
+      userInfo: userInfo
     })
-    this.userInfo = userInfo
   }
 
   logout() {
@@ -47,7 +47,7 @@ class App extends Component {
     }else if (this.state.signUp){
       screen = <SignUp parentContext={this} handler={this.loginState}/>
     }else{
-      screen = <Landing parentContext={this} handler={this.logout} userInfo={this.userInfo} />
+      screen = <Landing parentContext={this} handler={this.logout} userInfo={this.state.userInfo} />
     }
     return (
       <div className='App'>{screen}</div>
