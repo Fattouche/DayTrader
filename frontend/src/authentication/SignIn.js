@@ -14,6 +14,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 import styles from '../styles/SignInStyles';
+import {check_credentials} from '../backend_services/Service';
 
 
 class SignIn extends Component {
@@ -21,7 +22,7 @@ class SignIn extends Component {
     super(props);
     this.state = { 
       email: '',
-      password:'' 
+      password:''
     };
 
     this.classes = props.classes
@@ -29,6 +30,7 @@ class SignIn extends Component {
     this.landing = props.handler[1]
     this.signUp = this.signUp.bind(this)
     this.signIn = this.signIn.bind(this)
+    this.signInCallback = this.signInCallback.bind(this)
   }
 
   signUp(){
@@ -36,8 +38,22 @@ class SignIn extends Component {
   }
   
   signIn(){
+    if(this.state.email === "" || this.state.password === ""){
+      console.log("stop fucking around")
+      return
+    }
 
-    this.landing()
+    check_credentials(this.state.email, this.state.password, (err, response) => {this.signInCallback(err, response)});
+  }
+
+  signInCallback(err, response){
+      if (err) {
+        console.log(err.code);
+        console.log(err.message);
+      } else {
+        console.log(response)
+        this.landing()
+      }
   }
   
 render(){

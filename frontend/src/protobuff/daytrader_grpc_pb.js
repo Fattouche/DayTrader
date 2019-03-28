@@ -25,7 +25,7 @@ proto.daytrader = require('./daytrader_pb.js');
 proto.daytrader.LoggerClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
-  options['format'] = 'text';
+  options['format'] = 'binary';
 
   /**
    * @private @const {!grpc.web.GrpcWebClientBase} The client
@@ -61,7 +61,7 @@ proto.daytrader.LoggerClient =
 proto.daytrader.LoggerPromiseClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
-  options['format'] = 'text';
+  options['format'] = 'binary';
 
   /**
    * @private @const {!grpc.web.GrpcWebClientBase} The client
@@ -89,12 +89,12 @@ proto.daytrader.LoggerPromiseClient =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.log,
+ *   !proto.daytrader.Log,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_Logger_LogUserCommand = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.log} request */
+  /** @param {!proto.daytrader.Log} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -103,7 +103,7 @@ const methodInfo_Logger_LogUserCommand = new grpc.web.AbstractClientBase.MethodI
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -124,7 +124,7 @@ proto.daytrader.LoggerClient.prototype.logUserCommand =
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -144,12 +144,12 @@ proto.daytrader.LoggerPromiseClient.prototype.logUserCommand =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.log,
+ *   !proto.daytrader.Log,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_Logger_LogQuoteServerEvent = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.log} request */
+  /** @param {!proto.daytrader.Log} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -158,7 +158,7 @@ const methodInfo_Logger_LogQuoteServerEvent = new grpc.web.AbstractClientBase.Me
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -179,7 +179,7 @@ proto.daytrader.LoggerClient.prototype.logQuoteServerEvent =
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -199,12 +199,12 @@ proto.daytrader.LoggerPromiseClient.prototype.logQuoteServerEvent =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.log,
+ *   !proto.daytrader.Log,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_Logger_LogAccountTransaction = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.log} request */
+  /** @param {!proto.daytrader.Log} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -213,7 +213,7 @@ const methodInfo_Logger_LogAccountTransaction = new grpc.web.AbstractClientBase.
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -234,7 +234,7 @@ proto.daytrader.LoggerClient.prototype.logAccountTransaction =
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -254,12 +254,12 @@ proto.daytrader.LoggerPromiseClient.prototype.logAccountTransaction =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.log,
+ *   !proto.daytrader.Log,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_Logger_LogSystemEvent = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.log} request */
+  /** @param {!proto.daytrader.Log} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -268,7 +268,7 @@ const methodInfo_Logger_LogSystemEvent = new grpc.web.AbstractClientBase.MethodI
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -289,7 +289,7 @@ proto.daytrader.LoggerClient.prototype.logSystemEvent =
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -309,12 +309,12 @@ proto.daytrader.LoggerPromiseClient.prototype.logSystemEvent =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.log,
+ *   !proto.daytrader.Log,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_Logger_LogErrorEvent = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.log} request */
+  /** @param {!proto.daytrader.Log} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -323,7 +323,7 @@ const methodInfo_Logger_LogErrorEvent = new grpc.web.AbstractClientBase.MethodIn
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -344,7 +344,7 @@ proto.daytrader.LoggerClient.prototype.logErrorEvent =
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -364,12 +364,12 @@ proto.daytrader.LoggerPromiseClient.prototype.logErrorEvent =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.log,
+ *   !proto.daytrader.Log,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_Logger_LogDebugEvent = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.log} request */
+  /** @param {!proto.daytrader.Log} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -378,7 +378,7 @@ const methodInfo_Logger_LogDebugEvent = new grpc.web.AbstractClientBase.MethodIn
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -399,7 +399,7 @@ proto.daytrader.LoggerClient.prototype.logDebugEvent =
 
 
 /**
- * @param {!proto.daytrader.log} request The
+ * @param {!proto.daytrader.Log} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -419,12 +419,12 @@ proto.daytrader.LoggerPromiseClient.prototype.logDebugEvent =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
+ *   !proto.daytrader.Command,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_Logger_DumpLogs = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -433,7 +433,7 @@ const methodInfo_Logger_DumpLogs = new grpc.web.AbstractClientBase.MethodInfo(
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -454,7 +454,7 @@ proto.daytrader.LoggerClient.prototype.dumpLogs =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -472,6 +472,61 @@ proto.daytrader.LoggerPromiseClient.prototype.dumpLogs =
 
 
 /**
+ * @const
+ * @type {!grpc.web.AbstractClientBase.MethodInfo<
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.SummaryResponse>}
+ */
+const methodInfo_Logger_DisplaySummary = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.daytrader.SummaryResponse,
+  /** @param {!proto.daytrader.Command} request */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.daytrader.SummaryResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.daytrader.Command} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.Error, ?proto.daytrader.SummaryResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.SummaryResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.daytrader.LoggerClient.prototype.displaySummary =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/daytrader.Logger/DisplaySummary',
+      request,
+      metadata || {},
+      methodInfo_Logger_DisplaySummary,
+      callback);
+};
+
+
+/**
+ * @param {!proto.daytrader.Command} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.daytrader.SummaryResponse>}
+ *     A native promise that resolves to the response
+ */
+proto.daytrader.LoggerPromiseClient.prototype.displaySummary =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/daytrader.Logger/DisplaySummary',
+      request,
+      metadata || {},
+      methodInfo_Logger_DisplaySummary);
+};
+
+
+/**
  * @param {string} hostname
  * @param {?Object} credentials
  * @param {?Object} options
@@ -482,7 +537,7 @@ proto.daytrader.LoggerPromiseClient.prototype.dumpLogs =
 proto.daytrader.DayTraderClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
-  options['format'] = 'text';
+  options['format'] = 'binary';
 
   /**
    * @private @const {!grpc.web.GrpcWebClientBase} The client
@@ -518,7 +573,7 @@ proto.daytrader.DayTraderClient =
 proto.daytrader.DayTraderPromiseClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
-  options['format'] = 'text';
+  options['format'] = 'binary';
 
   /**
    * @private @const {!grpc.web.GrpcWebClientBase} The client
@@ -546,27 +601,27 @@ proto.daytrader.DayTraderPromiseClient =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.UserCredentials,
- *   !proto.daytrader.UserInfo>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.UserResponse>}
  */
 const methodInfo_DayTrader_GetUser = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.UserInfo,
-  /** @param {!proto.daytrader.UserCredentials} request */
+  proto.daytrader.UserResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.UserInfo.deserializeBinary
+  proto.daytrader.UserResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.UserCredentials} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.UserInfo)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.UserResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.UserInfo>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.UserResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.getUser =
@@ -581,11 +636,11 @@ proto.daytrader.DayTraderClient.prototype.getUser =
 
 
 /**
- * @param {!proto.daytrader.UserCredentials} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.UserInfo>}
+ * @return {!Promise<!proto.daytrader.UserResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.getUser =
@@ -601,12 +656,12 @@ proto.daytrader.DayTraderPromiseClient.prototype.getUser =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
+ *   !proto.daytrader.Command,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_DayTrader_CreateUser = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -615,7 +670,7 @@ const methodInfo_DayTrader_CreateUser = new grpc.web.AbstractClientBase.MethodIn
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -636,7 +691,7 @@ proto.daytrader.DayTraderClient.prototype.createUser =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -656,27 +711,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.createUser =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.BalanceResponse>}
  */
 const methodInfo_DayTrader_Add = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.BalanceResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.BalanceResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.BalanceResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.BalanceResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.add =
@@ -691,11 +746,11 @@ proto.daytrader.DayTraderClient.prototype.add =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.BalanceResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.add =
@@ -711,27 +766,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.add =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.PriceResponse>}
  */
 const methodInfo_DayTrader_Quote = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.PriceResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.PriceResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.PriceResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.PriceResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.quote =
@@ -746,11 +801,11 @@ proto.daytrader.DayTraderClient.prototype.quote =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.PriceResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.quote =
@@ -766,27 +821,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.quote =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.BalanceResponse>}
  */
 const methodInfo_DayTrader_Buy = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.BalanceResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.BalanceResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.BalanceResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.BalanceResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.buy =
@@ -801,11 +856,11 @@ proto.daytrader.DayTraderClient.prototype.buy =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.BalanceResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.buy =
@@ -821,27 +876,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.buy =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.StockUpdateResponse>}
  */
 const methodInfo_DayTrader_Sell = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.StockUpdateResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.StockUpdateResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.StockUpdateResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.StockUpdateResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.sell =
@@ -856,11 +911,11 @@ proto.daytrader.DayTraderClient.prototype.sell =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.StockUpdateResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.sell =
@@ -876,27 +931,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.sell =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.StockUpdateResponse>}
  */
 const methodInfo_DayTrader_CommitBuy = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.StockUpdateResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.StockUpdateResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.StockUpdateResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.StockUpdateResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.commitBuy =
@@ -911,11 +966,11 @@ proto.daytrader.DayTraderClient.prototype.commitBuy =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.StockUpdateResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.commitBuy =
@@ -931,27 +986,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.commitBuy =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.UserResponse>}
  */
 const methodInfo_DayTrader_CommitSell = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.UserResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.UserResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.UserResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.UserResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.commitSell =
@@ -966,11 +1021,11 @@ proto.daytrader.DayTraderClient.prototype.commitSell =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.UserResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.commitSell =
@@ -986,27 +1041,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.commitSell =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.BalanceResponse>}
  */
 const methodInfo_DayTrader_CancelBuy = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.BalanceResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.BalanceResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.BalanceResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.BalanceResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.cancelBuy =
@@ -1021,11 +1076,11 @@ proto.daytrader.DayTraderClient.prototype.cancelBuy =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.BalanceResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.cancelBuy =
@@ -1041,27 +1096,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.cancelBuy =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.StockUpdateResponse>}
  */
 const methodInfo_DayTrader_CancelSell = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.StockUpdateResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.StockUpdateResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.StockUpdateResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.StockUpdateResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.cancelSell =
@@ -1076,11 +1131,11 @@ proto.daytrader.DayTraderClient.prototype.cancelSell =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.StockUpdateResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.cancelSell =
@@ -1096,27 +1151,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.cancelSell =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.BalanceResponse>}
  */
 const methodInfo_DayTrader_SetBuyAmount = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.BalanceResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.BalanceResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.BalanceResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.BalanceResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.setBuyAmount =
@@ -1131,11 +1186,11 @@ proto.daytrader.DayTraderClient.prototype.setBuyAmount =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.BalanceResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.setBuyAmount =
@@ -1151,12 +1206,12 @@ proto.daytrader.DayTraderPromiseClient.prototype.setBuyAmount =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
+ *   !proto.daytrader.Command,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_DayTrader_SetSellAmount = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -1165,7 +1220,7 @@ const methodInfo_DayTrader_SetSellAmount = new grpc.web.AbstractClientBase.Metho
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -1186,7 +1241,7 @@ proto.daytrader.DayTraderClient.prototype.setSellAmount =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -1206,12 +1261,12 @@ proto.daytrader.DayTraderPromiseClient.prototype.setSellAmount =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
+ *   !proto.daytrader.Command,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_DayTrader_SetBuyTrigger = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -1220,7 +1275,7 @@ const methodInfo_DayTrader_SetBuyTrigger = new grpc.web.AbstractClientBase.Metho
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -1241,7 +1296,7 @@ proto.daytrader.DayTraderClient.prototype.setBuyTrigger =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -1261,27 +1316,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.setBuyTrigger =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.StockUpdateResponse>}
  */
 const methodInfo_DayTrader_SetSellTrigger = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.StockUpdateResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.StockUpdateResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.StockUpdateResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.StockUpdateResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.setSellTrigger =
@@ -1296,11 +1351,11 @@ proto.daytrader.DayTraderClient.prototype.setSellTrigger =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.StockUpdateResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.setSellTrigger =
@@ -1316,82 +1371,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.setSellTrigger =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
- */
-const methodInfo_DayTrader_CancelSetSell = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
-  function(request) {
-    return request.serializeBinary();
-  },
-  proto.daytrader.Response.deserializeBinary
-);
-
-
-/**
- * @param {!proto.daytrader.command} request The
- *     request proto
- * @param {?Object<string, string>} metadata User defined
- *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
- *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
- *     The XHR Node Readable Stream
- */
-proto.daytrader.DayTraderClient.prototype.cancelSetSell =
-    function(request, metadata, callback) {
-  return this.client_.rpcCall(this.hostname_ +
-      '/daytrader.DayTrader/CancelSetSell',
-      request,
-      metadata || {},
-      methodInfo_DayTrader_CancelSetSell,
-      callback);
-};
-
-
-/**
- * @param {!proto.daytrader.command} request The
- *     request proto
- * @param {?Object<string, string>} metadata User defined
- *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
- *     A native promise that resolves to the response
- */
-proto.daytrader.DayTraderPromiseClient.prototype.cancelSetSell =
-    function(request, metadata) {
-  return this.client_.unaryCall(this.hostname_ +
-      '/daytrader.DayTrader/CancelSetSell',
-      request,
-      metadata || {},
-      methodInfo_DayTrader_CancelSetSell);
-};
-
-
-/**
- * @const
- * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.BalanceResponse>}
  */
 const methodInfo_DayTrader_CancelSetBuy = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.BalanceResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.BalanceResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.BalanceResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.BalanceResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.cancelSetBuy =
@@ -1406,11 +1406,11 @@ proto.daytrader.DayTraderClient.prototype.cancelSetBuy =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.BalanceResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.cancelSetBuy =
@@ -1426,12 +1426,67 @@ proto.daytrader.DayTraderPromiseClient.prototype.cancelSetBuy =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.StockUpdateResponse>}
+ */
+const methodInfo_DayTrader_CancelSetSell = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.daytrader.StockUpdateResponse,
+  /** @param {!proto.daytrader.Command} request */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.daytrader.StockUpdateResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.daytrader.Command} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.Error, ?proto.daytrader.StockUpdateResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.StockUpdateResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.daytrader.DayTraderClient.prototype.cancelSetSell =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/daytrader.DayTrader/CancelSetSell',
+      request,
+      metadata || {},
+      methodInfo_DayTrader_CancelSetSell,
+      callback);
+};
+
+
+/**
+ * @param {!proto.daytrader.Command} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.daytrader.StockUpdateResponse>}
+ *     A native promise that resolves to the response
+ */
+proto.daytrader.DayTraderPromiseClient.prototype.cancelSetSell =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/daytrader.DayTrader/CancelSetSell',
+      request,
+      metadata || {},
+      methodInfo_DayTrader_CancelSetSell);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.AbstractClientBase.MethodInfo<
+ *   !proto.daytrader.Command,
  *   !proto.daytrader.Response>}
  */
 const methodInfo_DayTrader_DumpLog = new grpc.web.AbstractClientBase.MethodInfo(
   proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
@@ -1440,7 +1495,7 @@ const methodInfo_DayTrader_DumpLog = new grpc.web.AbstractClientBase.MethodInfo(
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -1461,7 +1516,7 @@ proto.daytrader.DayTraderClient.prototype.dumpLog =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -1481,27 +1536,27 @@ proto.daytrader.DayTraderPromiseClient.prototype.dumpLog =
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.daytrader.command,
- *   !proto.daytrader.Response>}
+ *   !proto.daytrader.Command,
+ *   !proto.daytrader.SummaryResponse>}
  */
 const methodInfo_DayTrader_DisplaySummary = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.daytrader.Response,
-  /** @param {!proto.daytrader.command} request */
+  proto.daytrader.SummaryResponse,
+  /** @param {!proto.daytrader.Command} request */
   function(request) {
     return request.serializeBinary();
   },
-  proto.daytrader.Response.deserializeBinary
+  proto.daytrader.SummaryResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.Error, ?proto.daytrader.Response)}
+ * @param {function(?grpc.web.Error, ?proto.daytrader.SummaryResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.daytrader.Response>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.daytrader.SummaryResponse>|undefined}
  *     The XHR Node Readable Stream
  */
 proto.daytrader.DayTraderClient.prototype.displaySummary =
@@ -1516,11 +1571,11 @@ proto.daytrader.DayTraderClient.prototype.displaySummary =
 
 
 /**
- * @param {!proto.daytrader.command} request The
+ * @param {!proto.daytrader.Command} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.daytrader.Response>}
+ * @return {!Promise<!proto.daytrader.SummaryResponse>}
  *     A native promise that resolves to the response
  */
 proto.daytrader.DayTraderPromiseClient.prototype.displaySummary =
