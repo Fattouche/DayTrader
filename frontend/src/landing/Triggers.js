@@ -112,12 +112,12 @@ class Triggers extends Component {
     }
 
     setBuyTriggerCallback(err, response, newBalance){
-      this.setState({buyDisabled:false})
       if(err){
         alert(err.message)
       }else{
-        alert(response.getMessage() + "\n" + "New balance: " + newBalance.toFixed(2))
+        alert(response.getMessage() + "\nNew balance: " + newBalance.toFixed(2))
       }
+      this.setState({buyDisabled:false})
     }
 
     handleSellTrigger(){

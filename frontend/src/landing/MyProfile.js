@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import { displaySummary } from '../backend_services/Service';
-import { ListItem, List, TextField } from '@material-ui/core';
+import { ListItem, List } from '@material-ui/core';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import FolderIcon from '@material-ui/icons/Folder';
+import PersonPin from '@material-ui/icons/PersonPin';
 
 
 const styles = theme => ({
@@ -91,7 +91,7 @@ class Content extends Component {
       <ListItem>
         <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
         <ListItemText primary="User Id">
@@ -101,7 +101,7 @@ class Content extends Component {
       <ListItem>
                 <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
       <ListItemText primary="Balance">
@@ -111,7 +111,7 @@ class Content extends Component {
     <ListItem>
     <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
     <ListItemText primary="Stocks">
@@ -126,7 +126,7 @@ class Content extends Component {
       <ListItem>
         <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
         <ListItemText primary="Transaction">
@@ -136,7 +136,7 @@ class Content extends Component {
       <ListItem>
                 <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
       <ListItemText primary="Transaction">
@@ -146,7 +146,7 @@ class Content extends Component {
     <ListItem>
     <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
     <ListItemText primary="Transaction">
@@ -161,7 +161,7 @@ class Content extends Component {
       <ListItem>
         <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
         <ListItemText primary="Trigger">
@@ -171,7 +171,7 @@ class Content extends Component {
       <ListItem>
                 <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
       <ListItemText primary="Trigger">
@@ -181,7 +181,7 @@ class Content extends Component {
     <ListItem>
     <ListItemAvatar>
           <Avatar>
-            <FolderIcon />
+            <PersonPin />
           </Avatar>
         </ListItemAvatar>
     <ListItemText primary="Trigger">

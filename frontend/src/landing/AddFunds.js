@@ -22,7 +22,7 @@ const styles = theme => ({
     },
     });
 
-class AddBalance extends Component {
+class AddFunds extends Component {
     constructor(props) {
       super(props);
       this.state = {
@@ -55,7 +55,7 @@ class AddBalance extends Component {
         if(err){
             alert(err.message)
         }else{
-            alert("New balance: " + response.getBalance())
+            alert("New balance: " + response.getBalance().toFixed(2))
         }
     }
 
@@ -80,4 +80,4 @@ class AddBalance extends Component {
     }
   }
   
-  export default withStyles(styles)(AddBalance);
+  export default withStyles(styles)(AddFunds);

@@ -23,7 +23,7 @@ const categories = [
     id: 'Manage',
     children: [
       { id: 'My Profile', icon: <PeopleIcon /> },
-      { id: 'Add Balance', icon: <AccessibleForward/> },
+      { id: 'Add Funds', icon: <AccessibleForward/> },
       { id: 'Buy', icon: <AttachMoney /> },
       { id: 'Sell', icon: <MoneyOff /> },
       { id: 'Browse', icon: <PublicIcon /> },
@@ -90,12 +90,7 @@ class Navigator extends Component {
         this.props = props
         this.changeContent = props.handler[0];
         this.logout = props.handler[1];
-        // this.showContentAndHeader = this.showContentAndHeader.bind(this)
     }
-
-// showContentAndHeader(childId){
-//     handler(childId)
-// }
 
 render(){
   return (
