@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { List, ListItem, TextField } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { validateStockSymbol, validatePrice } from '../shared/InputUtils';
 import InputAdornment from '@material-ui/core/InputAdornment';

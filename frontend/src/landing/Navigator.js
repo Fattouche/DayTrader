@@ -15,13 +15,15 @@ import SettingsPower from '@material-ui/icons/SettingsPower';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import MoneyOff from '@material-ui/icons/MoneyOff';
 import SettingsRemote from '@material-ui/icons/SettingsRemote';
+import AccessibleForward from '@material-ui/icons/AccessibleForward';
 
 
 const categories = [
   {
     id: 'Manage',
     children: [
-      { id: 'My Profile', icon: <PeopleIcon />, active: true },
+      { id: 'My Profile', icon: <PeopleIcon /> },
+      { id: 'Add Balance', icon: <AccessibleForward/> },
       { id: 'Buy', icon: <AttachMoney /> },
       { id: 'Sell', icon: <MoneyOff /> },
       { id: 'Browse', icon: <PublicIcon /> },
@@ -125,7 +127,7 @@ render(){
                 {id}
               </ListItemText>
             </ListItem>
-            {children.map(({ id: childId, icon, active }) => (
+            {children.map(({ id: childId, icon }) => (
               <ListItem
                 button
                 dense
@@ -133,7 +135,7 @@ render(){
                 className={classNames(
                   this.classes.item,
                   this.classes.itemActionable,
-                  active && this.classes.itemActiveItem,
+                  this.props.contentId === childId && this.classes.itemActiveItem,
                 )}
                 onClick={() => {childId === "Logout" ? this.logout() : this.changeContent(childId)}}
               >

@@ -10,6 +10,7 @@ import Sell from './Sell';
 import Buy from './Buy';
 import Browse from './Browse';
 import Triggers from './Triggers';
+import AddBalance from './AddBalance';
 
 
 let theme = createMuiTheme({
@@ -161,7 +162,8 @@ class Landing extends Component {
           'Buy': <Buy userId={props.userInfo.getUserId()}/>, 
           'Sell': <Sell userId={props.userInfo.getUserId()}/>, 
           'Browse': <Browse userId={props.userInfo.getUserId()}/>,
-          'Triggers': <Triggers/>
+          'Triggers': <Triggers/>,
+          'Add Balance': <AddBalance userId={props.userInfo.getUserId()}/>
         }
 
         this.state = {
@@ -205,7 +207,7 @@ class Landing extends Component {
               />
             </Hidden>
             <Hidden xsDown implementation="css">
-              <Navigator PaperProps={{ style: { width: drawerWidth } }} handler={[this.showContentAndHeader,this.logout]} />
+              <Navigator PaperProps={{ style: { width: drawerWidth } }} handler={[this.showContentAndHeader,this.logout]} contentId={this.state.content}/>
             </Hidden>
           </nav>
           <div className={this.classes.appContent}>

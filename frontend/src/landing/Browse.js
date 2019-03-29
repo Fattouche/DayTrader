@@ -57,7 +57,7 @@ class Browse extends Component {
     }
 
     keyPress(e){
-      if(e.key == 'Enter' && this.state.stock !== ''){
+      if(e.key === 'Enter' && this.state.stock !== ''){
         getQuote(this.state.userId, this.state.stock,(err, response) => {this.getQuoteCallback(err,response)})
       }
    };
