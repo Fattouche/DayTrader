@@ -90,9 +90,9 @@ class SignUp extends Component { // Stay consistent and change to class
               variant="contained"
               color="primary"
               className={this.classes.submit}
-              onClick={this.signIn}
+              onClick={this.verifyInformation}
             >
-              Sign in
+              Sign up
             </Button>
             <Button
               type="button"
@@ -100,9 +100,9 @@ class SignUp extends Component { // Stay consistent and change to class
               variant="contained"
               color="primary"
               className={this.classes.submit}
-              onClick={this.verifyInformation}
+              onClick={this.signIn}
             >
-              Sign up
+              Sign in
             </Button>
           </form>
         </Paper>

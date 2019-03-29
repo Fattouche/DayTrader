@@ -224,6 +224,7 @@ func (s *server) SetBuyAmount(ctx context.Context, req *pb.Command) (*pb.Balance
 		if err != nil {
 			logErrorEvent(ctx, err)
 			log.Println(err)
+			return nil, err
 		}
 		createBuyTrigger(ctx, user.Id, req.Symbol, buy.Id, req.Amount)
 		return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, nil

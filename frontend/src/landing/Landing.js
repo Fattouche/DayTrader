@@ -162,7 +162,7 @@ class Landing extends Component {
           'Buy': <Buy userId={props.userInfo.getUserId()}/>, 
           'Sell': <Sell userId={props.userInfo.getUserId()}/>, 
           'Browse': <Browse userId={props.userInfo.getUserId()}/>,
-          'Triggers': <Triggers/>,
+          'Triggers': <Triggers userId={props.userInfo.getUserId()}/>,
           'Add Balance': <AddBalance userId={props.userInfo.getUserId()}/>
         }
 
