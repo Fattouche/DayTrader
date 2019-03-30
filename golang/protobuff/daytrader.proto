@@ -68,9 +68,10 @@ message Trigger {
 
 message Transaction {
     string command_name = 1;
-    string amount = 2;
+    int32 stock_amount = 2;
     string stock_symbol = 3;
     string timestamp = 4;
+    float balance_change = 5;
 }
 
 message SummaryResponse {
