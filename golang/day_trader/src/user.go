@@ -144,8 +144,9 @@ func (user *User) getSellTriggers() []*pb.Trigger {
 	}
 	triggers := make([]*pb.Trigger, 0)
 	for rows.Next() {
+		var id int64
 		trigger := &pb.Trigger{Buy: false}
-		err = rows.Scan(nil, &trigger.Symbol, &trigger.Amount, &trigger.Price)
+		err = rows.Scan(&id, &trigger.Symbol, &trigger.Amount, &trigger.Price)
 		if err != nil {
 			log.Println("Error scanning sell trigger: ", err)
 		}
@@ -162,8 +163,9 @@ func (user *User) getBuyTriggers() []*pb.Trigger {
 	}
 	triggers := make([]*pb.Trigger, 0)
 	for rows.Next() {
+		var id int64
 		trigger := &pb.Trigger{Buy: true}
-		err = rows.Scan(nil, &trigger.Symbol, &trigger.Amount, &trigger.Price)
+		err = rows.Scan(&id, &trigger.Symbol, &trigger.Amount, &trigger.Price)
 		if err != nil {
 			log.Println("Error scanning buy trigger: ", err)
 		}
