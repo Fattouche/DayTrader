@@ -33,11 +33,9 @@ class Browse extends Component {
       };
 
       this.classes = props.classes
-      this.handler = props.handler
       this.handleChange = this.handleChange.bind(this)
       this.keyPress = this.keyPress.bind(this)
       this.getQuoteCallback = this.getQuoteCallback.bind(this)
-      // this.validateStockSymbol = this.validateStockSymbol.bind(this)
     }
 
     handleChange(e){

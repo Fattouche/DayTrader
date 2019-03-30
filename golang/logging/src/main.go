@@ -105,13 +105,13 @@ func (s *server) LogDebugEvent(ctx context.Context, req *pb.Log) (*pb.Response, 
 func (s *server) DumpLogs(ctx context.Context, req *pb.Command) (*pb.Response, error) {
 	go dumpLogsToXML(req.UserId, req.Filename)
 
-	return &pb.Response{Message: "Writing to XML"}, nil
+	return &pb.Response{UserId: req.UserId, Message: "Writing to XML"}, nil
 }
 
-func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.Response, error) {
+func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.SummaryResponse, error) {
 	rows, err := getRows("UserCommandLog", req.UserId)
 	if err != nil {
-		return &pb.Response{Message: "Failed to get rows from DB"}, err
+		return &pb.SummaryResponse{}, err
 	}
 
 	var entries []pb.Transaction
@@ -122,7 +122,7 @@ func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.Respo
 		err = rows.Scan(
 			&timestamp, nil, nil,
 			&entry.CommandName, nil, &entry.StockSymbol,
-			nil, &entry.Amount,
+			nil, &entry.StockAmount,
 		)
 		if err != nil {
 			log.Println("Error scanning rows: ", err)
@@ -136,7 +136,7 @@ func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.Respo
 	log.Println(entries)
 
 	// TODO: aggregate all transactions and return
-	return &pb.Response{Message: "yeee"}, nil
+	return &pb.SummaryResponse{}, nil
 }
 
 func startGRPCServer() {

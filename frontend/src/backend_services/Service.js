@@ -4,7 +4,7 @@ const BACKEND_ADDRESS = 'http://localhost:80'
 
 export function checkCredentials(username, password, callback) {
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setPassword(password)
 
@@ -13,23 +13,31 @@ export function checkCredentials(username, password, callback) {
 
 export function createUser(username, password, callback) {
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setPassword(password)
 
     client.createUser(command, {} /* metadata */, callback)
 }
 
+export function dumplog(username, filename, callback) {
+    var client = new proto.DayTraderClient(BACKEND_ADDRESS)
+    var command = new proto.command()
+    command.setUserId(username)
+    command.setFilename(filename)
+    client.dumpLog(command, {} /* metadata */, callback)
+}
+
 export function displaySummary(username, callback) {
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     client.displaySummary(command, {} /* metadata */, callback)
 }
 
 export function getQuote(username, symbol, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setSymbol(symbol)
     client.quote(command, {} /* metadata */, callback)
@@ -37,7 +45,7 @@ export function getQuote(username, symbol, callback){
 
 export function buy(username, symbol, amount, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setSymbol(symbol)
     command.setAmount(amount)
@@ -46,7 +54,7 @@ export function buy(username, symbol, amount, callback){
 
 export function setBuyAmount(username, symbol, amount, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setSymbol(symbol)
     command.setAmount(amount)
@@ -55,7 +63,7 @@ export function setBuyAmount(username, symbol, amount, callback){
 
 export function setBuyTrigger(username, symbol, price, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setSymbol(symbol)
     command.setAmount(price)
@@ -64,20 +72,20 @@ export function setBuyTrigger(username, symbol, price, callback){
 
 export function commitBuy(username, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     client.commitBuy(command, {}, callback)
 }
 export function cancelBuy(username, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     client.cancelBuy(command, {} /* metadata */, callback)
 }
 
 export function sell(username, symbol, amount, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setSymbol(symbol)
     command.setAmount(amount)
@@ -86,7 +94,7 @@ export function sell(username, symbol, amount, callback){
 
 export function setSellAmount(username, symbol, amount, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setSymbol(symbol)
     command.setAmount(amount)
@@ -95,7 +103,7 @@ export function setSellAmount(username, symbol, amount, callback){
 
 export function setSellTrigger(username, symbol, price, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setSymbol(symbol)
     command.setAmount(price)
@@ -104,21 +112,21 @@ export function setSellTrigger(username, symbol, price, callback){
 
 export function commitSell(username, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     client.commitSell(command, {}, callback)
 }
 
 export function cancelSell(username, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     client.cancelSell(command, {} /* metadata */, callback)
 }
 
 export function add(username, amount, callback){
     var client = new proto.DayTraderClient(BACKEND_ADDRESS)
-    var command = new proto.Command()
+    var command = new proto.command()
     command.setUserId(username)
     command.setAmount(amount)
     client.add(command, {} /* metadata */, callback)

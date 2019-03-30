@@ -16,6 +16,7 @@ import AttachMoney from '@material-ui/icons/AttachMoney';
 import MoneyOff from '@material-ui/icons/MoneyOff';
 import SettingsRemote from '@material-ui/icons/SettingsRemote';
 import AccessibleForward from '@material-ui/icons/AccessibleForward';
+import Delete from '@material-ui/icons/Delete';
 
 
 const categories = [
@@ -28,6 +29,7 @@ const categories = [
       { id: 'Sell', icon: <MoneyOff /> },
       { id: 'Browse', icon: <PublicIcon /> },
       { id: 'Triggers', icon: <SettingsRemote /> },
+      { id: 'Dumplog', icon: <Delete /> },
     ],
   },
   {

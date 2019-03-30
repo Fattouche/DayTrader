@@ -11,6 +11,7 @@ import Buy from './Buy';
 import Browse from './Browse';
 import Triggers from './Triggers';
 import AddFunds from './AddFunds';
+import Dumplog from './Dumplog';
 
 
 let theme = createMuiTheme({
@@ -163,7 +164,8 @@ class Landing extends Component {
           'Sell': <Sell userId={props.userInfo.getUserId()}/>, 
           'Browse': <Browse userId={props.userInfo.getUserId()}/>,
           'Triggers': <Triggers userId={props.userInfo.getUserId()}/>,
-          'Add Funds': <AddFunds userId={props.userInfo.getUserId()}/>
+          'Add Funds': <AddFunds userId={props.userInfo.getUserId()}/>,
+          'Dumplog': <Dumplog userId={props.userInfo.getUserId()}/>
         }
 
         this.state = {
