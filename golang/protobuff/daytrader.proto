@@ -62,6 +62,7 @@ message PriceResponse {
 message Trigger {
     float price = 1;
     float amount = 2;
+    string symbol = 3;
 }
 
 message Transaction {
