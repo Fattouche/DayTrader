@@ -10,6 +10,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PersonPin from '@material-ui/icons/PersonPin';
+import Money from '@material-ui/icons/Money';
 
 
 const styles = theme => ({
@@ -72,12 +73,11 @@ class Content extends Component {
       if(err){
         console.log(err.message)
       }else {
-        console.log(response)
         var userInfo = response.getUserInfo()
         this.setState(
           {
-            balance: userInfo ? userInfo.getBalance(): 0.0, // TODO(isaac): Remove this once cailan implements displaysummary
-            stocks: userInfo ? userInfo.getStocksMap(): null,
+            balance: userInfo.getBalance(), // TODO(isaac): Remove this once cailan implements displaysummary
+            stocks: userInfo.getStocksMap(),
             transactions: response.getTransactionsList(),
             buyTriggers: response.getBuyTriggersList(),
             sellTriggers: response.getSellTriggersList()
@@ -87,108 +87,66 @@ class Content extends Component {
   }
 
   generateAccountList(){
-    return [
+    var stockList = this.state.stocks.keys().arr_
+    var itemList = []
+    for(var i in stockList) {
+      itemList.push(
       <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="User Id">
-           {this.state.userId}
-        </ListItemText>
-      </ListItem>,
-      <ListItem>
-                <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-      <ListItemText primary="Balance">
-         {this.state.balance}
-      </ListItemText>
-    </ListItem>,
-    <ListItem>
-    <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-    <ListItemText primary="Stocks">
-       {this.state.stocks}
-    </ListItemText>
-  </ListItem>   
-    ]
+      <ListItemAvatar>
+        <Avatar>
+          <Money />
+        </Avatar>
+      </ListItemAvatar>
+      <ListItemText primary={stockList[i] + ":  " +  this.state.stocks.get(stockList[i]).toString()}/>
+      </ListItem>
+      )
+    }
+    return itemList
   }
 
   generateTransactionList(){
-    return [
-      <ListItem>
+    var transactionList = []
+    for(var i in this.state.transactions){
+      var name = this.state.transactions[i].getCommandName()
+      var symbol = this.state.transactions[i].getStockSymbol()
+      var amount = this.state.transactions[i].getStockAmount()
+      var balanceChange = this.state.transactions[i].getBalanceChange()
+      var timestamp = this.state.transactions[i].getTimestamp()
+
+      transactionList.push(
+        <ListItem>
         <ListItemAvatar>
           <Avatar>
             <PersonPin />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Transaction">
-           {this.state.userId}
-        </ListItemText>
-      </ListItem>,
-      <ListItem>
-                <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-      <ListItemText primary="Transaction">
-         {this.state.balance}
-      </ListItemText>
-    </ListItem>,
-    <ListItem>
-    <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-    <ListItemText primary="Transaction">
-       {this.state.stocks}
-    </ListItemText>
-  </ListItem>   
-    ]
+        <ListItemText primary={"Command: " + name + " Symbol: " + symbol + " Stock Amount: " + amount + " Balance Change: " + balanceChange.toFixed(2) + " Timestamp: " + timestamp}/>
+      </ListItem>
+      )
+    }
+    return transactionList
   }
 
   generateTriggerList(triggerType){
-    return [
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="Trigger">
-           {this.state.userId}
-        </ListItemText>
-      </ListItem>,
-      <ListItem>
-                <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-      <ListItemText primary="Trigger">
-         {this.state.balance}
-      </ListItemText>
-    </ListItem>,
+  var triggerList = []
+  var triggers = (triggerType === "buy") ? this.state.buyTriggers : this.state.sellTriggers
+  for(var i in triggers){
+    var symbol = triggers[i].getSymbol()
+    var amount = triggers[i].getAmount()
+    var price = triggers[i].getPrice()
+    triggerList.push(
     <ListItem>
-    <ListItemAvatar>
-          <Avatar>
-            <PersonPin />
-          </Avatar>
-        </ListItemAvatar>
-    <ListItemText primary="Trigger">
-       {this.state.stocks}
-    </ListItemText>
-  </ListItem>   
-    ]
+      <ListItemAvatar>
+        <Avatar>
+          <PersonPin />
+        </Avatar>
+      </ListItemAvatar>
+      <ListItemText primary={"Symbol: " + symbol + " Amount: " + amount.toFixed(2) + " Price: " + price.toFixed(2) }/>
+    </ListItem>
+    )
+  }
+    
+  return triggerList
   }
 
   render(){
@@ -202,7 +160,23 @@ class Content extends Component {
             </Typography>
             <div className={this.classes.demo}>
               <List dense={true}>
-                {this.generateAccountList()}
+                  <ListItem>
+                  <ListItemAvatar>
+                    <Avatar>
+                      <PersonPin />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={"User Id: " + this.state.userId}/>
+                </ListItem>
+                <ListItem>
+                          <ListItemAvatar>
+                    <Avatar>
+                      <PersonPin />
+                    </Avatar>
+                  </ListItemAvatar>
+                <ListItemText primary={"Balance: " + this.state.balance.toFixed(2)}/>
+                </ListItem>
+                 {this.generateAccountList()}
               </List>
             </div>
           </Grid>

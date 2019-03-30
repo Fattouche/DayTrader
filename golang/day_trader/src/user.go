@@ -49,7 +49,13 @@ func (user *User) popFromSellStack() *Sell {
 func userExists(userID string, password string) (float32, map[string]int32, error) {
 	var stocks map[string]int32
 	var balance float32
-	err := db.QueryRow("SELECT Balance from User where Id=? and Password=?", userID, password).Scan(&balance)
+	var err error
+	if password != "" {
+		err = db.QueryRow("SELECT Balance from User where Id=? and Password=?", userID, password).Scan(&balance)
+	} else {
+		err = db.QueryRow("SELECT Balance from User where Id=?", userID).Scan(&balance)
+	}
+
 	if err == nil {
 		stocks = getAllUserStock(userID)
 	}
