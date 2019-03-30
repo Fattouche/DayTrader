@@ -65,8 +65,7 @@ func (sell *Sell) commit(ctx context.Context, update bool, user *User) (err erro
 	if update {
 		err = sell.updateSell(ctx)
 	} else {
-		//log here instead
-		//_, err = sell.insertSell(ctx)
+		_, err = sell.insertSell(ctx)
 	}
 	return
 }
@@ -95,7 +94,7 @@ func (sell *Sell) insertSell(ctx context.Context) (*Sell, error) {
 
 func getSell(ctx context.Context, id int64) *Sell {
 	sell := &Sell{}
-	err := db.QueryRow("Select * from Sell where Id=?", id).Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount)
+	err := db.QueryRow("Select * from Sell where Id=?", id).Scan(&sell.Id, &sell.Price, &sell.StockSymbol, &sell.UserId, &sell.IntendedCashAmount, &sell.ActualCashAmount, &sell.StockSoldAmount, &sell.Timestamp)
 	if err != nil {
 		log.Println(err)
 	}

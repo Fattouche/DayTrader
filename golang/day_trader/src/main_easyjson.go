@@ -1037,3 +1037,100 @@ func (v *Buy) UnmarshalJSON(data []byte) error {
 func (v *Buy) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson89aae3efDecodeDayTrader7(l, v)
 }
+func easyjson89aae3efDecodeDayTrader8(in *jlexer.Lexer, out *Add) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "UserId":
+			out.UserId = string(in.String())
+		case "Amount":
+			out.Amount = float32(in.Float32())
+		case "Timestamp":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Timestamp).UnmarshalJSON(data))
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson89aae3efEncodeDayTrader8(out *jwriter.Writer, in Add) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"UserId\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.UserId))
+	}
+	{
+		const prefix string = ",\"Amount\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Float32(float32(in.Amount))
+	}
+	{
+		const prefix string = ",\"Timestamp\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.Timestamp).MarshalJSON())
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Add) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson89aae3efEncodeDayTrader8(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Add) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson89aae3efEncodeDayTrader8(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Add) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson89aae3efDecodeDayTrader8(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Add) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson89aae3efDecodeDayTrader8(l, v)
+}

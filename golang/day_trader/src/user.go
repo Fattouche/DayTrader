@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"time"
+
+	pb "github.com/Fattouche/DayTrader/golang/protobuff"
 )
 
 func (user *User) toString() string {
@@ -44,11 +47,11 @@ func (user *User) popFromSellStack() *Sell {
 }
 
 func userExists(userID string, password string) (float32, map[string]int32, error) {
-	stocks := make(map[string]int32)
+	var stocks map[string]int32
 	var balance float32
 	err := db.QueryRow("SELECT Balance from User where Id=? and Password=?", userID, password).Scan(&balance)
 	if err == nil {
-		getAllUserStock(userID, &stocks)
+		stocks = getAllUserStock(userID)
 	}
 	return balance, stocks, err
 }
@@ -117,4 +120,124 @@ func (user *User) updateStockBalance(ctx context.Context, symbol string) error {
 		return err
 	}
 	return nil
+}
+
+func (user *User) insertAdd(ctx context.Context, amount float32) error {
+	_, err := db.Exec("insert into Add_Transaction(UserId,Amount) Values(?,?)", user.Id, amount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (user *User) getSellTriggers() []*pb.Trigger {
+	rows, err := db.Query("SELECT Sell.Id, Sell.StockSymbol, Sell.StockSoldAmount, Sell.Price from Sell inner join Sell_Trigger on Sell_Trigger.SellId=Sell.Id where Sell_Trigger.Active=true and Sell.UserId=?", user.Id)
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+	}
+	triggers := make([]*pb.Trigger, 0)
+	for rows.Next() {
+		trigger := &pb.Trigger{Buy: false}
+		err = rows.Scan(nil, &trigger.Symbol, &trigger.Amount, &trigger.Price)
+		if err != nil {
+			log.Println("Error scanning sell trigger: ", err)
+		}
+		triggers = append(triggers, trigger)
+	}
+	return triggers
+}
+
+func (user *User) getBuyTriggers() []*pb.Trigger {
+	rows, err := db.Query("SELECT Buy.Id, Buy.StockSymbol, Buy.StockBoughtAmount, Buy.Price from Buy inner join Buy_Trigger on Buy_Trigger.BuyId=Buy.Id where Buy_Trigger.Active=true and Buy.UserId=?", user.Id)
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+	}
+	triggers := make([]*pb.Trigger, 0)
+	for rows.Next() {
+		trigger := &pb.Trigger{Buy: true}
+		err = rows.Scan(nil, &trigger.Symbol, &trigger.Amount, &trigger.Price)
+		if err != nil {
+			log.Println("Error scanning buy trigger: ", err)
+		}
+		triggers = append(triggers, trigger)
+	}
+	return triggers
+}
+
+func (user *User) getBuys() []*Buy {
+	rows, err := db.Query("SELECT StockSymbol, StockBoughtAmount, ActualCashAmount, Timestamp from Buy where UserId=?", user.Id)
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+	}
+	buys := make([]*Buy, 0)
+	for rows.Next() {
+		buy := &Buy{}
+		err = rows.Scan(&buy.StockSymbol, &buy.StockBoughtAmount, &buy.ActualCashAmount, &buy.Timestamp)
+		if err != nil {
+			log.Println("Error scanning buy: ", err)
+		}
+		buys = append(buys, buy)
+	}
+	return buys
+}
+
+func (user *User) getSells() []*Sell {
+	rows, err := db.Query("SELECT StockSymbol, StockSoldAmount, ActualCashAmount, TimeStamp from Sell where UserId=?", user.Id)
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+	}
+	sells := make([]*Sell, 0)
+	for rows.Next() {
+		sell := &Sell{}
+		err = rows.Scan(&sell.StockSymbol, &sell.StockSoldAmount, &sell.ActualCashAmount, &sell.Timestamp)
+		if err != nil {
+			log.Println("Error scanning sell: ", err)
+		}
+		sells = append(sells, sell)
+	}
+	return sells
+}
+
+func (user *User) getAdds() []*Add {
+	rows, err := db.Query("SELECT Amount, TimeStamp from Add_Transaction where UserId=?", user.Id)
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+	}
+	adds := make([]*Add, 0)
+	for rows.Next() {
+		add := &Add{}
+		err = rows.Scan(&add.Amount, &add.Timestamp)
+		if err != nil {
+			log.Println("Error scanning add: ", err)
+		}
+		adds = append(adds, add)
+	}
+	return adds
+}
+
+func (user *User) getTransactions() []*pb.Transaction {
+	buys := user.getBuys()
+	sells := user.getSells()
+	adds := user.getAdds()
+	transactions := make([]*pb.Transaction, 0)
+	timeFormat := "2 Jan 2006 15:04 PDT"
+	local, _ := time.LoadLocation("America/Los_Angeles")
+	for _, buy := range buys {
+		transaction := &pb.Transaction{CommandName: "Buy", StockAmount: int32(buy.StockBoughtAmount), BalanceChange: buy.ActualCashAmount, StockSymbol: buy.StockSymbol, Timestamp: buy.Timestamp.In(local).Format(timeFormat)}
+		transactions = append(transactions, transaction)
+	}
+	for _, sell := range sells {
+		transaction := &pb.Transaction{CommandName: "Sell", StockAmount: int32(sell.StockSoldAmount), BalanceChange: sell.ActualCashAmount, StockSymbol: sell.StockSymbol, Timestamp: sell.Timestamp.In(local).Format(timeFormat)}
+		transactions = append(transactions, transaction)
+	}
+	for _, add := range adds {
+		transaction := &pb.Transaction{CommandName: "Add", BalanceChange: add.Amount, Timestamp: add.Timestamp.In(local).Format(timeFormat)}
+		transactions = append(transactions, transaction)
+	}
+	return transactions
 }

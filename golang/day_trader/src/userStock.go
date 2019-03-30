@@ -12,18 +12,20 @@ func (userStock *UserStock) toString() string {
 	return string(bytes)
 }
 
-func getAllUserStock(userID string, stocks *map[string]int32) {
-	rows, err := db.Query("SELECT StockSymbol, Amount from UserStock where UserId=?", userID)
+func getAllUserStock(userID string) map[string]int32 {
+	rows, err := db.Query("SELECT StockSymbol, Amount from User_Stock where UserId=?", userID)
+	stocks := make(map[string]int32)
 	if err == nil {
 		defer rows.Close()
 		for rows.Next() {
 			var stockSymbol string
 			var amount int32
 			if rows.Scan(&stockSymbol, &amount) == nil {
-				(*stocks)[stockSymbol] = amount
+				stocks[stockSymbol] = amount
 			}
 		}
 	}
+	return stocks
 }
 
 func getOrCreateUserStock(ctx context.Context, userID, symbol string, user *User) *UserStock {

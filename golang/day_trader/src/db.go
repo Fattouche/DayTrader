@@ -22,6 +22,7 @@ var createTableStatements = []string{
 		IntendedCashAmount float DEFAULT 0,
 		ActualCashAmount float DEFAULT 0,
 		StockSoldAmount int DEFAULT 0,
+		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (Id),
 		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
 	)`,
@@ -33,6 +34,7 @@ var createTableStatements = []string{
 		IntendedCashAmount float DEFAULT 0,
 		ActualCashAmount float DEFAULT 0,
 		StockBoughtAmount int DEFAULT 0,
+		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (Id),
 		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
 	)`,
@@ -51,6 +53,14 @@ var createTableStatements = []string{
 		UNIQUE(UserId, BuyId),
 		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE,
 		FOREIGN KEY (BuyId) REFERENCES Buy(Id) ON DELETE CASCADE
+	)`,
+	`CREATE TABLE IF NOT EXISTS Add_Transaction(
+		Id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+		UserId varchar(32) NOT NULL,
+		Amount float DEFAULT 0,
+		Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (Id),
+		FOREIGN KEY (UserId) REFERENCES User(Id) ON DELETE CASCADE
 	)`,
 	`CREATE TABLE IF NOT EXISTS User_Stock(
 		UserId varchar(32) NOT NULL,
@@ -77,7 +87,7 @@ func createAndOpenDB() {
 			}
 		}
 	}
-	db, err = sql.Open("mysql", "root@tcp(daytrader_db:3306)/daytrader")
+	db, err = sql.Open("mysql", "root@tcp(daytrader_db:3306)/daytrader?parseTime=true")
 	if err != nil {
 		panic(err)
 	}

@@ -56,8 +56,7 @@ func (buy *Buy) commit(ctx context.Context, user *User, update bool) (*UserStock
 	if update {
 		err = buy.updateBuy(ctx)
 	} else {
-		//log here instead
-		//_, err = buy.insertBuy(ctx)
+		_, err = buy.insertBuy(ctx)
 	}
 	user.updateUserBalance(ctx, buy.IntendedCashAmount-buy.ActualCashAmount, true)
 	userStock := getOrCreateUserStock(ctx, buy.UserId, buy.StockSymbol, user)
@@ -89,7 +88,7 @@ func (buy *Buy) insertBuy(ctx context.Context) (*Buy, error) {
 
 func getBuy(ctx context.Context, id int64) *Buy {
 	buy := &Buy{}
-	err := db.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount)
+	err := db.QueryRow("Select * from Buy where Id=?", id).Scan(&buy.Id, &buy.Price, &buy.StockSymbol, &buy.UserId, &buy.IntendedCashAmount, &buy.ActualCashAmount, &buy.StockBoughtAmount, &buy.Timestamp)
 	if err != nil {
 		log.Println(err)
 	}

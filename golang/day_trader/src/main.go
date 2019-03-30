@@ -80,6 +80,12 @@ type UserStock struct {
 	Amount      int
 }
 
+type Add struct {
+	UserId    string
+	Amount    float32
+	Timestamp time.Time
+}
+
 // This server implements the protobuff Node type
 type server struct{}
 
@@ -107,12 +113,16 @@ func (s *server) GetUser(ctx context.Context, req *pb.Command) (*pb.UserResponse
 }
 
 func (s *server) CreateUser(ctx context.Context, req *pb.Command) (*pb.Response, error) {
-	return &pb.Response{UserId: req.UserId, Message: "Successfully created user"}, createUser(req.UserId, req.Password)
+	return &pb.Response{UserId: req.UserId, Message: "Created user"}, createUser(req.UserId, req.Password)
 }
 
 func (s *server) Add(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
 	user := getUser(req.UserId)
 	user, err := user.updateUserBalance(ctx, req.Amount, true)
+	if err != nil {
+		return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, err
+	}
+	err = user.insertAdd(ctx, req.Amount)
 	return &pb.BalanceResponse{UserId: user.Id, Balance: user.Balance}, err
 }
 
@@ -320,21 +330,15 @@ func (s *server) DumpLog(ctx context.Context, req *pb.Command) (*pb.Response, er
 }
 
 func (s *server) DisplaySummary(ctx context.Context, req *pb.Command) (*pb.SummaryResponse, error) {
-	// conn, err := grpc.Dial(logUrl, grpc.WithInsecure())
-	// if err != nil {
-	// 	log.Printf("Failed to dial to %s with %v", logUrl, err)
-	// }
-	// client := pb.NewLoggerClient(conn)
-	// _, err = client.DisplaySummary(ctx, req)
-	// if err != nil {
-	// 	log.Println("DisplaySummary call to log server failed: ", err)
-	// }
-
-	// _ (rename to response when ready to implement) should contain all transactions, once that's implemented
-	// TODO: grab info on current triggers, and then put it all together into
-	// a SummaryResponse proto and return
-
-	return &pb.SummaryResponse{}, nil
+	userResp, err := s.GetUser(ctx, &pb.Command{UserId: req.UserId})
+	if err != nil {
+		return &pb.SummaryResponse{}, err
+	}
+	user := getUser(req.UserId)
+	sellTriggers := user.getSellTriggers()
+	buyTriggers := user.getBuyTriggers()
+	transactions := user.getTransactions()
+	return &pb.SummaryResponse{UserInfo: userResp, SellTriggers: sellTriggers, BuyTriggers: buyTriggers, Transactions: transactions}, nil
 }
 
 // Starts a generic GRPC server
