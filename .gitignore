@@ -4,5 +4,4 @@ __pycache__/
 *$py.class
 .DS_Store
 *.workload
-*.png
 golang/logging/src/dumplogs/*
