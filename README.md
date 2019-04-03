@@ -2,11 +2,24 @@
 
 Day trader is a stock exchange platform built for performance and reliability.
 
+## Usage
+
+![login ](images/login.PNG "login")
+
+![daytrader](images/daytrader.PNG "daytrader")
+
+In order to use the current version(golang) you need to docker-compose up in several different directories:
+
+1. in frontend `docker-compose up`
+2. in golang/day_trader `docker-compose up`
+3. in golang/logging `docker-compose up`
+4. in quote_server `docker-compose up`
+
 ## Design
 
 This project is implemented in 2 different ways:
 
-1. Django(Python)
+### Django(Old version)
 - Rest communication
 - Nginx LB
 - Redis job queue
@@ -14,20 +27,38 @@ This project is implemented in 2 different ways:
 - Memcached for caching
 - Mysql DB
 
+![python design](images/python-design.png "python design")
 
-2. Golang
+
+### Golang(Current version)
+
+Front end:
+- React
+
+Backend:
 - GRPC communication
-- Nginx LB
+- Envoy LB
 - Memcached for caching
 - Mysql Db
 
+![go design](images/go-design.PNG "go design")
+
 ## Development
 
-To start using either app cd into the respective directory and run `docker-compose up`
+In order to use the current version(golang) you need to docker-compose up in several different directories:
+
+1. in frontend `docker-compose up`
+2. in golang/day_trader `docker-compose up`
+3. in golang/logging `docker-compose up`
+4. in quote_server `docker-compose up`
+
 
 ## Generator
 
-To run the generator, cd into the respective directory and then `cd workload_generator` and run `docker-compose up`
+To run the generator you must have completed the previous development step.
+
+1. in golang/workload_generator `docker-compose up`
+2. The workload file can be changed to simulate different user workloads
 
 ## Quote server
 
