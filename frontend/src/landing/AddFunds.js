@@ -4,11 +4,16 @@ import { TextField } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { validatePrice } from '../shared/InputUtils';
 import { add } from '../backend_services/Service';
+import classNames from 'classnames';
 
 const styles = theme => ({
     container: {
-      display: 'flex',
-      flexWrap: 'wrap',
+        display: 'flex',
+        flexDirection: 'column',
+        alignContent: 'flex-end',
+    },
+    item : {
+        flexGrow: 1,
     },
     textField: {
       marginLeft: theme.spacing.unit,
@@ -61,18 +66,18 @@ class AddFunds extends Component {
 
     render() {
         return(
-        <div>
+        <div className={this.classes.container}>
         <TextField
             id="outlined-name"
             label="Amount"
-            className={this.classes.textField}
+            className={classNames(this.classes.textField, this.classes.item)}
             onChange={this.handleAmountChange}
             value={this.state.amount}
             margin="normal"
             variant="outlined"
             autoComplete='off'
           />
-          <Button variant="outlined" color="primary" onClick={this.buttonPress}>
+          <Button variant="outlined" color="primary" onClick={this.buttonPress} className={this.classes.item}>
           Add
         </Button>
         </div>

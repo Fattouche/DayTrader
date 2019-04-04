@@ -4,15 +4,21 @@ import { withStyles } from '@material-ui/core/styles';
 import { getQuote } from '../backend_services/Service';
 import { validateStockSymbol } from '../shared/InputUtils';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import classNames from 'classnames';
+
 
 const styles = theme => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    alignContent: 'flex-end',
   },
   textField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
+  },
+  item : {
+    flexGrow: 1,
   },
   dense: {
     marginTop: 16,
@@ -62,22 +68,25 @@ class Browse extends Component {
 
     render() {
       return(
-        <div>
+        <div className={this.classes.container}>
           <TextField
               id="outlined-name"
               label="Stock Symbol"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"> </InputAdornment>,
+              }}
               onChange={this.handleChange}
               onKeyDown = {this.keyPress}
               value={this.state.stock}
               margin="normal"
               variant="outlined"
               autoComplete='off'
-            />
+            /><br></br>
             <TextField
               id="outlined-name"
               label="Stock Price"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}

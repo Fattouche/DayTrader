@@ -10,15 +10,21 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import classNames from 'classnames';
+
 
 const styles = theme => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    alignContent: 'flex-end',
   },
   textField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
+  },
+  item : {
+    flexGrow: 1,
   },
   dense: {
     marginTop: 16,
@@ -124,11 +130,11 @@ class Sell extends Component {
 
     render() {
         return(
-          <div>
+          <div className={this.classes.container}>
           <TextField
               id="outlined-name"
               label="Stock Symbol"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={this.handleStockChange}
               value={this.state.stock}
               margin="normal"
@@ -137,7 +143,7 @@ class Sell extends Component {
             <TextField
               id="outlined-name"
               label="Sell Amount"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={this.handleAmountChange}
               onKeyDown = {this.keyPress}
               InputProps={{
@@ -147,7 +153,7 @@ class Sell extends Component {
               margin="normal"
               variant="outlined"
             />
-            <Button variant="outlined" color="primary" onClick={this.buttonPress}>
+            <Button variant="outlined" color="primary" onClick={this.buttonPress} className={this.classes.item}>
               Sell
             </Button>
             <Dialog open={this.state.isModalOpen} onClose={() => {this.setState({ isModalOpen: false })}} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"

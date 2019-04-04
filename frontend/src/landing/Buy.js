@@ -10,11 +10,18 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import classNames from 'classnames';
+
 
 const styles = theme => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    alignContent: 'flex-end',
+    // flexWrap: 'wrap',
+  },
+  item : {
+    flexGrow: 1,
   },
   textField: {
     marginLeft: theme.spacing.unit,
@@ -133,11 +140,11 @@ class Buy extends Component {
 
     render() {
       return(
-        <div>
+        <div className={this.classes.container}>
           <TextField
               id="outlined-name"
               label="Stock Symbol"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={this.handleStockChange}
               value={this.state.stock}
               margin="normal"
@@ -145,8 +152,8 @@ class Buy extends Component {
             />
             <TextField
               id="outlined-name"
-              label="Purchase Amount"
-              className={this.classes.textField}
+              label="Buy Amount"
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={this.handleAmountChange}
               onKeyDown = {this.keyPress}
               InputProps={{
@@ -156,7 +163,7 @@ class Buy extends Component {
               margin="normal"
               variant="outlined"
             />
-            <Button variant="outlined" color="primary" onClick={this.buttonPress}>
+            <Button variant="outlined" color="primary" onClick={this.buttonPress} className={this.classes.item}>
               Buy
             </Button>
             <Dialog open={this.state.isModalOpen} onClose={this.handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"

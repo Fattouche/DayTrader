@@ -3,11 +3,17 @@ import { TextField } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { dumplog } from '../backend_services/Service';
 import Button from '@material-ui/core/Button';
+import classNames from 'classnames';
+
 
 const styles = theme => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    alignContent: 'flex-end',
+  },
+  item : {
+    flexGrow: 1,
   },
   textField: {
     marginLeft: theme.spacing.unit,
@@ -64,18 +70,18 @@ class Dumplog extends Component {
 
     render() {
       return(
-        <div>
+        <div className={this.classes.container}>
           <TextField
               id="outlined-name"
               label="Filename"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={this.handleChange}
               value={this.state.filename}
               margin="normal"
               variant="outlined"
               autoComplete='off'
             />
-            <Button variant="outlined" color="primary" onClick={this.buttonPress}>
+            <Button variant="outlined" color="primary" onClick={this.buttonPress} className={this.classes.item}>
               Dumplog
             </Button>
         </div>);

@@ -4,11 +4,16 @@ import { TextField } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { validatePrice, validateStockSymbol } from '../shared/InputUtils';
 import { setSellAmount, setSellTrigger, setBuyAmount, setBuyTrigger } from '../backend_services/Service';
+import classNames from 'classnames';
 
 const styles = theme => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    alignContent: 'flex-end',
+  },
+  item : {
+    flexGrow: 1,
   },
   textField: {
     marginLeft: theme.spacing.unit,
@@ -159,11 +164,11 @@ class Triggers extends Component {
     }
 
     render() {
-        return(<div>
+        return(<div className={this.classes.container}>
           <TextField
               id="outlined-name"
               label="Symbol"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={(e) => {this.handleStockChange(e, "buy")}}
               value={this.state.buyTrigger.symbol}
               margin="normal"
@@ -174,7 +179,7 @@ class Triggers extends Component {
           <TextField
               id="outlined-name"
               label="Buy Amount"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={(e) => {this.handleNumericalChange(e,"buy","amount")}}
               value={this.state.buyTrigger.amount}
               margin="normal"
@@ -185,7 +190,7 @@ class Triggers extends Component {
             <TextField
               id="outlined-name"
               label="Buy Price"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={(e) => {this.handleNumericalChange(e,"buy","price")}}
               value={this.state.buyTrigger.price}
               margin="normal"
@@ -193,8 +198,8 @@ class Triggers extends Component {
               autoComplete='off'
               disabled={this.state.buyDisabled}
             />
-            <Button variant="outlined" color="primary" onClick={() => {this.handleBuyTrigger()}}>
-            Set Trigger
+            <Button variant="outlined" color="primary" onClick={() => {this.handleBuyTrigger()}} className={this.classes.item}>
+            Set Buy Trigger
           </Button>
           <br/>
           <br/>
@@ -202,7 +207,7 @@ class Triggers extends Component {
           <TextField
               id="outlined-name"
               label="Symbol"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={(e) => {this.handleStockChange(e, "sell")}}
               value={this.state.sellTrigger.symbol}
               margin="normal"
@@ -213,7 +218,7 @@ class Triggers extends Component {
           <TextField
               id="outlined-name"
               label="Sell Amount"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={(e) => {this.handleNumericalChange(e,"sell","amount")}}
               value={this.state.sellTrigger.amount}
               margin="normal"
@@ -224,7 +229,7 @@ class Triggers extends Component {
             <TextField
               id="outlined-name"
               label="Sell Price"
-              className={this.classes.textField}
+              className={classNames(this.classes.textField, this.classes.item)}
               onChange={(e) => {this.handleNumericalChange(e,"sell","price")}}
               value={this.state.sellTrigger.price}
               margin="normal"
@@ -232,8 +237,8 @@ class Triggers extends Component {
               autoComplete='off'
               disabled={this.state.sellDisabled}
             />
-            <Button variant="outlined" color="primary" onClick={() => {this.handleSellTrigger()}}>
-            Set Trigger
+            <Button variant="outlined" color="primary" onClick={() => {this.handleSellTrigger()}} className={this.classes.item}>
+            Set Sell Trigger
           </Button>
           </div>
           )
