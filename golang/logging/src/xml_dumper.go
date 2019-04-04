@@ -106,13 +106,13 @@ func getRows(tableName, userID string) (*sql.Rows, error) {
 
 func dumpLogsToXML(userID, filename string) {
 	if userID == "" {
-		dumpErrorLogs(userID, filename+"_Error")
 		dumpAccountLogs(userID, filename+"_Account")
 		dumpDebugLogs(userID, filename+"_Debug")
 		dumpSystemEventLogs(userID, filename+"_System")
 		// For final dumplog, do a wait to make sure all logs are in the DB
 		time.Sleep(time.Second * 20)
 	}
+	dumpErrorLogs("", filename+"_Error")
 	dumpUserLogs(userID, filename+"_User")
 }
 
