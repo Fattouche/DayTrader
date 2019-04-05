@@ -3,7 +3,7 @@ import { withStyles } from '@material-ui/core';
 import { TextField } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { validatePrice, validateStockSymbol } from '../shared/InputUtils';
-import { setSellAmount, setSellTrigger, setBuyAmount, setBuyTrigger } from '../backend_services/Service';
+import { setSellAmount, setSellTrigger, setBuyAmount, setBuyTrigger, cancelSetBuy, cancelSetSell } from '../backend_services/Service';
 import classNames from 'classnames';
 
 const styles = theme => ({
@@ -45,10 +45,14 @@ class Triggers extends Component {
       this.handleBuyTrigger = this.handleBuyTrigger.bind(this)
       this.setBuyAmountCallback = this.setBuyAmountCallback.bind(this)
       this.setBuyTriggerCallback = this.setBuyTriggerCallback.bind(this)
-      
+      this.cancelBuyTrigger = this.cancelBuyTrigger.bind(this)
+      this.cancelSetBuyCallback = this.cancelSetBuyCallback.bind(this)
+
       this.handleSellTrigger = this.handleSellTrigger.bind(this)
       this.setSellAmountCallback = this.setSellAmountCallback.bind(this)
       this.setSellTriggerCallback = this.setSellTriggerCallback.bind(this)
+      this.cancelSellTrigger = this.cancelSellTrigger.bind(this)
+      this.cancelSetSellCallback = this.cancelSetSellCallback.bind(this)
     }
 
     handleStockChange(e, buyOrSell){
@@ -86,7 +90,7 @@ class Triggers extends Component {
     }
 
     handleBuyTrigger(){
-      if(this.state.buyTrigger.amount > 0 && this.state.buyTrigger.price > 0){
+      if(this.state.buyTrigger.amount > 0 && this.state.buyTrigger.price > 0 && this.state.buyTrigger.symbol !== ""){
         // Disable input fields since we will be chaining callbacks 
         this.setState({buyDisabled:true})
         setBuyAmount(
@@ -99,6 +103,27 @@ class Triggers extends Component {
         alert("Figure it out nerd")
       }
     }
+
+    cancelBuyTrigger(){
+      if(this.state.buyTrigger.symbol !== ""){
+        cancelSetBuy(
+          this.state.userId,
+          this.state.buyTrigger.symbol,
+          (err, response) => {this.cancelSetBuyCallback(err,response)}
+        )
+      }else {
+        alert('Enter a stock symbol')
+      }
+    }
+
+    cancelSetBuyCallback(err, response){
+      if(err){
+        alert(err.message)
+      }else{
+        console.log(response)
+      }
+    }
+
 
     setBuyAmountCallback(err, response){
       if(err){
@@ -126,7 +151,7 @@ class Triggers extends Component {
     }
 
     handleSellTrigger(){
-      if(this.state.sellTrigger.amount > 0 && this.state.sellTrigger.price > 0){
+      if(this.state.sellTrigger.amount > 0 && this.state.sellTrigger.price > 0 && this.state.sellTrigger.symbol !== ""){
         // Disable input fields since we will be chaining callbacks 
         this.setState({sellDisabled:true})
         setSellAmount(
@@ -137,6 +162,26 @@ class Triggers extends Component {
           ) 
       }else{
         alert("Figure it out nerd")
+      }
+    }
+
+    cancelSellTrigger(){
+      if(this.state.sellTrigger.symbol !== ""){
+        cancelSetSell(
+          this.state.userId,
+          this.state.buyTrigger.symbol,
+          (err, response) => {this.cancelSetSellCallback(err,response)}
+        )
+      }else {
+        alert('Enter a stock symbol')
+      }
+    }
+
+    cancelSetSellCallback(err, response){
+      if(err){
+        alert(err.message)
+      }else{
+        console.log(response)
       }
     }
 
@@ -201,6 +246,9 @@ class Triggers extends Component {
             <Button variant="outlined" color="primary" onClick={() => {this.handleBuyTrigger()}} className={this.classes.item}>
             Set Buy Trigger
           </Button>
+          <Button variant="outlined" color="primary" onClick={() => {this.cancelBuyTrigger()}} className={this.classes.item}>
+            Cancel Buy Trigger
+          </Button>
           <br/>
           <br/>
           <br/>
@@ -239,6 +287,9 @@ class Triggers extends Component {
             />
             <Button variant="outlined" color="primary" onClick={() => {this.handleSellTrigger()}} className={this.classes.item}>
             Set Sell Trigger
+          </Button>
+          <Button variant="outlined" color="primary" onClick={() => {this.cancelSellTrigger()}} className={this.classes.item}>
+            Cancel Sell Trigger
           </Button>
           </div>
           )

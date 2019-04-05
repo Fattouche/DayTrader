@@ -146,3 +146,21 @@ export function add(username, amount, callback){
     command.setName("ADD")
     client.add(command, {} /* metadata */, callback)
 }
+
+export function cancelSetBuy(username, symbol, callback){
+    var client = new proto.DayTraderClient(BACKEND_ADDRESS)
+    var command = new proto.command()
+    command.setUserId(username)
+    command.setSymbol(symbol)
+    command.setName("CANCEL_SET_BUY")
+    client.cancelSetBuy(command, {} /* metadata */, callback)
+}
+
+export function cancelSetSell(username, symbol, callback){
+    var client = new proto.DayTraderClient(BACKEND_ADDRESS)
+    var command = new proto.command()
+    command.setUserId(username)
+    command.setSymbol(symbol)
+    command.setName("CANCEL_SET_SELL")
+    client.cancelSetSell(command, {} /* metadata */, callback)
+}
