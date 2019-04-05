@@ -169,7 +169,7 @@ class Triggers extends Component {
       if(this.state.sellTrigger.symbol !== ""){
         cancelSetSell(
           this.state.userId,
-          this.state.buyTrigger.symbol,
+          this.state.sellTrigger.symbol,
           (err, response) => {this.cancelSetSellCallback(err,response)}
         )
       }else {
