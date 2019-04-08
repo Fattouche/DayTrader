@@ -16,12 +16,15 @@ func (user *User) toString() string {
 	return string(bytes)
 }
 
-func (user *User) popFromBuyStack() *Buy {
+func (user *User) popFromBuyStack(ctx context.Context) *Buy {
 	if len(user.BuyStack) == 0 {
 		return nil
 	}
 	buy := user.BuyStack[len(user.BuyStack)-1]
 	if buy.isExpired() {
+		for _, buy := range user.BuyStack {
+			buy.cancel(ctx, user)
+		}
 		user.BuyStack = make([]*Buy, 0)
 		buy = nil
 	} else {
@@ -31,12 +34,15 @@ func (user *User) popFromBuyStack() *Buy {
 	return buy
 }
 
-func (user *User) popFromSellStack() *Sell {
+func (user *User) popFromSellStack(ctx context.Context) *Sell {
 	if len(user.SellStack) == 0 {
 		return nil
 	}
 	sell := user.SellStack[len(user.SellStack)-1]
 	if sell.isExpired() {
+		for _, sell := range user.SellStack {
+			sell.cancel(ctx, user)
+		}
 		user.SellStack = make([]*Sell, 0)
 		sell = nil
 	} else {

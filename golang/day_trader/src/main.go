@@ -160,7 +160,7 @@ func (s *server) Sell(ctx context.Context, req *pb.Command) (*pb.StockUpdateResp
 func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.StockUpdateResponse, error) {
 	var err error
 	user := getUser(req.UserId)
-	buy := user.popFromBuyStack()
+	buy := user.popFromBuyStack(ctx)
 	if buy == nil {
 		err = errors.New("No buy on the stack")
 		logErrorEvent(ctx, err)
@@ -177,7 +177,7 @@ func (s *server) CommitBuy(ctx context.Context, req *pb.Command) (*pb.StockUpdat
 func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.UserResponse, error) {
 	var err error
 	user := getUser(req.UserId)
-	sell := user.popFromSellStack()
+	sell := user.popFromSellStack(ctx)
 	if sell == nil {
 		err = errors.New("No sell on the stack")
 		logErrorEvent(ctx, err)
@@ -192,7 +192,7 @@ func (s *server) CommitSell(ctx context.Context, req *pb.Command) (*pb.UserRespo
 
 func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.BalanceResponse, error) {
 	user := getUser(req.UserId)
-	buy := user.popFromBuyStack()
+	buy := user.popFromBuyStack(ctx)
 	if buy != nil {
 		buy.cancel(ctx, user)
 	} else {
@@ -205,7 +205,7 @@ func (s *server) CancelBuy(ctx context.Context, req *pb.Command) (*pb.BalanceRes
 
 func (s *server) CancelSell(ctx context.Context, req *pb.Command) (*pb.StockUpdateResponse, error) {
 	user := getUser(req.UserId)
-	sell := user.popFromSellStack()
+	sell := user.popFromSellStack(ctx)
 	if sell != nil {
 		sell.cancel(ctx, user)
 	} else {
