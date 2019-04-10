@@ -52,3 +52,4 @@ static_resources:
      - socket_address:
         address: day_trader_daytrader_web_3
         port_value: 41000
+    # outlier_detection: {consecutive_5xx: "3"}

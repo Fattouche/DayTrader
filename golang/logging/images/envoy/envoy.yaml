@@ -46,3 +46,4 @@ static_resources:
      - socket_address:
         address: logging_server
         port_value: 40000
+    # outlier_detection: {consecutive_5xx: "3"}
